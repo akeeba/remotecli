@@ -1,0 +1,1430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Akeeba Backup JSON API</title>
+
+    <author>
+      <personname><firstname>Nicholas</firstname><surname>Dionysopoulos</surname></personname>
+
+      <affiliation>
+        <orgname>AkeebaBackup.com</orgname>
+      </affiliation>
+    </author>
+
+    <pubdate>December 2011</pubdate>
+
+    <revhistory>
+      <revision>
+        <date>December 2011</date>
+
+        <revremark>First version</revremark>
+      </revision>
+
+      <revision>
+        <date>April 2012</date>
+
+        <revremark>Updated for Akeeba Backup 3.5</revremark>
+      </revision>
+
+      <revision>
+        <date>July 2012</date>
+
+        <revremark>Updated for Akeeba Backup 3.5.3</revremark>
+      </revision>
+    </revhistory>
+  </info>
+
+  <section>
+    <title>Introduction to the API</title>
+
+    <para>Akeeba Backup's JSON API is provided as a means to automate various
+    functions of the Akeeba Backup component without having to visit its
+    back-end, from remote client applications. The client applications can be
+    written in any programming language supporting HTTP transfers and JSON
+    encoding/decoding, such as PHP, Javscript, Delphi, Java or C/C++. The main
+    design goals of the API are:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis role="bold">Stability</emphasis>. The interface should
+        be stable enough at least until the next major release of Akeeba
+        Backup.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">Ease of use</emphasis>. Basic
+        functionality should be as simple to implement as possible, with a
+        minimal list of requirements.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">Security</emphasis>. The web is a
+        treacherous place. Eavesdropping is fairly easy to accomplish, so are
+        man-in-the-middle and replay attacks. However, not all websites are
+        equipped with a valid, commercially signed SSL certificate which rules
+        out this kind of attacks. As a result, we implement two alternate
+        methods of authentication and two encryption standards, ranging from
+        fairly trivial to very secure.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">Agility</emphasis>. The API should be
+        agile enough to provide methods not only for running backups, but also
+        fetching statistics as well as remotely downloading files, without the
+        need to resort to another API or protocol. Everything should be
+        catered for by the JSON API over standard HTTP transfers.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>This guide is supposed to be the reference to programming against
+    this interface.</para>
+  </section>
+
+  <section>
+    <title>Client and server data formats</title>
+
+    <section>
+      <title>Client-side</title>
+
+      <para>The client is sending its requests to the server over a standard
+      HTTP GET operation to the endpoint URI of the component. An end-point
+      URI looks like
+      <uri>http://<replaceable>www.example.com</replaceable>/index.php?option=com_akeeba&amp;view=json&amp;format=raw&amp;json=<replaceable>&lt;data&gt;</replaceable></uri>.
+      It goes without saying, www.example.com is to be replaced by the
+      <abbrev>FQDN</abbrev> of the site where Akeeba Backup is installed. The
+      &lt;data&gt; part of the URI is the JSON-encoded Request Object.</para>
+
+      <para><emphasis role="bold">Exceptions to the GET rule</emphasis>: Some
+      request methods may require you to use POST instead of GET. Such
+      exceptions will be documented in the respective method.</para>
+
+      <para><emphasis role="bold">Alternative endpoint URL</emphasis>: Since
+      API level 319 you can substitute format=raw with format=component. This
+      increases the compatibility with poorly written third party Joomla!
+      system plugins and we strongly recommend always using that.</para>
+
+      <section>
+        <title>The Request Object</title>
+
+        <para>The Request Object is a JSON object with the following
+        fields:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>encapsulation</term>
+
+            <listitem>
+              <para>An Encapsulation Identifier constant (integer), defining
+              the encapsulation method of the body</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>body</term>
+
+            <listitem>
+              <para>A JSON string representing the Request Body, encoded in
+              the specified encapsulation</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+
+      <section>
+        <title>The Request Body</title>
+
+        <para>The Request Body is a JSON object with the following
+        fields:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>challenge</term>
+
+            <listitem>
+              <para>This field is required if and only if the encapsulation is
+              1 (ENCAPSULATION_RAW). It consists of a salt string and an MD5
+              hash, separated by a colon, like this: <code>salt:md5</code>.
+              The salt can be an arbitrary length alphanumeric string. The md5
+              part of the challenge is the result of the MD5 hash of the
+              concatenated string of the salt and the Akeeba Backup front-end
+              secret key, as configured in the component's Parameters. For
+              example, if the salt is foo and the secret key is bar, the md5
+              is md5(foobar) = 3858f62230ac3c915f300c664312c63f, therefore the
+              challenge is
+              <code>foo:3858f62230ac3c915f300c664312c63f</code>.</para>
+
+              <para>If the encapsulation is higher than 1, the challenge field
+              is completely ignored. The authentication is implicitly
+              performed as soon as the body is successfully deciphered, since
+              the knowledge of the server's key is a prerequisite for
+              successful encryption.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>key</term>
+
+            <listitem>
+              <para>This field must be present and is required if and only if
+              the encapsulation is higher than 1. The server's response will
+              be encrypted using this key, not the Secret Key defined in the
+              component's Parameters.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>method</term>
+
+            <listitem>
+              <para>The name of the method you want the server to
+              execute</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>data</term>
+
+            <listitem>
+              <para>A JSON object containing the parameters to be passed to
+              the method.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <section>
+      <title>Server-side</title>
+
+      <para>When the server receives a request and processed it, it will reply
+      with a Response Object. The encapsulation used may be different than the
+      encapsulation you requested in your request. The encapsulation changes
+      behaviour is the following:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>If your request was using ENCAPSULATION_RAW the result will
+          always be in the same encapsulation. This means that unencrypted
+          connections will always be replied with unencrypted
+          connections.</para>
+        </listitem>
+
+        <listitem>
+          <para>If your request was encrypted but the server can not handle
+          encryption (e.g. Core version of the component, or mcrypt not
+          activated in the server) the error message will be encapsulated in
+          ENCAPSULATION_RAW.</para>
+        </listitem>
+
+        <listitem>
+          <para>If your request was using ENCAPSULATION_AESCTR128 or
+          ENCAPSULATION_AESCTR256 the same encapsulation will be used for the
+          response, except if you request a file download. In that case, the
+          respective CBC encapsulation will be used if the server supports
+          mcrypt, otherwise the ENCAPSULATION_RAW will be used. This is done
+          for performance reasons, as encrypting more than 5Kb of data using
+          the CTR method may cause server timeouts.</para>
+        </listitem>
+
+        <listitem>
+          <para>If your request was using one of the CBC encapsulations, the
+          same encapsulation will always be used for the response.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>In any case, the client program MUST check the encapsulation field
+      of the response object before trying to parse its body.</para>
+
+      <section>
+        <title>The Response Object</title>
+
+        <para>The server's response comes as a JSON-encoded Response
+        Object.</para>
+
+        <warning>
+          <para>The JSON string is prefixed and suffixed with a triple hash
+          mark (###). The client program must throw away anything before and
+          including the first occurrence of the triple has mark, as well as
+          anything after and including the last occurrence of the triple hash
+          mark. This is done for compatibility reasons, as some servers inject
+          PHP warnings, or mistakenly serve their output as a full HTML page
+          instead of the requested raw JSON format.</para>
+        </warning>
+
+        <para>The Response Object contains the following fields:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>encapsulation</term>
+
+            <listitem>
+              <para>The encapsulation the server decided to use for its
+              response</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>body</term>
+
+            <listitem>
+              <para>An object containing the following fields:</para>
+
+              <variablelist>
+                <varlistentry>
+                  <term>status</term>
+
+                  <listitem>
+                    <para>The status of the request</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>data</term>
+
+                  <listitem>
+                    <para>The JSON-encoded Response Data, in the specified
+                    encapsulation</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <important>
+          <para>Unlike the request, the entire body is not encapsulated. The
+          status is always transferred as plain text, the data is
+          encapsulated.</para>
+        </important>
+
+        <para>When the status is anything other than 200, the data is an
+        encapsulated and JSON-encoded string containing more information about
+        the error condition which occurred. If the status is 200, please refer
+        to the Methods Reference for the expected response data.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Constants Reference</title>
+
+      <section>
+        <title>Encapsulation Identifiers</title>
+
+        <para>The predefined encapsulation identifiers are:</para>
+
+        <variablelist>
+          <varlistentry>
+            <term>1</term>
+
+            <listitem>
+              <para>ENCAPSULATION_RAW. The JSON-encoded body is represented as
+              plain text (no encryption)</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>2</term>
+
+            <listitem>
+              <para>ENCAPSULATION_AESCTR128. The JSON-encoded body is
+              encrypted using AES-128 in CTR (counter) mode. The result is
+              base64-encoded before transport. An implementation for CTR
+              encryption and decryption exists for PHP and Javascript.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>3</term>
+
+            <listitem>
+              <para>ENCAPSULATION_AESCTR256. The JSON-encoded body is
+              encrypted using AES-256 in CTR (counter) mode. The result is
+              base64-encoded before transport. An implementation for CTR
+              encryption and decryption exists for PHP and Javascript.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>4</term>
+
+            <listitem>
+              <para>ENCAPSULATION_AESCBC128. The JSON-encoded body is
+              encrypted using AES-128 in CBC mode. Since the original message
+              is padded with 0x00 for its size to become a multiple of 16, the
+              length of the plaintext is appended to the ciphertext (4 bytes).
+              The result is base64-encoded before transport.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>5</term>
+
+            <listitem>
+              <para>ENCAPSULATION_AESCBC256. The JSON-encoded body is
+              encrypted using AES-256 in CBC mode. Since the original message
+              is padded with 0x00 for its size to become a multiple of 16, the
+              length of the plaintext is appended to the ciphertext (4 bytes).
+              The result is base64-encoded before transport.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>Do note that AES-128 and AES-256 both use Rijndael in 128-bits
+        encryption mode. The only difference is the key size, which is 128
+        bits for AES-128 and 256 bits for AES-256. Reference implementations
+        for PHP using the mcrypt library are available in the AEUtilEncrypt
+        class of the component (Professional version).</para>
+
+        <para>All encrypted encapsulations (those higher than 1) encrypt the
+        message with the Secret Key defined in Akeeba Backup's component
+        Parameters. If the key is correct, the ciphertext can be deciphered
+        server-side, therefore successful decipher of the request body
+        constitutes successful authentication of the client against the
+        server.</para>
+      </section>
+
+      <section>
+        <title>Status identifiers</title>
+
+        <variablelist>
+          <varlistentry>
+            <term>200</term>
+
+            <listitem>
+              <para>Normal reply. Your request was successful.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>401</term>
+
+            <listitem>
+              <para>Invalid credentials. The challenge you provided failed, or
+              you used an invalid key to encrypt your request.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>403</term>
+
+            <listitem>
+              <para>Inadequate privileges. The system administrator doesn't
+              allow the requested action to be performed over the JSON API
+              (reserved status code for future use)</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>404</term>
+
+            <listitem>
+              <para>Requested resource not found. This can imply that the
+              backup record ID or the file you requested to download is not
+              present in the system.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>405</term>
+
+            <listitem>
+              <para>Unknown JSON method. The JSON method requested is
+              unknown.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>500</term>
+
+            <listitem>
+              <para>An error occurred. An unspecified error occurred while
+              processing your request. More information will be provided in
+              the data part of the response.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>501</term>
+
+            <listitem>
+              <para>Not implemented. The method you requested is not
+              implemented by the server.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>503</term>
+
+            <listitem>
+              <para>Remote service not activated. The system administrator has
+              not activated the front-end or remote backup feature of Akeeba
+              Backup.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Methods Reference</title>
+
+    <section>
+      <title>getVersion</title>
+
+      <para>Returns the version number of the API and the component.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>None. The request data body is null.</para>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>api</term>
+
+          <listitem>
+            <para>Integer. The API level this server understands.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>component</term>
+
+          <listitem>
+            <para>String. The exact version of the component, e.g. "3.1" for
+            Akeeba Backup 3.1 stable.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>date</term>
+
+          <listitem>
+            <para>String. The release date of the component in YYYY-MM-DD
+            format, e.g. "2010-07-21" for July 21st, 2010.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>edition</term>
+
+          <listitem>
+            <para>String. If we have Akeeba Backup Professional it return
+            "pro", otherwise "core". Since API level 320.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getProfiles</title>
+
+      <para>Returns a list of the backup profiles.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>None. The request data body is null.</para>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A list of objects. Each object has the following format:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>The numeric profile ID used in all other API calls.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>name</term>
+
+          <listitem>
+            <para>The human-readable name of the profile, as set by the user
+            in Akeeba Backup's back-end.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>startBackup</title>
+
+      <para>Begins a backup job</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All the fields are optional. You can have a null data body.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. Default = 1. The numeric profile ID to use for this
+            backup job.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>String. Default = Backup taken on &lt;date&gt; &lt;time&gt;.
+            The short description to list in the Manage Backups (formerly
+            "Administer Backup Files") page.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>comment</term>
+
+          <listitem>
+            <para>String. Default = Empty string. A longer comment to include
+            in the Manage Backups (formerly "Administer Backup Files") listing
+            for this backup record.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>tag</term>
+
+          <listitem>
+            <para>String. Default = json. Do not use this option! This is
+            reserved for future use.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A simple JSON object:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>HasRun</term>
+
+          <listitem>
+            <para>Boolean. When true, more steps are required to backup the
+            site (unless Error is not empty). When false, the backup has just
+            finished.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Domain</term>
+
+          <listitem>
+            <para>String. The backup domain. It can be one of "init',
+            'installer', 'db', 'pack', 'finalization'. It tells you which
+            major step the backup is in, i.e. 'db' for database backup.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Step</term>
+
+          <listitem>
+            <para>String. Free text describing the last operation in the
+            current domain, e.g. the name of the last folder backed up. You
+            should only use it for verbose progress display.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Substep</term>
+
+          <listitem>
+            <para>String. Free text, giving more detail about the Step. You
+            should only use it for verbose progress display.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Error</term>
+
+          <listitem>
+            <para>String. The last error occurred. If this is not an empty
+            string or null, you can assume that the backup has failed,
+            irrespectively of the HasRun value.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Warnings</term>
+
+          <listitem>
+            <para>Array of Strings. The warnings produced during the last
+            step. You'd better display them to the user.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>startSRPBackup</title>
+
+      <para>Begins a System Restore Point backup job</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>Some fields are mandatory.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. Default = 1. The numeric profile ID to use for this
+            backup job.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>String. Default = Backup taken on &lt;date&gt; &lt;time&gt;.
+            The short description to list in the Manage Backups (formerly
+            "Administer Backup Files") page.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>comment</term>
+
+          <listitem>
+            <para>String. Default = Empty string. A longer comment to include
+            in the Manage Backups (formerly "Administer Backup Files") listing
+            for this backup record.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>tag</term>
+
+          <listitem>
+            <para>String. Default = json. Do not use this option! This is
+            reserved for future use.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A simple JSON object:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>Required. Extension type. One of <option>component</option>,
+            <option>module</option>, <option>plugin</option> or
+            <option>template</option> (other extension types are not
+            supported)</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>name</term>
+
+          <listitem>
+            <para>Required. The name of the extension. For example, com_akeeba
+            for Akeeba Backup.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>group</term>
+
+          <listitem>
+            <para>Required for plugins, modules and templates. For plugins,
+            this is the plugin folder, e.g. <option>system</option> for System
+            Plugins. For modules and templates, it can be
+            <option>site</option> or <option>admin</option>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>customdirs</term>
+
+          <listitem>
+            <para>An array of custom directories to back up. Please consult
+            the System Restore Points developer documentation for more
+            information.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>extraprefixes</term>
+
+          <listitem>
+            <para>An array of extra table prefixes to use on top of the
+            default one. Please consult the System Restore Points developer
+            documentation for more information.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>customtables</term>
+
+          <listitem>
+            <para>An array of custom table names to back up. Please consult
+            the System Restore Points developer documentation for more
+            information.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>skiptables</term>
+
+          <listitem>
+            <para>An array of tables to skip backing up. Please consult the
+            System Restore Points developer documentation for more
+            information.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>xmlname</term>
+
+          <listitem>
+            <para>If the XML manifest file's name does not follow the default
+            conventions, please enter the name of the XML file here. Please
+            consult the System Restore Points developer documentation for more
+            information.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>stepBackup</title>
+
+      <para>Continues a backup job started with startBackup</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are optional. You can have a null data body.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>tag</term>
+
+          <listitem>
+            <para>String. Default = json. Do not use this option! This is
+            reserved for future use.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>HasRun</term>
+
+          <listitem>
+            <para>Boolean. When true, more steps are required to backup the
+            site (unless Error is not empty). When false, the backup has just
+            finished.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Domain</term>
+
+          <listitem>
+            <para>String. The backup domain. It can be one of "init',
+            'installer', 'db', 'pack', 'finalization'. It tells you which
+            major step the backup is in, i.e. 'db' for database backup.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Step</term>
+
+          <listitem>
+            <para>String. Free text describing the last operation in the
+            current domain, e.g. the name of the last folder backed up. You
+            should only use it for verbose progress display.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Substep</term>
+
+          <listitem>
+            <para>String. Free text, giving more detail about the Step. You
+            should only use it for verbose progress display.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Error</term>
+
+          <listitem>
+            <para>String. The last error occurred. If this is not an empty
+            string or null, you can assume that the backup has failed,
+            irrespectively of the HasRun value.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Warnings</term>
+
+          <listitem>
+            <para>Array of Strings. The warnings produced during the last
+            step. You'd better display them to the user.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>listBackups</title>
+
+      <para>Returns a (partial) list of the backup records known to the
+      component. The records are presented in reverse order, i.e. the first
+      record is the last backup attempt, whereas the last record is the
+      earliest backup attempt known to the component.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are optional. You can have a null data body.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>from</term>
+
+          <listitem>
+            <para>Integer. Default = 0. The starting offset of the list, maps
+            to the limitstart parameter in the Joomla! API.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>limit</term>
+
+          <listitem>
+            <para>Integer. Default = 50. How many records to return at once,
+            maps to the limit parameter in the Joomla! API. You can set it to
+            0 to return all records, but do note that this may cause a server
+            timeout.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A list of JSON objects. Each object has the following
+      format:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>Integer. The numeric ID of the backup record, used whenever
+            you want to fetch files, delete files, etc.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>String. The short backup description.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>comment</term>
+
+          <listitem>
+            <para>String. The longer backup comment. Expect it to contain
+            HTML.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backupstart</term>
+
+          <listitem>
+            <para>String. A MySQL timestamp of the time the backup started,
+            e.g. "2010-07-21 16:30:00".</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backupend</term>
+
+          <listitem>
+            <para>String. A MySQL timestamp of the time the backup finished,
+            e.g. "2010-07-21 16:30:00".</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>status</term>
+
+          <listitem>
+            <para>String. The status of this backup run. Can be one of:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><emphasis role="bold">run</emphasis> The backup is still
+                running, or it's stuck</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">fail</emphasis> The backup has
+                failed</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">complete</emphasis> The backup has
+                run successfully</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>origin</term>
+
+          <listitem>
+            <para>String. The backup origin. Indicates where the backup was
+            started from. This list continues to expand and now consists
+            of:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><emphasis role="bold">backend</emphasis> A back-end
+                manual backup</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">frontend</emphasis> A front-end
+                backup, using the redirects API</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">cli</emphasis> A native command
+                line backup using backup.php (probably in a CRON job)</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">lite</emphasis> A front-end manual
+                backup using the Lite Mode</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">json</emphasis> A remote backup
+                using the JSON API</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">xmlrpc</emphasis> A remote backup
+                using the XML-RPC API</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>String. The backup mode used in that backup. Can be one
+            of:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><emphasis role="bold">full</emphasis> Full backup
+                (default)</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">dbonly</emphasis> Main site
+                database only backup to SQL files</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">extradbonly</emphasis> Extra
+                Databases only backup</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">alldb</emphasis> All databases
+                (main site and any extra databases) backup</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">fileonly</emphasis> Files only
+                backup, non-incremental</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">incfile</emphasis> Files only
+                backup, incremental</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>profile_id</term>
+
+          <listitem>
+            <para>Integer. The numeric Backup Profile ID</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>archivename</term>
+
+          <listitem>
+            <para>String. The base name of the archive and its extension, e.g.
+            foobar.jpa</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>absolute_path</term>
+
+          <listitem>
+            <para>String. The full absolute file system path to the archive
+            file, e.g. /home/myuser/public_html/backups/foobar.jpa.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>multipart</term>
+
+          <listitem>
+            <para>Integer. The number of archive parts of this backup. 0 and 1
+            both mean only 1 part is present.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>tag</term>
+
+          <listitem>
+            <para>Reserved for future use.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>filesexist</term>
+
+          <listitem>
+            <para>Integer. Non-zero values mean that the archive files are
+            still present in the server. A zero value means that the files no
+            longer exist on the server.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>meta</term>
+
+          <listitem>
+            <para>String. The combination of status and filesexist
+            fields:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><emphasis role="bold">ok</emphasis> A successful backup
+                whose files exist on the server</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">obsolete</emphasis> A successful
+                backup whose files no longer exist on the server</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">pending</emphasis> A backup still
+                running, or stuck</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">fail</emphasis> A backup which
+                failed</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>size</term>
+
+          <listitem>
+            <para>Integer. The total size of all archive parts. Do note that
+            32-bit versions of PHP overflow past 2Gb. You can't rely on this
+            field.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getBackupInfo</title>
+
+      <para>Gets detailed information about a specific backup record.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>backup_id</term>
+
+          <listitem>
+            <para>Integer. The numeric ID of the backup record you want more
+            info about.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A simple JSON object, consisting of ALL the fields described in
+      listBackups plus:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>filenames</term>
+
+          <listitem>
+            <para>An array of objects. Each object has the following
+            format:</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>part</term>
+
+                <listitem>
+                  <para>Integer. The part number (1 to
+                  <varname>multipart</varname>)</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>name</term>
+
+                <listitem>
+                  <para>String. The base filename of this part.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>size</term>
+
+                <listitem>
+                  <para>Integer. The part size in bytes.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>download</title>
+
+      <para>Sends back a chunk of a backup archive file, maximum length of
+      1Mb</para>
+
+      <para>It should be well noted that if the requested encapsulation is CTR
+      it will be automatically upgraded to the respective CBC mode, i.e.
+      ENCAPSULATION_AESCTR128 will be upgraded to ENCAPSULATION_AESCBC128.
+      This happens because the CTR encapsulation is extremely slow and would
+      cause a server time-out.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>backup_id</term>
+
+          <listitem>
+            <para>The numeric ID of the backup record whose files you want to
+            download</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>part_id</term>
+
+          <listitem>
+            <para>The backup part you wish to download. For example, if we
+            have a multi-part archive with the base name test.jpa and six
+            parts (.j01 through .j05 and .jpa) then part_id=2 means that we
+            want to download test.j02 and part_id=6 means that we want to
+            download the last part, i.e. test.jpa. If the backup record is not
+            a multi-part archive just use 1.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>segment</term>
+
+          <listitem>
+            <para>Each file is internally divided into 1Mb "segments". This
+            parameter tells the JSON API which "segment" to download.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>As a rule of thumb, always start with part_id=1 and segment=1.
+      Then, start incrementing the segment. When you get an "Error reading
+      specified segment" error, increase the part number and start again with
+      segment=1. When you get an "Error reading specified segment" error for
+      the first segment of a given part, you are done reading the backup
+      archive parts of this backup record.</para>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Depends on the encapsulation. For ENCAPSULATION_RAW you get
+      base64-encoded raw binary data. For ENCAPSULATION_AESCBC128/256 you get
+      encrypted raw binary data.</para>
+
+      <para>As a rule of thumb, when you use ENCAPSULATION_RAW you must
+      base64-decode the data part of the response and append to the archive
+      file on disk.</para>
+    </section>
+
+    <section>
+      <title>downloadDirect</title>
+
+      <para>Sends back a entire backup archive part as raw binary data stream,
+      i.e. a regular file download</para>
+
+      <para>Do note that the data is always returned unencrypted, no mater
+      what the requested encapsulation was in your request.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>backup_id</term>
+
+          <listitem>
+            <para>The numeric ID of the backup record whose files you want to
+            download</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>part_id</term>
+
+          <listitem>
+            <para>The backup part you wish to download. For example, if we
+            have a multi-part archive with the base name test.jpa and six
+            parts (.j01 through .j05 and .jpa) then part_id=2 means that we
+            want to download test.j02 and part_id=6 means that we want to
+            download the last part, i.e. test.jpa. If the backup record is not
+            a multi-part archive just use 1.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Unencrypted binary stream containing the raw file data. You will
+      also receive standard HTTP headers setting the content disposition to
+      Attachment, specifying an application/octet-stream MIME type and
+      notifying you of the size of the download. In fact, you can generate a
+      URL and pass it to any third party download tool (e.g. cURL, Wget) to
+      download the archive part.</para>
+    </section>
+
+    <section>
+      <title>delete</title>
+
+      <para>Completely removes a backup record from the database. Unlike
+      deleteFiles, it will delete the files corresponding to the given backup
+      record and the backup record itself. The Akeeba Backup component will
+      not be aware that the specified backup record ever existed.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>backup_id</term>
+
+          <listitem>
+            <para>The numeric backup record identifier to delete.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Returns true on success</para>
+    </section>
+
+    <section>
+      <title>deleteFiles</title>
+
+      <para>Remove only the files corresponding to a given backup record, but
+      not the backup record itself. The Akeeba Backup component will display
+      this backup record marked as "obsolete"</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>backup_id</term>
+
+          <listitem>
+            <para>The numeric backup record identifier to delete.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Returns true on success</para>
+    </section>
+
+    <section>
+      <title>getLog</title>
+
+      <para>Returns the contents of the log file associated with a given
+      backup tag. A backup "tag" is an identifier which conventionally
+      indicates the backup origin. The default tag for backups initiated by
+      the JSON API is "remote".</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>tag</term>
+
+          <listitem>
+            <para>The backup tag</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>The contents of the log file, using the same data format as file
+      downloads</para>
+    </section>
+  </section>
+</article>

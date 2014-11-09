@@ -1,0 +1,767 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info>
+    <title>Akeeba Remote CLI User's Guide</title>
+
+    <author>
+      <personname><firstname>Nicholas</firstname><othername>K.</othername><surname>Dionysopoulos</surname></personname>
+
+      <affiliation>
+        <orgname>AkeebaBackup.com</orgname>
+      </affiliation>
+    </author>
+
+    <pubdate>December 2011</pubdate>
+  </info>
+
+  <chapter>
+    <title>Welcome</title>
+
+    <section xml:id="introduction">
+      <title>Introduction</title>
+
+      <para>Remote CLI is a powerful command-line script which allows you to
+      automate your backups, download backup archives and even update Akeeba
+      Backup. It is designed for power users and system administrators who
+      want to automate these Akeeba Backup-related tasks. It uses Akeeba
+      Backup's remote JSON API, which means that you can install the script on
+      one machine (even your own PC!) and control any number of sites, across
+      different hosts, remotely.</para>
+
+      <para>The script is shipped as a PHAR file. This is an executable PHP
+      package which can be used with PHP 5.2.7 or later (PHP 5.3.1 or later
+      recommended). The script is available for download free of charge from
+      AkeebaBackup.com.</para>
+    </section>
+  </chapter>
+
+  <chapter xml:id="using-remotecli">
+    <title>Using Remote CLI</title>
+
+    <section xml:id="usage">
+      <title>Usage</title>
+
+      <para>You can use Remote CLI from the command line of your operating
+      system with a command like this:</para>
+
+      <programlisting>php remote.phar --action=<replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
+
+      <para>Remote CLI requires a command line version of PHP (a.k.a. PHP-CLI)
+      to be installed on your machine. In the command line above, please
+      substitute php with the full path to your PHP CLI executable file. On
+      most Linux and Mac OS X systems, you don't need to specify a path, just
+      <command>php</command> will do as the executable file is already in the
+      path. On Windows, however, you most likely need to specify a full
+      path.</para>
+
+      <tip>
+        <para>The PHP project provides <link
+        xlink:href="http://windows.php.net/download/">an installer of PHP for
+        Windows</link> which can install PHP for you and place the php.exe
+        binary in your path. For sanity's sake, we recommend you to install
+        PHP in <filename>c:\PHP</filename> and put
+        <filename>remote.phar</filename> in there as well. This is the easiest
+        way to be perfectly sure where everything is installed!</para>
+      </tip>
+
+      <important>
+        <para>Remote CLI requires PHP 5.3 or PHP 5.2 with the optional "phar"
+        extension installed and activated. If you get a fatal error regarding
+        the Phar class when you try to run Remote CLI, you are running PHP 5.2
+        without the "phar" extension activated. The easiest workaround is to
+        install PHP 5.3 which has that extension built in. In any case, PHP
+        5.2 is end of life, so using PHP 5.3 is a more sane choice
+        anyway.</para>
+      </important>
+
+      <para><replaceable>hostName</replaceable> is the URL to your site's
+      root, without a trailing slash, e.g. http://www.example.com.
+      <replaceable>secretKey</replaceable> is the Secret Key you have defined
+      in your Akeeba Backup "Component Configuration" dialog. The options
+      which are required for each action are described in the <link
+      linkend="options">Options</link> chapter of this documentation. For
+      practical examples, or if you want to find out how to automate backing
+      up and downloading the backups of your site, please consult the <link
+      linkend="walkthrough">Walkthrough</link> chapter.</para>
+
+      <para><replaceable>actionName</replaceable> can be one of:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>test</term>
+
+          <listitem>
+            <para>Tests whether Remote CLI can connect to your site. If it can
+            not, it will tell you why.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backup</term>
+
+          <listitem>
+            <para>Performs a backup. It can (optionally) download the backup
+            archive and delete it from the server afterwards.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>download</term>
+
+          <listitem>
+            <para>Downloads a backup archive and can optionally delete it from
+            the server afterwards</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>deletefile</term>
+
+          <listitem>
+            <para>Delete backup archives from the server</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>delete</term>
+
+          <listitem>
+            <para>Deletes backup archives and the associated backup record
+            from the server</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>listbackups</term>
+
+          <listitem>
+            <para>Lists the latest backup records</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>profiles</term>
+
+          <listitem>
+            <para>Lists the profile IDs and descriptions</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backupinfo</term>
+
+          <listitem>
+            <para>Shows detailed information about a backup record</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>upgrade</term>
+
+          <listitem>
+            <para>Upgrades Akeeba Backup on the server, if there is an update
+            available</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <warning>
+        <para>Before you can use Remote CLI with your site, you will need to
+        enable the remote API in Akeeba Backup. In order to do that, go to
+        your site's back-end, click on <guimenu>Components</guimenu>,
+        <guimenuitem>Akeeba Backup</guimenuitem> and click on the
+        <guibutton>Component Parameters</guibutton> button. You will have to
+        set <guilabel>Enable front-end and remote backup</guilabel> to Yes.
+        You will also need to supply a <guilabel>Secret Key</guilabel> of your
+        liking. This is the password to connect to your site over Akeeba
+        Backup's Remote API. Due to several issues which have to do with
+        server configuration, we strongly recommend using only alphanumeric
+        characters (a-z, A-Z, 0-9), dash and underscore in your Secret Key.
+        Other characters may lead to inability to connect to your site.</para>
+      </warning>
+    </section>
+
+    <section xml:id="options">
+      <title>Options</title>
+
+      <para>Under any circumstances you can append <option>-m</option> or
+      <option>--machine-readable</option> to the end of the command line to
+      instruct Remote CLI to use a machine-readable output format. If you omit
+      it, a human-readable format will be used instead (default).</para>
+
+      <para>Using the option <option>--nocolor</option> will skip the
+      generation of color escape sequences. The default behaviour of Remote
+      CLI is to color-code its output for easier reading. However, some
+      terminal emulators, like Windows' command prompt application, do not
+      support them and display them as verbatim text. This can be confusing,
+      therefore the use of <option>--nocolor</option> is strongly
+      recommended.</para>
+
+      <para>Moreover, you can specify the <option>--license</option> parameter
+      to display the text of the GNU General Public License version 3, under
+      which the software is distributed. In this case, the action and all
+      options will be silently ignored.</para>
+
+      <para>Each action can be used with one or several options. Some of them
+      are mandatory for the correct operation of Remote CLI. The following
+      sections detail the parameters which can be used with each option. All
+      actions require the following mandatory options:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>host</term>
+
+          <listitem>
+            <para>The URL to your site's root, without a trailing slash, e.g.
+            <uri>http://www.example.com</uri> Please note that if your site is
+            located in a subdirectory, you have to give the full path to the
+            subdirectory, e.g. <uri>http://www.example.com/joomla</uri></para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>secret</term>
+
+          <listitem>
+            <para>The secret key, as defined in Akeeba Backup's component
+            parameters. In order to access it in the component, please log in
+            to your site's back-end, go to Components, Akeeba Backup and click
+            on the Component Parameters button. Make sure the Enable front-end
+            and remote backup option is enabled. Right below it, you will find
+            the Secret Key field.</para>
+
+            <important>
+              <para>We strongly advise you to use only lower and upper case
+              latin letters and numbers (a-z, A-Z, 0-9) in your secret word,
+              as many servers will refuse to work with secret words containing
+              special characters.</para>
+            </important>
+
+            <important>
+              <para>If you are using sh404SEF make sure you have upgraded to
+              the latest release. Older versions conflicted with Akeeba
+              Backup's remote API feature and will cause Remote CLI to report
+              a JSON decoding error. No support will be provided for this
+              error. The only workaround is to upgrade your copy of sh404SEF
+              (which is a good idea anyway, as the older versions also
+              contained potential security vulnerabilities).</para>
+            </important>
+
+            <important>
+              <para>Some SEF and security components will corrupt or block the
+              request to Akeeba Backup's Remote API. In this case you will
+              most likely get a "JSON decoding error". If this happens you may
+              have to instruct your component to ignore com_akeeba or allow
+              full access to the
+              <uri>http://www.example.com/index.php?option=com_akeeba&amp;view=json</uri>
+              URL. If unsure, please consult with the developer of your SEF or
+              security component.</para>
+            </important>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>Below you can find the options required by each command:</para>
+
+      <bridgehead>test</bridgehead>
+
+      <para>No extra options are used</para>
+
+      <bridgehead>backup</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>The numeric profile ID you want take a backup with. If it is
+            not specified, a backup with the default profile (#1) will be
+            taken. Please see the profiles command for an easy way to list
+            profile names and IDs.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>An optional description of your backup. Put it in double
+            quotes, i.e. <option>--description="My backup
+            description"</option>. If not specified, the default backup
+            description (the one with the date and time of the backup) will be
+            used by Akeeba Backup automatically.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>comment</term>
+
+          <listitem>
+            <para>An optional backup comment. Put it in double quotes, i.e.
+            <option>--comment="My backup comment"</option>. If not specified,
+            no comment will be stored with your backup.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>download</term>
+
+          <listitem>
+            <para>If you specify <option>--download</option> or
+            <option>-d</option>, the produced backup archive will be
+            downloaded to your computer. In this case, please refer to the
+            next section for its required parameters. You can also specify
+            <option>--delete</option> or <option>-D</option> together with
+            <option>--download</option> / <option>-d</option> in order to
+            delete the backup archive after it has been downloaded to your
+            PC.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>download</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>The numeric backup ID to download (see listbackups). Note:
+            when you use the --download or -d switch with the backup action
+            you must not use this option. In all other cases, this option is
+            mandatory.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>dlmode</term>
+
+          <listitem>
+            <para>Can be one of http, chunk or curl</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>http</term>
+
+                <listitem>
+                  <para>instructs Remote CLI to download the backup archive
+                  through HTTP, similar to what you get by clicking the
+                  download links in the "Manage Backups" (formerly "Administer Backup Files") page of
+                  Akeeba Backup. Even though it is the simplest method, it may
+                  cause corrupted downloads of backup archives over 10-20Mb on
+                  most shared hosts.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>chunk</term>
+
+                <listitem>
+                  <para>works similarly to http, but is designed to work with
+                  larger backup archives. It tries to download 1Mb at a time,
+                  in order to work around server restrictions on HTTP
+                  download. However, on a few shared hosts this will cause the
+                  download to fail with a timeout error, memory outage error
+                  or an Internal Server Error (HTTP 500 error).</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>curl</term>
+
+                <listitem>
+                  <para>is the recommended method and can be used to download
+                  the backup archive over FTP, FTPS or SFTP. The only downside
+                  is that it needs some configuration (see the dlurl option
+                  below).</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>dlpath</term>
+
+          <listitem>
+            <para>Specify the path to save the downloaded file. For example,
+            <option>--dlpath="c:\User\Myuser\Downloads"</option> on Windows,
+            or <option>--dlpath="/home/myuser/Downloads"</option> on Linux,
+            Mac OS X and other UNIX-based operating systems.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>dlurl</term>
+
+          <listitem>
+            <para>This option is only required if you are using the curl
+            download method. In this case, it tells Remote CLI how to connect
+            to your site in order to download the backup archives.</para>
+
+            <para>If you are using FTP, you have to specify something like
+            <option>--dlurl="ftp://username:password@hostname:port/path/to/output/directory</option></para>
+
+            <para>Username and Password are your FTP username and password.
+            Hostname is the FTP server's host name. Port is the numeric TCP/IP
+            port (normally it's 21, ask your host). The
+            <filename>/path/to/output/directory</filename> is the FTP path to
+            yoru output directory. In order to figure out the latter, please
+            use FileZilla to connect to your site and navigate to the backup
+            output directory (by default that is
+            <filename>administrator/components/com_akeeba/backup</filename>).
+            Copy the path shown above the right-hand folders pane. That's the
+            one you want.</para>
+
+            <para>Example:</para>
+
+            <para><option>--dlurl="ftp://myuser:
+            mypassword@ftp.example.com:21/public_html/administrator/components/com_akeeba/backup
+            </option></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>delete</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>The backup record's ID that you want deleted. Please see
+            listbackups below.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>deletefiles</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>The backup record's ID that you want deleted. Please see
+            listbackups below.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>profiles</bridgehead>
+
+      <para>This command has no options. It will simply return a list of
+      profile IDs and descriptions.</para>
+
+      <bridgehead>listbackups</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>from</term>
+
+          <listitem>
+            <para>(Optional) From which record you want to start the listing.
+            If not specified, 0 is assumed, showing the top results (latest
+            backup records).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>to</term>
+
+          <listitem>
+            <para>(Optional) Up to which record you want the listing to go to.
+            If not specified, 50 is assumed, therefore showing the latest 50
+            backup records.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>backupinfo</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>The backup record's ID whose info you want displayed. Please
+            see listbackups above.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>update</bridgehead>
+
+      <para>There are no options. Calling this action will check if an update
+      is available and, if there is, will install it automatically on your
+      site.</para>
+    </section>
+
+    <section xml:id="walkthrough">
+      <title>Walkthrough</title>
+
+      <para>Below we will see how to get Remote CLI interface your site, make
+      sure Akeeba Backup is up to date, run a backup and automatically
+      download the backup archive to your PC.</para>
+
+      <para>In this fictional example, the following assumptions are made:
+      Your site can be found at <uri>http://www.example.com</uri> and the
+      secret word is <option>iloveakeeba</option>. The backup archives are
+      stored in the default output directory
+      (<filename>administrator/components/com_akeeba/backup</filename>). The
+      site's FTP host is <uri>ftp.example.com</uri> and its username and
+      password are <option>example</option> and <option>test</option>
+      respectively. The site is under the <filename>public_html</filename>
+      directory. We also assume that the PHP CLI executable is already in your
+      path.</para>
+
+      <bridgehead>Connection test</bridgehead>
+
+      <para>We begin by making sure that Remote CLI can access our
+      site:</para>
+
+      <programlisting>php remote.phar --action=test --host=http://www.example.com --secret=iloveakeeba</programlisting>
+
+      <para>You should see something like this:</para>
+
+      <screen>Akeeba Remote Control CLI svn724 (2011-06-14)
+Copyright ©2008-2014 Nicholas K. Dionysopoulos / AkeebaBackup.com
+--------------------------------------------------------------------------------
+ This program comes with ABSOLUTELY NO WARRANTY. This is Free Software and you
+ are welcome to redistribute it under certain conditions. Use command line
+ option --license for details.
+--------------------------------------------------------------------------------
+Successful connection to site</screen>
+
+      <para>The last line tells you that the connection worked. However, if
+      something goes wrong, you might get one of these error messages:</para>
+
+      <para><emphasis>Error 401 - Invalid login credentials</emphasis> : Your
+      secret word is wrong. Go to your site's back-end,
+      <guimenu>Components</guimenu>, <guimenuitem>Akeeba Backup</guimenuitem>,
+      click on <guibutton>Component Parameters</guibutton> and enter a secret
+      key of your liking. We strongly recommend using only a-z, A-Z and 0-9 to
+      work around limitations with some hosts.</para>
+
+      <para><emphasis>Error 503 - Access denied</emphasis>: You forgot to
+      enable the remote API or enter a secret word in Akeeba Backup. Go to
+      your site's back-end, <guimenu>Components</guimenu>, <guimenuitem>Akeeba
+      Backup</guimenuitem>, click on <guibutton>Component
+      Parameters</guibutton> and set <guilabel>Enable remote and front-end
+      backups</guilabel> to <option>Yes</option>. Then enter a secret key of
+      your liking. We strongly recommend using only a-z, A-Z and 0-9 to work
+      around limitations with some hosts.</para>
+
+      <para><emphasis>Your server does not seem to be compatible with Remote
+      Control</emphasis> : Check that you are using the correct host name,
+      including the http/https prefix. Also make sure that Akeeba Backup 3.3.0
+      or later is installed and activated. Also note that some SEF and
+      security extensions may be blocking the Remote API calls to your site.
+      In this case, you won't be able to use Remote CLI.</para>
+
+      <important>
+        <para>If your host name, secret key or any other option contains
+        non-alphanumeric characters (anything except 0-9, a-z, A-Z, slash,
+        backslash, dash, dot and underscore) you MUST enclose the option value
+        in double quotes. For example, --secret=ab=gt%6 will not work, but
+        --secret="ab=gt%6" will do. If you get connection errors despite
+        having set the correct host name and secret key, try using double
+        quotes around all of your option values.</para>
+      </important>
+
+      <bridgehead>Taking a backup</bridgehead>
+
+      <para>The following command will take a backup (without downloading it
+      to your local PC), using backup profile #1:</para>
+
+      <programlisting>php remote.phar --action=backup --host=http://www.example.com --secret=iloveakeeba --profile=1</programlisting>
+
+      <para>You should see a long list of output coming through, detailing the
+      backup progress. In the end it should read:</para>
+
+      <screen>Backup finished successfully</screen>
+
+      <para>And that's it! You now have a backup. Since it's useless without
+      downloading, let's try...</para>
+
+      <bridgehead>Taking and downloading a backup</bridgehead>
+
+      <para>There are many ways to download a backup archive. We'll explore
+      only two, using HTTP (not recommended on most sites) and FTP.</para>
+
+      <para>First, let's try HTTP. The command line to achieve that is the
+      same as the backup command line, with the --download, --dlmethod and
+      --dlpath added:</para>
+
+      <programlisting>php remote.phar --action=backup --host=http://www.example.com --secret=iloveakeeba --profile=1
+    --download --dlmode=http --dlpath="c:\Downloads"</programlisting>
+
+      <warning>
+        <para>The command line above should be entered ON A SINGLE LINE. We
+        have added the line break for typesetting purposes only. When you copy
+        &amp; paste it and it doesn't work, come back here, read this
+        paragraph, go back to your command line and REMOVE the line break
+        after --profile=1.</para>
+      </warning>
+
+      <para>This will take a backup and then download it to C:\Downloads (or
+      anything else you specify with --dlpath) using the HTTP download method.
+      After the "Backup finished successfully" messages you will also see many
+      download lines and a "Archive downloaded successfully". If that fails,
+      you'll have to use the FTP mode.</para>
+
+      <para>First, you need to know the following information about your
+      site:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>FTP hostname. We'll assume it's <uri>ftp.example.com</uri> for
+          this example</para>
+        </listitem>
+
+        <listitem>
+          <para>FTP username and password. We'll assume it's
+          <option>foo</option> and <option>bar</option>, respectively</para>
+        </listitem>
+
+        <listitem>
+          <para>The FTP path to your backup output directory. We'll assume
+          it's
+          <filename>/public_html/administrator/components/com_akeeba/backup</filename>.</para>
+
+          <tip>
+            <para>In order to find this directory, connect to your site using
+            FileZilla. Navigate inside the folder Joomla! is installed in.
+            Usually it's a directory named <filename>public_html</filename>,
+            <filename>htdocs</filename>, <filename>www</filename> or something
+            similar. If unsure don't ask us, ask your host. Then navigate to
+            your backup output directory. The default is
+            <filename>administrators/components/com_akeeba/backup</filename>.
+            If unsure, check your Akeeba Backup Configuration page. Now, on
+            the right-hand pane you will find the FTP path, right above the
+            folders list. Copy this; it's the path we need.</para>
+          </tip>
+        </listitem>
+      </itemizedlist>
+
+      <para>Then, modify the command line to read:</para>
+
+      <programlisting>php remote.phar --action=backup --host=http://www.example.com --secret=iloveakeeba --profile=1
+--download --dlmode=curl --dlpath="c:\Downloads"
+--dlurl="ftp://<emphasis role="bold">foo</emphasis>:<emphasis role="bold">bar</emphasis>@<emphasis
+          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeeba/backup</emphasis>"</programlisting>
+
+      <warning>
+        <para>The command line above should be entered ON A SINGLE LINE. We
+        have added the line break for typesetting purposes only. When you copy
+        &amp; paste it and it doesn't work, come back here, read this
+        paragraph, go back to your command line and REMOVE the line break
+        after --profile=1 and before --dlurl.</para>
+      </warning>
+
+      <para>One final note. After you download the backup archive, it's a good
+      idea to delete the copy on the server for security reasons. Just append
+      --delete to the command line to achieve that. For example, the command
+      line above will become:</para>
+
+      <programlisting>php remote.phar --action=backup --host=http://www.example.com --secret=iloveakeeba --profile=1
+--download --dlmode=curl --dlpath="c:\Downloads" --delete
+--dlurl="ftp://<emphasis role="bold">foo</emphasis>:<emphasis role="bold">bar</emphasis>@<emphasis
+          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeeba/backup</emphasis>"
+</programlisting>
+
+      <warning>
+        <para>The command line above should be entered ON A SINGLE LINE. We
+        have added the line break for typesetting purposes only. When you copy
+        &amp; paste it and it doesn't work, come back here, read this
+        paragraph, go back to your command line and REMOVE the line break
+        after --profile=1 and before --dlurl.</para>
+      </warning>
+
+      <para>That's it!</para>
+
+      <bridgehead>Updating Akeeba Backup automatically</bridgehead>
+
+      <para>If your server supports our Live Update method, you can
+      automatically update Akeeba Backup to its latest version, when one is
+      made available. The command line to do that is:</para>
+
+      <programlisting>php remote.phar --action=update --host=http://www.example.com --secret=iloveakeeba</programlisting>
+
+      <para>That was easy, wasn't it?</para>
+
+      <bridgehead>Automating the whole lot</bridgehead>
+
+      <para>If you want to automate updating Akeeba Backup, taking and
+      downloading backups, you can simply create a batch/script file and use
+      your Operating System's scheduling features to run it at predefined
+      intervals. We suggest taking a look at the following tutorials:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><link
+          xlink:href="http://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/">HowTo:
+          Add Jobs To cron Under Linux or UNIX?</link></para>
+        </listitem>
+
+        <listitem>
+          <para><link
+          xlink:href="http://hints.macworld.com/article.php?story=2001020700163714">Using
+          the 'cron' scheduler in Mac OS X</link></para>
+        </listitem>
+
+        <listitem>
+          <para><link xlink:href="http://support.microsoft.com/kb/308569">How
+          to schedule tasks on Windows XP</link></para>
+        </listitem>
+
+        <listitem>
+          <para><link
+          xlink:href="http://windows.microsoft.com/en-US/windows7/Schedule-a-task">How
+          to schedule tasks on Windows 7</link> (also works on Vista)</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>As for the batch/script file, all you have to do is to include the
+      commands above in a .BAT (Windows) or .sh (Linux, Mac OS X) file. For
+      example, a Windows batch file (backup.php) looks like that:</para>
+
+      <programlisting>REM IMPORTANT! Before running Remote CLI, you have to change the current
+REM directory to wherever remote.phar is located in. In this example, we
+REM will assume that you followed our advice and put it in c:\PHP
+C:
+CD c:\PHP
+
+REM The following line updates Akeeba Backup - REMOVE THE LINE BREAKS
+REM WHEN COPYING THIS SCRIPT TO YOUR SYSTEM, OTHERWISE IT WILL NOT WORK!!!
+
+php-cli.exe remote.phar --action=update --host=http://www.example.com
+ --secret=iloveakeeba
+
+REM The following line takes and downloads a backup - REMOVE THE LINE
+REM BREAKS WHEN COPYING THIS SCRIPT TO YOUR SYSTEM, OTHERWISE IT WILL
+REN NOT WORK!!!
+
+php-cli.exe remote.phar --action=backup --host=http://www.example.com
+ --secret=iloveakeeba --profile=1 --download --dlmode=curl --dlpath="c:\Downloads"
+ --dlurl="ftp://foo:bar@ftp.example.com/public_html/administrator/components/com_akeeba/backup"
+ --delete</programlisting>
+
+      <para>Note that we assume that the path to PHP is c:\PHP\php-cli.exe and
+      you followed our advice and also copied Remote CLI (remote.phar) into
+      C:\PHP. That's it! You can now use the Scheduled Tasks feature of
+      Windows to make this file run whenever you want, essentially having an
+      always up-to-date copy of Akeeba Backup installed on your site, take
+      automated backups of your site, download them to your PC and remove them
+      from the server. All you need to do once you set this up is to remember
+      to leave your PC turned on for the scheduled task to run. Easy
+      peasy!</para>
+    </section>
+  </chapter>
+</book>
