@@ -57,6 +57,9 @@ class RemoteApi
 
 	public function executeJSONQuery($url, $query)
 	{
+		$options = RemoteUtilsCli::getInstance();
+		$verbose = $options->verbose;
+
 		if ($this->_verb == 'GET')
 		{
 			$url .= '?' . $query;
@@ -82,12 +85,28 @@ class RemoteApi
 		// Pretend we are IE7, so that webservers play nice with us
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.0.3705; .NET CLR 1.1.4322; Media Center PC 4.0)');
 
+		if ($verbose)
+		{
+			RemoteUtilsRender::debug('URL: ' . $url);
+		}
+
 		$raw = curl_exec($ch);
 		curl_close($ch);
 
 		if ($raw === false)
 		{
+			if ($verbose)
+			{
+				echo "cURL error\n";
+				RemoteUtilsRender::debug('cURL error');
+			}
+
 			throw new RemoteApiExceptionComms;
+		}
+
+		if ($verbose)
+		{
+			RemoteUtilsRender::debug('Raw Result: ' . $raw);
 		}
 
 		$startPos = strpos($raw, '###') + 3;
@@ -107,11 +126,18 @@ class RemoteApi
 		if (is_null($result))
 		{
 			$options = RemoteUtilsCli::getInstance();
-			if ($options->debug)
+
+			if ($options->verbose)
 			{
 				RemoteUtilsRender::debug('Invalid JSON: ' . $json);
 			}
+
 			throw new RemoteApiExceptionJson;
+		}
+
+		if ($verbose)
+		{
+			RemoteUtilsRender::debug('Parsed Result: ' . print_r($result, true));
 		}
 
 		return $result;
