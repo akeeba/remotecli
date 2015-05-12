@@ -742,7 +742,7 @@ class RemoteAppController
 
 		if ($data->body->status != 200)
 		{
-			throw new RemoteExceptionCanlistrecords("Could not list backup records");
+			throw new RemoteExceptionCantlistrecords("Could not list backup records");
 		}
 
 		RemoteUtilsRender::header("List of backup records");
