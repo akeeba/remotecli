@@ -267,6 +267,65 @@
         </varlistentry>
       </variablelist>
 
+      <para>All commands also accept the following optional options:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>encapsulation</term>
+
+          <listitem>
+            <para>By default ARC CLI will use an insecure, plain text method
+            to authenticate itself with Akeeba Backup / Akeeba Solo. If your
+            site does not use HTTPS this may pose a security risk.
+            Fortunately, Akeeba Backup / Akeeba Solo implements its own
+            cryptography for cases like this. This option tells ARC CLI which
+            kind of cryptography to use. The available options are:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><emphasis role="bold">RAW</emphasis> The default. No
+                encryption takes place. Only use with HTTPS sites.</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">CTR128</emphasis> Use AES in CTR
+                mode with a 128 bit key. This method works with all servers
+                but it's slow.</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">CTR256</emphasis> Same as above,
+                uses a 256 bit key which is better but a lot slower.</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">AES128</emphasis> Use AES in CBC
+                mode with a 128 bit key. This method requires that BOTH the
+                remote site AND the machine you're executing ARC CLI from have
+                the mcrypt PHP module installed and enabled and the mcrypt
+                module supports the rijndael-128 algorithm. If either server
+                does not meet these requirements the encryption will be
+                downgraded to CTR128 or, in some cases, result in an error
+                message.</para>
+              </listitem>
+
+              <listitem>
+                <para><emphasis role="bold">AES256</emphasis> Same as above,
+                uses a 256 bit key which is better but just a bit
+                slower.</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>Please note that error messages and downloads with the
+            <option>http</option> download mode are always transferred
+            unencrypted no matter which encapsulation you are using. Error
+            messages do not pose a security risk, but downloads do. Never use
+            the <option>http</option> download mode unless your server is
+            using HTTPS or you are using JPS (encrypted) archives.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
       <para>Below you can find the options required by each command:</para>
 
       <bridgehead>test</bridgehead>
@@ -352,10 +411,14 @@
                 <listitem>
                   <para>instructs Remote CLI to download the backup archive
                   through HTTP, similar to what you get by clicking the
-                  download links in the "Manage Backups" (formerly "Administer Backup Files") page of
-                  Akeeba Backup. Even though it is the simplest method, it may
-                  cause corrupted downloads of backup archives over 10-20Mb on
-                  most shared hosts.</para>
+                  download links in the "Manage Backups" (formerly "Administer
+                  Backup Files") page of Akeeba Backup. Even though it is the
+                  simplest method, it may cause corrupted downloads of backup
+                  archives over 10-20Mb on most shared hosts.</para>
+
+                  <para>Files are transferred unencrypted with this method.
+                  You are advised to only use this if your server is using
+                  HTTPS or with JPS (encrypted) archives only.</para>
                 </listitem>
               </varlistentry>
 
@@ -369,6 +432,13 @@
                   download. However, on a few shared hosts this will cause the
                   download to fail with a timeout error, memory outage error
                   or an Internal Server Error (HTTP 500 error).</para>
+
+                  <para>If you have used an <option>--encapsulation</option>
+                  parameter other than RAW all data is transferred encrypted
+                  with this method. This is the recommended method for servers
+                  which offer neither HTTPS nor FTPS/SFTP <emphasis>as long as
+                  you use an <option>--encapsulation</option> parameter other
+                  than RAW</emphasis>.</para>
                 </listitem>
               </varlistentry>
 
@@ -380,6 +450,11 @@
                   the backup archive over FTP, FTPS or SFTP. The only downside
                   is that it needs some configuration (see the dlurl option
                   below).</para>
+
+                  <para>If you are using plain old FTP (not FTPS or SFTP) the
+                  files and login credentials are transferred unencrypted. You
+                  are advised to never use this method with plain old FTP (not
+                  FTPS or SFTP) for security reasons.</para>
                 </listitem>
               </varlistentry>
             </variablelist>
