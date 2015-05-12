@@ -33,7 +33,8 @@ $options->setMapping(array(
 	'delete'           => 'D',
 	'verbose'          => 'v',
 	'machine-readable' => 'm',
-	'filename'         => 'f'
+	'filename'         => 'f',
+	'encapsulation'    => 'e'
 ));
 
 
