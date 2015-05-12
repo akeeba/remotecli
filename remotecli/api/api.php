@@ -97,10 +97,10 @@ class RemoteApi
 		{
 			if ($verbose)
 			{
-				echo "cURL error\n";
 				RemoteUtilsRender::debug('cURL error');
 			}
 
+			// throw new RemoteApiExceptionComms($curlErrorMessage, $curlErrorNumber);
 			throw new RemoteApiExceptionComms;
 		}
 
