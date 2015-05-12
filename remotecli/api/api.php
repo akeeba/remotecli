@@ -1,11 +1,11 @@
 <?php
-
 /**
  * @package   AkeebaRemote
  * @copyright Copyright (c)2009-2014 Nicholas K. Dionysopoulos
  * @license   GNU General Public License version 3, or later
  * @version   $Id$
  */
+
 class RemoteApi
 {
 	/** @var  string  The hostname to use */
@@ -19,6 +19,9 @@ class RemoteApi
 
 	/** @var  string  The format to use for communications */
 	private $_format = '';
+
+	/** @var  string  The encryption key used for the responses of encrypted requests */
+	private $responseKey = '';
 
 	/**
 	 * Gets a Singleton object instance of this class
@@ -63,6 +66,9 @@ class RemoteApi
 	 */
 	public function doQuery($method, $params = array(), $component = 'com_akeeba')
 	{
+		$this->genRandomKey();
+		//$this->responseKey = null;
+
 		$url = $this->getURL();
 		$query = $this->prepareQuery($method, $params, $component);
 
@@ -168,25 +174,27 @@ class RemoteApi
 
 		$encrypt = new RemoteUtilsEncrypt();
 
+		$key = empty($this->responseKey) ? $this->_secret : $this->responseKey;
+
 		switch ($result->encapsulation)
 		{
 			case 2:
-				$result->body->data = $encrypt->AESDecryptCtr($result->body->data, $this->_secret, 128);
+				$result->body->data = $encrypt->AESDecryptCtr($result->body->data, $key, 128);
 				break;
 
 			case 3:
-				$result->body->data = $encrypt->AESDecryptCtr($result->body->data, $this->_secret, 256);
+				$result->body->data = $encrypt->AESDecryptCtr($result->body->data, $key, 256);
 				break;
 
 			case 4:
 				$result->body->data = base64_decode($result->body->data);
-				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $this->_secret, 128);
+				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $key, 128);
 				$result->body->data = rtrim($result->body->data, chr(0));
 				break;
 
 			case 5:
 				$result->body->data = base64_decode($result->body->data);
-				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $this->_secret, 256);
+				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $key, 256);
 				$result->body->data = rtrim($result->body->data, chr(0));
 				break;
 		}
@@ -232,6 +240,11 @@ class RemoteApi
 			$salt              = md5(microtime(true));
 			$challenge         = $salt . ':' . md5($salt . $this->_secret);
 			$body['challenge'] = $challenge;
+		}
+
+		if (($encapsulation != 1) && !empty($this->responseKey))
+		{
+			$body['key'] = $this->responseKey;
 		}
 
 		$bodyData          = json_encode($body);
@@ -487,4 +500,14 @@ class RemoteApi
 		}
 	}
 
+	/**
+	 * Create a random encryption key and store it in $this->responseKey
+	 *
+	 * @return  void
+	 */
+	protected function genRandomKey()
+	{
+		$randval = new RemoteUtilsRandval();
+		$this->responseKey = $randval->generateString(64);
+	}
 }
