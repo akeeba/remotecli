@@ -6,9 +6,7 @@
 /build/buildlang
 /build/epub
 /build/phingext
-/build/templates/release.json
 /build/tools
-/build/*.properties
 
 /documentation/jsonapi/*.xml~
 /documentation/remotecli/*.xml~

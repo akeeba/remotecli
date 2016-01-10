@@ -1,22 +1,6 @@
 <?xml version="1.0"?>
 <project name="AkeebaRemoteCli" description="Akeeba Remote CLI" default="all" >
-	<property file="./build.properties" />
-
-	<property name="dirs.root" value=".." />
-	<property name="dirs.remotecli" value="../remotecli" />
-	<property name="dirs.release" value="../release" />
-
-    <property name="version" value="git" />
-
-	<property name="dirs.bin" value="bin" />
-	<property name="dirs.bin.libxml" value="${dirs.bin}/libxml" />
-	<property name="dirs.bin.fop" value="${dirs.bin}/fop" />
-	<property name="dirs.bin.dbxsl" value="${dirs.bin}/dbxsl" />
-	<property name="dirs.bin.release" value="../release" />
-	<property name="dirs.documentation" value="../documentation" />
-
-	<taskdef name="zipme" classname="phingext.ZipmeTask" />
-	<taskdef name="gitversion" classname="phingext.GitVersionTask" />
+	<import file="${phing.dir}/../../buildfiles/phing/common.xml" />
 
 	<!--
 	====================================================================================================
@@ -24,38 +8,12 @@
 	====================================================================================================
 	-->
 	
-	<target name="all" description="Makes everything"
-		depends="git,documentation">
-	</target>
-
 	<target name="git" description="Makes only packages, not the documentation"
 		depends="new-release,setup-properties,remotecli">
 	</target>
 
 	<target name="documentation" description="Creates the documentation packages"
 		depends="doc-remote-pdf">
-	</target>
-	
-	<target name="new-release" description="Create afresh the release directory">
-		<!-- Create the release directory afresh -->
-		<delete dir="${dirs.release}" quiet="true" includeemptydirs="true" />
-		<mkdir dir="${dirs.release}" />
-	</target>
-	
-	<target name="setup-properties" description="Set up version and build properties">
-		<!-- Initialize the build.date timestamp -->
-		<tstamp>
-			<format property="build.date" pattern="%Y-%m-%d" />
-		</tstamp>
-
-		<!-- Initialize the version if it's not set -->
-		<if>
-			<equals arg1="${version}" arg2="git" />
-			<then>
-				<gitversion workingcopy="${dirs.root}" propertyname="git.lastrevision" />
-				<property name="version" value="rev${git.lastrevision}" override="true" />
-			</then>
-		</if>
 	</target>
 
 	<!--
@@ -104,37 +62,15 @@
 	-->
 	
 	<target name="doc-remote-pdf" description="Documentation for Remote CLI in PDF format">
-		<exec command="xsltproc --nonet --xinclude --novalid --stringparam body.start.indent 0 --stringparam variablelist.term.break.after 1 --stringparam variablelist.term.separator &quot;&quot; --stringparam variablelist.max.termlength 12 --stringparam section.autolabel 1 --stringparam toc.section.depth 5 --stringparam fop1.extensions 1 --output ${dirs.bin.release}/remotecli.fo ${dirs.bin.dbxsl}/fo/docbook.xsl ${dirs.documentation}/remotecli/remotecli.xml" dir="${project.basedir}" />
-		<exec command="${dirs.bin.fop}/fop -fo ${dirs.bin.release}/remotecli.fo -pdf ${dirs.bin.release}/remotecli.pdf" logoutput="true" />
-		<delete file="${dirs.release}/remotecli.fo" quiet="true" />
+		<phingcall target="docbook-pdf">
+			<property name="docs.input" value="remotecli/remotecli.xml" />
+		</phingcall>
 	</target>
 
     <target name="doc-epub" description="Documentation for Joomla! in ePub format">
-        <mkdir dir="${dirs.bin.release}/tmp" />
-        <mkdir dir="${dirs.bin.release}/tmp/OEBPS" />
-        <mkdir dir="${dirs.bin.release}/tmp/OEBPS/images" />
-        <copy todir="${dirs.bin.release}/tmp/OEBPS/images">
-            <fileset dir="${dirs.documentation}/remotecli/images">
-                <include name="*.png" />
-                <include name="*.jpg" />
-                <include name="*.jpeg" />
-                <include name="*.gif" />
-            </fileset>
-        </copy>
-
-        <exec command="xsltproc --nonet --xinclude --novalid --stringparam epub.stylesheet style.css --stringparam body.start.indent 0 --stringparam variablelist.term.break.after 1 --stringparam variablelist.term.separator &quot;&quot; --stringparam variablelist.max.termlength 12 --stringparam section.autolabel 1 --stringparam toc.section.depth 5 --output ${dirs.bin.release}/tmp/remotecli.epub ${dirs.bin.dbxsl}/epub3/chunk.xsl ${dirs.documentation}/remotecli/remotecli.xml" dir="${project.basedir}" />
-
-        <copy file="./epub/mimetype" tofile="${dirs.bin.release}/tmp/mimetype" overwrite="true" />
-        <copy file="./epub/com.apple.ibooks.display-options.xml" tofile="${dirs.bin.release}/tmp/META-INF/com.apple.ibooks.display-options.xml" overwrite="true" />
-        <copy file="./epub/docbook-epub.css" tofile="${dirs.bin.release}/tmp/OEBPS/docbook-epub.css" overwrite="true" />
-
-        <zip destfile="${dirs.bin.release}/remotecli.epub" basedir="${dirs.bin.release}/tmp">
-            <fileset dir="${dirs.bin.release}/tmp">
-                <include name="**" />
-            </fileset>
-        </zip>
-
-        <delete dir="${dirs.bin.release}/tmp" quiet="true" />
+		<phingcall target="docbook-epub">
+			<property name="docs.input" value="remotecli/remotecli.xml" />
+		</phingcall>
     </target>
 
 	<!--
@@ -143,67 +79,21 @@
 	====================================================================================================
 	-->
 
-	<target name="link" description="Internal linker">
-		<exec command="php ../buildfiles/tools/link.php ${application.startdir}/.." dir="${application.startdir}/.." passthru="true" />
-	</target>
-
-	<target name="ftpdeploy" depends="git">
-		<gitversion workingcopy="${dirs.root}" propertyname="git.lastrevision" />
-		<!-- Core release -->
-		<echo>Uploading Remote CLI</echo>
-		<ftpdeploy
-			host="${ftp.host}"
-			port="${ftp.port}"
-			username="${ftp.username}"
-			password="${ftp.password}"
-			dir="${ftp.dir}/remotecli/rev${git.lastrevision}"
-			mode="${ftp.mode}"
-			passive="true"
-			level="debug">
-			<fileset dir="${dirs.root}">
-				<include name="CHANGELOG"/>
-			</fileset>			
-			<fileset dir="${dirs.release}">
-				<include name="remote*"/>
-			</fileset>
-		</ftpdeploy>
-	</target>
-
 	<target name="docsdeploy" depends="docsdeploy-jsonapi, docsdeploy-remotecli">
 		<echo>All Akeeba Remote CLI documentation has been uploaded</echo>
 	</target>
 	
 	<target name="docsdeploy-jsonapi" >
-		<echo>Uploading JSON API documentation</echo>
-		<ftpdeploy
-			host="${ftp.host}"
-			port="${ftp.port}"
-			username="${ftp.username}"
-			password="${ftp.password}"
-			dir="${ftp.dir.docs}/json-api"
-			mode="${ftp.mode}"
-			passive="true"
-			level="debug">
-			<fileset dir="${dirs.documentation}/jsonapi">
-				<include name="*.xml"/>
-			</fileset>			
-		</ftpdeploy>
+		<phingcall target="docbook-deploy">
+			<property name="docsdeploy.path.source" value="jsonapi" />
+			<property name="docsdeploy.path.target" value="json-api" />
+		</phingcall>
 	</target>
 
 	<target name="docsdeploy-remotecli" >
-		<echo>Uploading Akeeba Remote CLI docs</echo>
-		<ftpdeploy
-			host="${ftp.host}"
-			port="${ftp.port}"
-			username="${ftp.username}"
-			password="${ftp.password}"
-			dir="${ftp.dir.docs}/arccli"
-			mode="${ftp.mode}"
-			passive="true"
-			level="debug">
-			<fileset dir="${dirs.documentation}/remotecli">
-				<include name="*.xml"/>
-			</fileset>			
-		</ftpdeploy>
+		<phingcall target="docbook-deploy">
+			<property name="docsdeploy.path.source" value="remotecli" />
+			<property name="docsdeploy.path.target" value="arccli" />
+		</phingcall>
 	</target>
 </project>
