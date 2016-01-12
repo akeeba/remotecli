@@ -1,7 +1,7 @@
 <?php
 /**
  * @package AkeebaRemote
- * @copyright Copyright (c)2008-2011 Nicholas K. Dionysopoulos
+ * @copyright Copyright (c)2008-2016 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
  * @version $Id$
  */

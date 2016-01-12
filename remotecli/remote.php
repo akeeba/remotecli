@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   AkeebaRemote
- * @copyright Copyright (c)2009-2014 Nicholas K. Dionysopoulos
+ * @copyright Copyright (c)2009-2016 Nicholas K. Dionysopoulos
  * @license   GNU General Public License version 3, or later
  * @version   $Id$
  */
@@ -54,7 +54,7 @@ if ( !$options->get('machine-readable', 0))
 	{
 		echo <<<ENDBANNER
 Akeeba Remote Control CLI $arc_version ($arc_date)
-Copyright ©2008-2014 Nicholas K. Dionysopoulos / AkeebaBackup.com
+Copyright ©2008-2016 Nicholas K. Dionysopoulos / AkeebaBackup.com
 --------------------------------------------------------------------------------
  This program comes with ABSOLUTELY NO WARRANTY. This is Free Software and you
  are  welcome to redistribute  it under  certain conditions. Use  command line
