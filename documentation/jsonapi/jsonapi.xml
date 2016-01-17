@@ -17,8 +17,6 @@
       </affiliation>
     </author>
 
-    <pubdate>December 2011</pubdate>
-
     <revhistory>
       <revision>
         <date>December 2011</date>
@@ -37,6 +35,12 @@
 
         <revremark>Updated for Akeeba Backup 3.5.3</revremark>
       </revision>
+
+      <revision>
+        <date>January 2016</date>
+
+        <revremark>Updated for advanced Akeeba Solo JSON API</revremark>
+      </revision>
     </revhistory>
   </info>
 
@@ -44,17 +48,24 @@
     <title>Introduction to the API</title>
 
     <para>Akeeba Backup's JSON API is provided as a means to automate various
-    functions of the Akeeba Backup component without having to visit its
-    back-end, from remote client applications. The client applications can be
-    written in any programming language supporting HTTP transfers and JSON
-    encoding/decoding, such as PHP, Javscript, Delphi, Java or C/C++. The main
-    design goals of the API are:</para>
+    functions of the Akeeba Backup component for Joomla!, Akeeba Backup for
+    WordPress plugin and Akeeba Solo standalone application without having to
+    visit their back-end, from remote client applications. The client
+    applications can be written in any programming language supporting HTTP
+    transfers and JSON encoding/decoding, such as PHP, Javscript, Delphi, Java
+    or C/C++. The main design goals of the API are:</para>
 
     <itemizedlist>
       <listitem>
-        <para><emphasis role="bold">Stability</emphasis>. The interface should
-        be stable enough at least until the next major release of Akeeba
-        Backup.</para>
+        <para><emphasis role="bold">Uniformity</emphasis>. The interface is
+        uniform across all of our backup products.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">Backwards compatibility</emphasis>. The
+        interface remains backward compatible for the longest time possible.
+        Backwards incompatible changes are noted in the documentation, by API
+        version.</para>
       </listitem>
 
       <listitem>
@@ -74,16 +85,17 @@
       </listitem>
 
       <listitem>
-        <para><emphasis role="bold">Agility</emphasis>. The API should be
-        agile enough to provide methods not only for running backups, but also
-        fetching statistics as well as remotely downloading files, without the
-        need to resort to another API or protocol. Everything should be
-        catered for by the JSON API over standard HTTP transfers.</para>
+        <para><emphasis role="bold">Functionality</emphasis>. The API should
+        be agile enough to provide methods not only for running backups, but
+        also fetching statistics as well as remotely downloading files,
+        without the need to resort to another API or protocol. Everything
+        should be catered for by the JSON API over standard HTTP
+        transfers.</para>
       </listitem>
     </itemizedlist>
 
-    <para>This guide is supposed to be the reference to programming against
-    this interface.</para>
+    <para>This guide is meant to be the reference to programming against this
+    interface.</para>
   </section>
 
   <section>
@@ -99,6 +111,11 @@
       It goes without saying, www.example.com is to be replaced by the
       <abbrev>FQDN</abbrev> of the site where Akeeba Backup is installed. The
       &lt;data&gt; part of the URI is the JSON-encoded Request Object.</para>
+
+      <note>
+        <para>API endpoints for Akeeba Backup for WordPress and Akeeba Solo
+        are different than the one illustrated above.</para>
+      </note>
 
       <para><emphasis role="bold">Exceptions to the GET rule</emphasis>: Some
       request methods may require you to use POST instead of GET. Such
@@ -604,6 +621,15 @@
             reserved for future use.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term>overrides</term>
+
+          <listitem>
+            <para>Array. Configuration variable overrides. Available since API
+            version 335.</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
 
       <bridgehead renderas="sect3">Response Data returned</bridgehead>
@@ -674,139 +700,13 @@
     <section>
       <title>startSRPBackup</title>
 
-      <para>Begins a System Restore Point backup job</para>
+      <para>NO LONGER AVAILABLE</para>
 
-      <bridgehead renderas="sect3">Request Data expected</bridgehead>
-
-      <para>Some fields are mandatory.</para>
-
-      <variablelist>
-        <varlistentry>
-          <term>profile</term>
-
-          <listitem>
-            <para>Integer. Default = 1. The numeric profile ID to use for this
-            backup job.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>description</term>
-
-          <listitem>
-            <para>String. Default = Backup taken on &lt;date&gt; &lt;time&gt;.
-            The short description to list in the Manage Backups (formerly
-            "Administer Backup Files") page.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>comment</term>
-
-          <listitem>
-            <para>String. Default = Empty string. A longer comment to include
-            in the Manage Backups (formerly "Administer Backup Files") listing
-            for this backup record.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>tag</term>
-
-          <listitem>
-            <para>String. Default = json. Do not use this option! This is
-            reserved for future use.</para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
-      <bridgehead renderas="sect3">Response Data returned</bridgehead>
-
-      <para>A simple JSON object:</para>
-
-      <variablelist>
-        <varlistentry>
-          <term>type</term>
-
-          <listitem>
-            <para>Required. Extension type. One of <option>component</option>,
-            <option>module</option>, <option>plugin</option> or
-            <option>template</option> (other extension types are not
-            supported)</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>name</term>
-
-          <listitem>
-            <para>Required. The name of the extension. For example, com_akeeba
-            for Akeeba Backup.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>group</term>
-
-          <listitem>
-            <para>Required for plugins, modules and templates. For plugins,
-            this is the plugin folder, e.g. <option>system</option> for System
-            Plugins. For modules and templates, it can be
-            <option>site</option> or <option>admin</option>.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>customdirs</term>
-
-          <listitem>
-            <para>An array of custom directories to back up. Please consult
-            the System Restore Points developer documentation for more
-            information.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>extraprefixes</term>
-
-          <listitem>
-            <para>An array of extra table prefixes to use on top of the
-            default one. Please consult the System Restore Points developer
-            documentation for more information.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>customtables</term>
-
-          <listitem>
-            <para>An array of custom table names to back up. Please consult
-            the System Restore Points developer documentation for more
-            information.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>skiptables</term>
-
-          <listitem>
-            <para>An array of tables to skip backing up. Please consult the
-            System Restore Points developer documentation for more
-            information.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>xmlname</term>
-
-          <listitem>
-            <para>If the XML manifest file's name does not follow the default
-            conventions, please enter the name of the XML file here. Please
-            consult the System Restore Points developer documentation for more
-            information.</para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+      <para>This used to allow you to start a System Restore Point backup in
+      Joomla!. Beginning with Joomla! 1.6 the premise of such a backup became
+      increasingly unrealistic. By Joomla! 3.0 it was unlikely to offer any
+      real benefits in the case of a disaster, therefore it was completely
+      removed.</para>
     </section>
 
     <section>
@@ -1425,6 +1325,281 @@
 
       <para>The contents of the log file, using the same data format as file
       downloads</para>
+    </section>
+
+    <section>
+      <title>getGUIConfiguration</title>
+
+      <para>Returns a JSON definition for the configuration page. Available
+      since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>None</para>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object with the configuration GUI definition and the
+      configuratioAn n values.</para>
+    </section>
+
+    <section>
+      <title>saveConfiguration</title>
+
+      <para>Saves the configuration of a backup profile. Available since API
+      version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you are saving to.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>engineconfig</term>
+
+          <listitem>
+            <para>An associative array with all the configuration keys you are
+            saving. You can define a partial set of configuration keys to only
+            update specific configuration keys.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true or false indicating whether the saving was
+      successful.</para>
+    </section>
+
+    <section>
+      <title>saveProfile</title>
+
+      <para>Updates or creates a backup profile. Available since API version
+      340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you are saving to. Do not define it
+            (or set to 0) to save into a new backup profile.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>source</term>
+
+          <listitem>
+            <para>Integer. The profile ID to copy all data from. Do not define
+            it to read the data from the same profile as the one you're saving
+            to.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>String. The profile title.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>quickicon</term>
+
+          <listitem>
+            <para>Integer. 1 to show a backup quickicon in the interface for
+            this profile, 0 to hide it.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>When both profile and source are empty or zero a new, empty
+      profile is created. In this case the description MUST be present.</para>
+
+      <para>When profile is empty but source is not you are copying the source
+      profile into a new profile (the engine and filter configuration is
+      copied over).</para>
+
+      <para>When profile is non empty but source is empty you are editing an
+      existing profile. In this case you should specify description or
+      quickicon for the operation to make any sense.</para>
+
+      <para>When both the profile and source are non empty you are overwriting
+      profile with the contents of the source profile.</para>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true.</para>
+    </section>
+
+    <section>
+      <title>deleteProfile</title>
+
+      <para>Deletes a backup profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you are deleting. Mandatory. Must be
+            greater than 1.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true.</para>
+    </section>
+
+    <section>
+      <title>browse</title>
+
+      <para>Returns the list of subdirectories and directory information for a
+      requested folder. Used to implement directory browsers, e.g. for the
+      output directory.</para>
+
+      <para>Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>folder</term>
+
+          <listitem>
+            <para>String. The absolute folder to list. Empty to list the
+            site's root.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>processfolder</term>
+
+          <listitem>
+            <para>Integer. 1 to process folder variables, e.g.
+            [DEFAULT_OUTPUT], in the folder name.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object with the following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>folder</term>
+
+          <listitem>
+            <para>String. The path to the folder.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>folder_raw</term>
+
+          <listitem>
+            <para>String. The path to the folder before replacing folder
+            variables.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>parent</term>
+
+          <listitem>
+            <para>String. The path to the folder's parent.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>exists</term>
+
+          <listitem>
+            <para>Boolean. Does the folder really exist?</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>inRoot</term>
+
+          <listitem>
+            <para>Boolean. Is this folder under the site's root? False means
+            that the folder is above the site's root.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>openbasedirRestricted</term>
+
+          <listitem>
+            <para>Boolean. Is this folder restricted by open_basedir?</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>writable</term>
+
+          <listitem>
+            <para>Boolean. Is the folder writable?</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>subfolders</term>
+
+          <listitem>
+            <para>Array of String. The names of the folder's subdirectories.
+            Does NOT include the current (.) and parent (..) items.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>breadcrumbs</term>
+
+          <listitem>
+            <para>Array of Array. Breadcrumbs leading to the folder. Each
+            breadcrumb has the following keys:</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>label</term>
+
+                <listitem>
+                  <para>The breadcrumb part to display (name of the breadcrumb
+                  folder).</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>folder</term>
+
+                <listitem>
+                  <para>The absolute path to the folder this breadcrumb points
+                  to. You can use that as the folder argument in a follow-up
+                  browse API call.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </section>
   </section>
 </article>
