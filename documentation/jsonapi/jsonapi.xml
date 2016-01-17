@@ -1335,7 +1335,16 @@
 
       <bridgehead renderas="sect3">Request Data expected</bridgehead>
 
-      <para>None</para>
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile to get the configuration for. Default:
+            1 (default backup profile)</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
 
       <bridgehead renderas="sect3">Response Data returned</bridgehead>
 
@@ -1597,6 +1606,398 @@
                 </listitem>
               </varlistentry>
             </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getDBRoots</title>
+
+      <para>Returns the database roots for the backup profile. Available since
+      API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array of JSON objects is returned. Each object has the
+      following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>value</term>
+
+          <listitem>
+            <para>The UUID of the database definition.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>text</term>
+
+          <listitem>
+            <para>The human readable database definition name in the form of
+            host/database (e.g. localhost/example) or host:port/database (e.g.
+            mysql.example.com:8306/example). The main database of the site
+            always returns a localised string in the tune of "Main site
+            database".</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getDBEntities</title>
+
+      <para>Returns a list of all the database entities and any exclusion
+      filters applied to each one of them. Typically used to render a GUI for
+      setting database filters. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>string. The UUID of the database root, default [SITEDB] (the
+            main site database definition). See getDBRoots</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array of JSON objects is returned. Each object has the
+      following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>node</term>
+
+          <listitem>
+            <para>The name of the database table, view, function, trigger or
+            procedure on which the filter is applied.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>The filter type. <option>tabledata</option> for content
+            exclusion (only the definition is backed up),
+            <option>tables</option> for skipping both the definition and the
+            data.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getDBFilters</title>
+
+      <para>Returns the database entities exclusion filters for the chosen
+      backup profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>string. The UUID of the database root, default [SITEDB] (the
+            main site database definition). See getDBRoots</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object is returned with the keys</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>The UUID of the database root.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>tables</term>
+
+          <listitem>
+            <para>A list of database entities. This is a JSON object. The
+            property keys of the object are the database entity (table, view,
+            function, trigger, procedure) names. The property values are JSON
+            objects with the following keys:</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>type</term>
+
+                <listitem>
+                  <para>The type of the database entity. One of:</para>
+
+                  <variablelist>
+                    <varlistentry>
+                      <term>table</term>
+
+                      <listitem>
+                        <para>Regular table</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term>view</term>
+
+                      <listitem>
+                        <para>Regular VIEW</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term>merge</term>
+
+                      <listitem>
+                        <para>Merge table (MySQL only, means MRG_MYISAM table
+                        type)</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term>temp</term>
+
+                      <listitem>
+                        <para>Temporary table. For MySQL that includes MEMORY,
+                        EXAMPLE, BLACKHOLE and FEDERATED.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term>procedure</term>
+
+                      <listitem>
+                        <para>Database procedure.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term>function</term>
+
+                      <listitem>
+                        <para>Database function.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term>trigger</term>
+
+                      <listitem>
+                        <para>Database trigger</para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>tables</term>
+
+                <listitem>
+                  <para>Is this table excluded? 0: No. 1: Yes. 2: Always
+                  (excluded by a RegEx, conditional, algorithmic or
+                  platform-specific filter).</para>
+
+                  <note>
+                    <para>In the Akeeba Backup / Solo interface these values
+                    are rendered with the following color coding 0: white 1:
+                    yellow 2: red.</para>
+                  </note>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>tabledata</term>
+
+                <listitem>
+                  <para>Is the table data excluded? 0: No. 1: Yes. 2: Always
+                  (not a regular table; or excluded by a RegEx, conditional,
+                  algorithmic or platform-specific filter).</para>
+
+                  <note>
+                    <para>In the Akeeba Backup / Solo interface these values
+                    are rendered with the following color coding 0: white 1:
+                    yellow 2: red.</para>
+                  </note>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>setDBFilter</title>
+
+      <para>Sets or resets a database exclusion filter. Available since API
+      version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>string. The UUID of the database root, default [SITEDB] (the
+            main site database definition). See getDBRoots</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>table</term>
+
+          <listitem>
+            <para>string. The name of the table for this filter. See
+            getDBFilters.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>string. The filter type. See getDBFilters.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>status</term>
+
+          <listitem>
+            <para>int. 1 to set the filter, 0 to reset it.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object with the following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>success</term>
+
+          <listitem>
+            <para>Bool. True if the operation succeeded.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>newstate</term>
+
+          <listitem>
+            <para>Bool. The new state of the filter, true if the filter is
+            enabled.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getFSRoots</title>
+
+      <para>Returns the filesystem roots for the backup profile. Available
+      since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array of JSON objects is returned. Each object has the
+      following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>value</term>
+
+          <listitem>
+            <para>The UUID of the filesystem root ([SITEROOT] means the site's
+            root).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>text</term>
+
+          <listitem>
+            <para>The full filesystem path to this root.</para>
           </listitem>
         </varlistentry>
       </variablelist>
