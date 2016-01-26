@@ -1660,7 +1660,7 @@
     </section>
 
     <section>
-      <title>getDBEntities</title>
+      <title>getDBFilters</title>
 
       <para>Returns a list of all the database entities and any exclusion
       filters applied to each one of them. Typically used to render a GUI for
@@ -1720,7 +1720,7 @@
     </section>
 
     <section>
-      <title>getDBFilters</title>
+      <title>getDBEntities</title>
 
       <para>Returns the database entities exclusion filters for the chosen
       backup profile. Available since API version 340.</para>
@@ -2001,6 +2001,1015 @@
           </listitem>
         </varlistentry>
       </variablelist>
+    </section>
+
+    <section>
+      <title>getFSFilters</title>
+
+      <para>Returns the filesystem exclusion filters for the chosen backup
+      profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>string. The UUID of the filesystem root, default [SITEROOT]
+            (the main site database definition). See getFSRoots</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array of JSON objects is returned. Each object has the
+      following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>node</term>
+
+          <listitem>
+            <para>The relative path to the file or directory database on which
+            the filter is applied.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>The filter type:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><option>directories</option>. Exclude this
+                directory.</para>
+              </listitem>
+
+              <listitem>
+                <para><option>skipdirs</option>. Exclude the subdirectories
+                contained in this directory.</para>
+              </listitem>
+
+              <listitem>
+                <para><option>skipfiles</option>. Exclude the files contained
+                in this directory.</para>
+              </listitem>
+
+              <listitem>
+                <para><option>files</option>. Exclude this file.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getFSEntities</title>
+
+      <para>Returns the filesystem entities (files and folders) exclusion
+      filters for the chosen backup profile. Available since API version
+      340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>string. The UUID of the database root, default [SITEDB] (the
+            main site database definition). See getDBRoots</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>subdirectory</term>
+
+          <listitem>
+            <para>string. The relative path to the subdirectory you are
+            listing. The path is relative to the root specified above. The
+            subdirectory components MUST be separated with forward slashes and
+            MUST NOT begin or end with a forward slash.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object is returned with the keys</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>The UUID of the database root.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>crumbs</term>
+
+          <listitem>
+            <para>An array of folder names leading from the root to the
+            current subdirectory</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>folders</term>
+
+          <listitem>
+            <para>A JSON object. The property keys are folder names. The
+            property values are JSON objects with the following format:</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>directories</term>
+
+                <listitem>
+                  <para>Is this entire directory and all of its contents to be
+                  excluded? 0 = No. 1 = Yes. 2 = Always (excluded by an
+                  algorithmic, platform-specific or regular expression
+                  filter)</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>skipfiles</term>
+
+                <listitem>
+                  <para>Are the files contained in this directory to be
+                  excluded? 0 = No. 1 = Yes. 2 = Always (excluded by an
+                  algorithmic, platform-specific or regular expression
+                  filter)</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>skipdirs</term>
+
+                <listitem>
+                  <para>Are the directories contained in this directory to be
+                  excluded? 0 = No. 1 = Yes. 2 = Always (excluded by an
+                  algorithmic, platform-specific or regular expression
+                  filter)</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>files</term>
+
+          <listitem>
+            <para>A JSON object. The property keys are file names. The
+            property values are JSON objects with the following format:</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>files</term>
+
+                <listitem>
+                  <para>Is this file to be excluded? 0 = No. 1 = Yes. 2 =
+                  Always (excluded by an algorithmic, platform-specific or
+                  regular expression filter)</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>size</term>
+
+                <listitem>
+                  <para>The size of the file in bytes.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>setFSFilter</title>
+
+      <para>Sets or resets a filesystem exclusion filter. Available since API
+      version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>string. The UUID of the fileystem root, default [SITEROOT]
+            (the main site database definition). See getFSRoots</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>path</term>
+
+          <listitem>
+            <para>string. The path to the folder / file you are excluding. See
+            getFSEntities.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>string. The filter type. See getFSFilters.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>status</term>
+
+          <listitem>
+            <para>int. 1 to set the filter, 0 to reset it.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object with the following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>success</term>
+
+          <listitem>
+            <para>Bool. True if the operation succeeded.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>newstate</term>
+
+          <listitem>
+            <para>Bool. The new state of the filter, true if the filter is
+            enabled.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getIncludedDirectories</title>
+
+      <para>Lists the additional included directories. Available since API
+      version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object. The object keys are the UUIDs of the extra included
+      directories. The value of each object key is a JSON array with the
+      following keys.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>0</term>
+
+          <listitem>
+            <para>String. The absolute path to the extra included
+            directory.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>1</term>
+
+          <listitem>
+            <para>String. Virtual folder for storing its contents inside the
+            backup archive.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>setIncludedDirectory</title>
+
+      <para>Add an additional included directory definition. Available since
+      API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>uuid</term>
+
+          <listitem>
+            <para>String. A unique identified for this definition. If left
+            empty a UUIDv4 will be generated automatically.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>path</term>
+
+          <listitem>
+            <para>String. The absolute filesystem path of the included
+            directory.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>virtualFolder</term>
+
+          <listitem>
+            <para>String. The name of the folder inside the archive's
+            extradirs directory where the files of the included directory will
+            be stored. Default: the name of the included directory (last
+            component of its path).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>success</term>
+
+          <listitem>
+            <para>Bool. True on success.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>newstate</term>
+
+          <listitem>
+            <para>Bool. Ignored (always false).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>removeIncludedDirectory</title>
+
+      <para>Removes an additional included directory definition. Available
+      since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>uuid</term>
+
+          <listitem>
+            <para>String. A unique identified for the definition to
+            delete.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>success</term>
+
+          <listitem>
+            <para>Bool. True on success.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>newstate</term>
+
+          <listitem>
+            <para>Bool. Ignored (always true).</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getIncludedDBs</title>
+
+      <para>Lists the additional included database definitions. Available
+      since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object. The object keys are the unique names of the extra
+      included datbases. The value of each object key is a JSON array with the
+      following keys.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>host</term>
+
+          <listitem>
+            <para>String. The hostname of the database</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>port</term>
+
+          <listitem>
+            <para>Int. The port of the database server, null if not
+            specified.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>driver</term>
+
+          <listitem>
+            <para>String. Database driver to use, e.g. mysql, mysqli,
+            pdomysql, mssql, sqlazure, postgresql</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>user</term>
+
+          <listitem>
+            <para>String. The user name to connect to the database
+            server.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>password</term>
+
+          <listitem>
+            <para>String. The password to connect to the database
+            server.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>database</term>
+
+          <listitem>
+            <para>String. The name of the database you are connecting
+            to.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>setIncludedDB</title>
+
+      <para>Adds an additional included database definition. Available since
+      API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>name</term>
+
+          <listitem>
+            <para>String. The unique name for this database. It is best to
+            only use lowercase letters and dashes.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>connection</term>
+
+          <listitem>
+            <para>A JSON object with the following keys.</para>
+
+            <para><variablelist>
+                <varlistentry>
+                  <term>host</term>
+
+                  <listitem>
+                    <para>String. The hostname of the database</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>port</term>
+
+                  <listitem>
+                    <para>Int. The port of the database server, null if not
+                    specified.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>driver</term>
+
+                  <listitem>
+                    <para>String. Database driver to use, e.g. mysql, mysqli,
+                    pdomysql, mssql, sqlazure, postgresql</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>user</term>
+
+                  <listitem>
+                    <para>String. The user name to connect to the database
+                    server.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>password</term>
+
+                  <listitem>
+                    <para>String. The password to connect to the database
+                    server.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>database</term>
+
+                  <listitem>
+                    <para>String. The name of the database you are connecting
+                    to.</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>test</term>
+
+          <listitem>
+            <para>Bool. True (default) to test the connection before
+            saving.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true on success.</para>
+    </section>
+
+    <section>
+      <title>removeIncludedDB</title>
+
+      <para>Removes an additional included database definition. Available
+      since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>name</term>
+
+          <listitem>
+            <para>String. The unique name of the db to remove.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true on success.</para>
+    </section>
+
+    <section>
+      <title>testDBConnection</title>
+
+      <para>Test the connection to a database, used to test connection
+      information before submitting it to setIncludedDB. Available since API
+      version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>connection</term>
+
+          <listitem>
+            <para>A JSON object with the following keys.</para>
+
+            <para><variablelist>
+                <varlistentry>
+                  <term>host</term>
+
+                  <listitem>
+                    <para>String. The hostname of the database</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>port</term>
+
+                  <listitem>
+                    <para>Int. The port of the database server, null if not
+                    specified.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>driver</term>
+
+                  <listitem>
+                    <para>String. Database driver to use, e.g. mysql, mysqli,
+                    pdomysql, mssql, sqlazure, postgresql</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>user</term>
+
+                  <listitem>
+                    <para>String. The user name to connect to the database
+                    server.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>password</term>
+
+                  <listitem>
+                    <para>String. The password to connect to the database
+                    server.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>database</term>
+
+                  <listitem>
+                    <para>String. The name of the database you are connecting
+                    to.</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>A JSON object.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>status</term>
+
+          <listitem>
+            <para>Bool. True if the connection is successful.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>message</term>
+
+          <listitem>
+            <para>String. Error message when status is false.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>getRegexDBFilters</title>
+
+      <para>Returns the regular expression database exclusion filters for the
+      backup profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>String. The database root to get filters for (default:
+            [SITEDB])</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array of JSON objects is returned. Each object has the
+      following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>String. Filter type. One of regextables (exclude an entire
+            table / view / function / trigger / procedure from the backup) or
+            regextabledata (exclude the contents of the table, not its
+            structure).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>item</term>
+
+          <listitem>
+            <para>String. The filter's regular expression.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>setRegexDBFilter</title>
+
+      <para>Sets a regular expression database exclusion filter for the backup
+      profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>String. The database root to get filters for (default:
+            [SITEDB])</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>regex</term>
+
+          <listitem>
+            <para>String. The regular expression to set.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>String. Filter type, see getRegexDBFilters.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>status</term>
+
+          <listitem>
+            <para>Bool. True to set the filter, false to reset (remove) the
+            filter.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true on success.</para>
+    </section>
+
+    <section>
+      <title>getRegexFSFilters</title>
+
+      <para>Returns the regular expression filesystem exclusion filters for
+      the backup profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>String. The filesystem root to get filters for (default:
+            [SITEROOT])</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array of JSON objects is returned. Each object has the
+      following keys:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>String. Filter type. One of regexfiles (exclude files
+            matching the regex), regexdirectories (exclude the directories
+            matching the regex), regexskipdirs (exclude the subdirectories of
+            directories matching the regex), regexskipfiles (exclude the files
+            of the directories matching the regex)</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>item</term>
+
+          <listitem>
+            <para>String. The filter's regular expression.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>setRegexFSFilter</title>
+
+      <para>Sets a regular expression filesystem exclusion filter for the
+      backup profile. Available since API version 340.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <para>All fields are MANDATORY.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile ID you want to list.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>root</term>
+
+          <listitem>
+            <para>String. The filesystem root to get filters for (default:
+            [SITEROOT])</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>regex</term>
+
+          <listitem>
+            <para>String. The regular expression to set.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>type</term>
+
+          <listitem>
+            <para>String. Filter type, see getRegexFSFilters.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>status</term>
+
+          <listitem>
+            <para>Bool. True to set the filter, false to reset (remove) the
+            filter.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>Boolean true on success.</para>
     </section>
   </section>
 </article>
