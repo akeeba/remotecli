@@ -14,7 +14,7 @@ if ($phar)
 }
 else
 {
-	$path = realpath(dirname(__FILE__)) . '/';
+	$path = __DIR__ . '/';
 }
 
 // Load the version number defines

@@ -2,6 +2,8 @@
 <project name="AkeebaRemoteCli" description="Akeeba Remote CLI" default="all" >
 	<import file="${phing.dir}/../../buildfiles/phing/common.xml" />
 
+	<property name="dirs.remotecli" value="${dirs.root}/remotecli" />
+
 	<!--
 	====================================================================================================
 	Tasks - General
