@@ -125,13 +125,14 @@ class RemoteAppController
 	 */
 	private function backup()
 	{
-		$options     = RemoteUtilsCli::getInstance();
-		$profile     = (int)($options->get('profile', 1));
-		$description = $options->get('description', "Remote backup");
-		$comment     = $options->get('comment', '');
-		$backupId    = 0;
-		$archive     = '';
-		$progress    = 0;
+		$options        = RemoteUtilsCli::getInstance();
+		$profile        = (int) ($options->get('profile', 1));
+		$description    = $options->get('description', "Remote backup");
+		$comment        = $options->get('comment', '');
+		$backupRecordID = 0;
+		$archive        = '';
+		$progress       = 0;
+		$backupID       = null;
 
 		// @todo Test for download options
 
@@ -156,7 +157,12 @@ class RemoteAppController
 		{
 			if (isset($data->body->data->BackupID))
 			{
-				$backupId = $data->body->data->BackupID;
+				$backupRecordID = $data->body->data->BackupID;
+			}
+
+			if (isset($data->body->data->backupid))
+			{
+				$backupID = $data->body->data->backupid;
 			}
 
 			if (isset($data->body->data->Archive))
@@ -174,16 +180,26 @@ class RemoteAppController
 			RemoteUtilsRender::info("Domain  : {$data->body->data->Domain}");
 			RemoteUtilsRender::info("Step    : {$data->body->data->Step}");
 			RemoteUtilsRender::info("Substep : {$data->body->data->Substep}");
-			if ( !empty($data->body->data->Warnings))
+
+			if (!empty($data->body->data->Warnings))
 			{
 				foreach ($data->body->data->Warnings as $warning)
 				{
 					RemoteUtilsRender::warning("Warning : $warning");
 				}
 			}
+
 			RemoteUtilsRender::info('');
 
-			$data = $api->doQuery('stepBackup');
+			$params = array();
+
+			if (!empty($backupID))
+			{
+				$params['backupid'] = $backupID;
+			}
+
+			$data = $api->doQuery('stepBackup', $params);
+
 			if ($data->body->status != 200)
 			{
 				throw new RemoteExceptionError('Error ' . $data->body->status . ": " . $data->body->data);
@@ -193,9 +209,9 @@ class RemoteAppController
 		RemoteUtilsRender::header('Backup finished successfully');
 
 		// If we have to download, proceed with the download step
-		if ($options->download && $backupId)
+		if ($options->download && $backupRecordID)
 		{
-			$options->set('id', $backupId);
+			$options->set('id', $backupRecordID);
 			$options->set('archive', $archive);
 			$this->download();
 		}
