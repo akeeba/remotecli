@@ -41,6 +41,12 @@
 
         <revremark>Updated for advanced Akeeba Solo JSON API</revremark>
       </revision>
+
+      <revision>
+        <date>June 2016</date>
+
+        <revremark>backupid information</revremark>
+      </revision>
     </revhistory>
   </info>
 
@@ -52,13 +58,14 @@
     WordPress plugin and Akeeba Solo standalone application without having to
     visit their back-end, from remote client applications. The client
     applications can be written in any programming language supporting HTTP
-    transfers and JSON encoding/decoding, such as PHP, Javscript, Delphi, Java
-    or C/C++. The main design goals of the API are:</para>
+    transfers and JSON encoding/decoding, such as PHP, JavaScript, Delphi,
+    .NET, Java and C/C++. The main design goals of the API are:</para>
 
     <itemizedlist>
       <listitem>
         <para><emphasis role="bold">Uniformity</emphasis>. The interface is
-        uniform across all of our backup products.</para>
+        uniform across all of our backup products (Akeeba Backup for Joomla!,
+        Akeeba Backup for WordPress, Akeeba Solo).</para>
       </listitem>
 
       <listitem>
@@ -81,7 +88,7 @@
         equipped with a valid, commercially signed SSL certificate which rules
         out this kind of attacks. As a result, we implement two alternate
         methods of authentication and two encryption standards, ranging from
-        fairly trivial to very secure.</para>
+        fairly trivial to quite secure.</para>
       </listitem>
 
       <listitem>
@@ -96,6 +103,13 @@
 
     <para>This guide is meant to be the reference to programming against this
     interface.</para>
+
+    <para>For a real world implementation in PHP please take a look at <link
+    xlink:href="https://github.com/akeeba/remotecli">Akeeba Remote Control
+    CLI</link>. You can also run it with the <option>--verbose</option> switch
+    to see the communications taking place between the client and the server.
+    We believe this is the best interactive demonstration of the API
+    implementation.</para>
   </section>
 
   <section>
@@ -577,7 +591,7 @@
     <section>
       <title>startBackup</title>
 
-      <para>Begins a backup job</para>
+      <para>Begins a backup job. You must run it before stepBackup.</para>
 
       <bridgehead renderas="sect3">Request Data expected</bridgehead>
 
@@ -694,6 +708,76 @@
             step. You'd better display them to the user.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term>BackupID</term>
+
+          <listitem>
+            <para>Integer. The numeric ID of the backup record being created.
+            Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Archive</term>
+
+          <listitem>
+            <para>String. The name of the backup archive. You will only get
+            this in one of the responses of startBackup or stepBackup, when
+            the archive is first created. In all other responses it will be
+            empty. Only use the non-empty response. Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Progress</term>
+
+          <listitem>
+            <para>Integer. The percentage of the backup process completion
+            (0-100). Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backupid</term>
+
+          <listitem>
+            <para>String. The unique identifier of this backup. You need to
+            pass this in all subsequent calls to stepBackup. Since API
+            340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>sleepTime</term>
+
+          <listitem>
+            <para>Integer. How many milliseconds you should wait before you
+            run the next stepBackup. Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>stepNumber</term>
+
+          <listitem>
+            <para>Integer. The sequential number of this step. Step numbers
+            returned by stepBackup must be sequentially numbered,
+            monotonically increasing. Anything else indicates a misbehaving
+            server / broken backup. Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>stepState</term>
+
+          <listitem>
+            <para>String. The run state of the engine. It can be one of error,
+            init, prepared, running, postrun and finished. This is debugging
+            information about the engine internals and you should not act upon
+            it. Since API 340.</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </section>
 
@@ -716,15 +800,26 @@
 
       <bridgehead renderas="sect3">Request Data expected</bridgehead>
 
-      <para>All fields are optional. You can have a null data body.</para>
+      <para>The backupid field is recommended since API 335 and <emphasis
+      role="bold">mandatory</emphasis> since API 340. If you do not pass the
+      backupid the backup will most likely fail.</para>
 
       <variablelist>
         <varlistentry>
           <term>tag</term>
 
           <listitem>
-            <para>String. Default = json. Do not use this option! This is
-            reserved for future use.</para>
+            <para>String. Optional. Default = json. Do not use this option!
+            This is reserved for future use.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backupif</term>
+
+          <listitem>
+            <para>String. MANDATORY. The unique identifier of this backup, as
+            returned by the previous call to startBackup or stepBackup.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -787,6 +882,67 @@
           <listitem>
             <para>Array of Strings. The warnings produced during the last
             step. You'd better display them to the user.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Archive</term>
+
+          <listitem>
+            <para>String. The name of the backup archive. You will only get
+            this in one of the responses of startBackup or stepBackup, when
+            the archive is first created. In all other responses it will be
+            empty. Only use the non-empty response. Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Progress</term>
+
+          <listitem>
+            <para>Integer. The percentage of the backup process completion
+            (0-100). Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>backupid</term>
+
+          <listitem>
+            <para>String. The unique identifier of this backup. You need to
+            pass this in all subsequent calls to stepBackup. Since API
+            340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>sleepTime</term>
+
+          <listitem>
+            <para>Integer. How many milliseconds you should wait before you
+            run the next stepBackup. Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>stepNumber</term>
+
+          <listitem>
+            <para>Integer. The sequential number of this step. Step numbers
+            returned by stepBackup must be sequentially numbered,
+            monotonically increasing. Anything else indicates a misbehaving
+            server / broken backup. Since API 340.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>stepState</term>
+
+          <listitem>
+            <para>String. The run state of the engine. It can be one of error,
+            init, prepared, running, postrun and finished. This is debugging
+            information about the engine internals and you should not act upon
+            it. Since API 340.</para>
           </listitem>
         </varlistentry>
       </variablelist>
