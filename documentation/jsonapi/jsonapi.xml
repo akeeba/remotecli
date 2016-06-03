@@ -815,7 +815,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term>backupif</term>
+          <term>backupid</term>
 
           <listitem>
             <para>String. MANDATORY. The unique identifier of this backup, as
