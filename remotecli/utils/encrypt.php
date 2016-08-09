@@ -491,7 +491,7 @@ class RemoteUtilsEncrypt
 	 *
 	 * @return string The ciphertext
 	 */
-	public function AESEncryptCBC($plaintext, $password, $nBits = 128)
+	public function KOTKOT_AESEncryptCBC($plaintext, $password, $nBits = 128)
 	{
 		// standard allows 128/192/256 bit keys
 		if (!($nBits == 128 || $nBits == 192 || $nBits == 256))
@@ -586,7 +586,7 @@ class RemoteUtilsEncrypt
 	 *
 	 * @return string The plaintext
 	 */
-	public function AESDecryptCBC($ciphertext, $password, $nBits = 128)
+	public function KOTKOT_AESDecryptCBC($ciphertext, $password)
 	{
 		// standard allows 128/192/256 bit keys
 		if (!($nBits == 128 || $nBits == 192 || $nBits == 256))
@@ -670,5 +670,215 @@ class RemoteUtilsEncrypt
 		}
 
 		return $plaintext;
+	}
+
+	/**
+	 * AES encryption in CBC mode. This is the standard mode (the CTR methods
+	 * actually use Rijndael-128 in CTR mode, which - technically - isn't AES).
+	 * The data length is tucked as a 32-bit unsigned integer (little endian)
+	 * after the ciphertext. It supports AES-128 only.
+	 *
+	 * @since  3.0.1
+	 * @author Nicholas K. Dionysopoulos
+	 *
+	 * @param   string  $plaintext  The data to encrypt
+	 * @param   string  $password   Encryption password
+	 *
+	 * @return  string  The ciphertext
+	 */
+	public function AESEncryptCBC($plaintext, $password)
+	{
+		$adapter = $this->getAdapter();
+
+		if (!$adapter->isSupported())
+		{
+			return false;
+		}
+
+		// Get the expanded key from the password
+		$key = $this->expandKey($password);
+
+		// Create an IV
+		$iv = $this->createTheWrongIV($password);
+
+		// The ciphertext is the encrypted string...
+		$ciphertext = $adapter->encrypt($plaintext, $key, $iv);
+
+		// ...minus the IV which was placed in front
+		$ciphertext = substr($ciphertext, 16);
+
+		// ...plus the plaintext length.
+		$ciphertext .= pack('V', strlen($plaintext));
+
+		return $ciphertext;
+	}
+
+	/**
+	 * AES decryption in CBC mode. This is the standard mode (the CTR methods
+	 * actually use Rijndael-128 in CTR mode, which - technically - isn't AES).
+	 *
+	 * It supports AES-128 only. It assumes that the last 4 bytes
+	 * contain a little-endian unsigned long integer representing the unpadded
+	 * data length.
+	 *
+	 * @since  3.0.1
+	 * @author Nicholas K. Dionysopoulos
+	 *
+	 * @param   string  $ciphertext  The data to encrypt
+	 * @param   string  $password    Encryption password
+	 *
+	 * @return  string  The plaintext
+	 */
+	public function AESDecryptCBC($ciphertext, $password)
+	{
+		$adapter = $this->getAdapter();
+
+		if (!$adapter->isSupported())
+		{
+			return false;
+		}
+
+		// Get the expanded key from the password
+		$key = $this->expandKey($password);
+
+		// Read the data size
+		$data_size = unpack('V', substr($ciphertext, -4));
+
+		// Try to get the IV from the data
+		$iv = substr($ciphertext, -24, 20);
+		$rightStringLimit = -4;
+
+		// No stored IV. Do it the dumb way.
+		$iv = $this->createTheWrongIV($password);
+
+		// Decrypt
+		$plaintext = $adapter->decrypt($iv . substr($ciphertext, 0, $rightStringLimit), $key);
+
+		// Trim padding, if necessary
+		if (strlen($plaintext) > $data_size)
+		{
+			$plaintext = substr($plaintext, 0, $data_size);
+		}
+
+		return $plaintext;
+	}
+
+	/**
+	 * That's the old way of creating an IV that's definitely not cryptographically sound.
+	 *
+	 * DO NOT USE, EVER, UNLESS YOU WANT TO DECRYPT LEGACY DATA
+	 *
+	 * @param   string  $password  The raw password from which we create an IV in a super bozo way
+	 *
+	 * @return  string  A 16-byte IV string
+	 *
+	 * @since   4.6.0
+	 * @author  Nicholas K. Dionysopoulos
+	 */
+	function createTheWrongIV($password)
+	{
+		static $ivs = array();
+
+		$key = md5($password);
+
+		if (!isset($ivs[$key]))
+		{
+			// Create an Initialization Vector (IV) based on the password, using the same technique as for the key
+			$nBytes = 16; // AES uses a 128 -bit (16 byte) block size, hence the IV size is always 16 bytes
+			$pwBytes = array();
+
+			for ($i = 0; $i < $nBytes; $i++)
+			{
+				$pwBytes[$i] = ord(substr($password, $i, 1)) & 0xff;
+			}
+
+			$iv = $this->Cipher($pwBytes, $this->KeyExpansion($pwBytes));
+			$newIV = '';
+
+			foreach ($iv as $int)
+			{
+				$newIV .= chr($int);
+			}
+
+			$ivs[$key] = $newIV;
+		}
+
+		return $ivs[$key];
+	}
+
+	/**
+	 * Expand the password to an appropriate 128-bit encryption key
+	 *
+	 * @param   string  $password
+	 *
+	 * @return  string
+	 *
+	 * @since   5.2.0
+	 * @author  Nicholas K. Dionysopoulos
+	 */
+	public function expandKey($password)
+	{
+		// Try to fetch cached key or create it if it doesn't exist
+		$nBits     = 128;
+		$lookupKey = md5($password . '-' . $nBits);
+
+		if (array_key_exists($lookupKey, $this->passwords))
+		{
+			$key = $this->passwords[$lookupKey];
+
+			return $key;
+		}
+
+		// use AES itself to encrypt password to get cipher key (using plain password as source for
+		// key expansion) - gives us well encrypted key.
+		$nBytes  = $nBits / 8; // Number of bytes in key
+		$pwBytes = array();
+
+		for ($i = 0; $i < $nBytes; $i++)
+		{
+			$pwBytes[$i] = ord(substr($password, $i, 1)) & 0xff;
+		}
+
+		$key    = $this->Cipher($pwBytes, $this->KeyExpansion($pwBytes));
+		$key    = array_merge($key, array_slice($key, 0, $nBytes - 16)); // expand key to 16/24/32 bytes long
+		$newKey = '';
+
+		foreach ($key as $int)
+		{
+			$newKey .= chr($int);
+		}
+
+		$key = $newKey;
+
+		$this->passwords[$lookupKey] = $key;
+
+		return $key;
+	}
+
+	/**
+	 * Returns the correct AES-128 CBC encryption adapter
+	 *
+	 * @return  RemoteUtilsAdapterInterface
+	 *
+	 * @since   5.2.0
+	 * @author  Nicholas K. Dionysopoulos
+	 */
+	public function getAdapter()
+	{
+		static $adapter = null;
+
+		if (is_object($adapter) && ($adapter instanceof RemoteUtilsAdapterInterface))
+		{
+			return $adapter;
+		}
+
+		$adapter = new RemoteUtilsAdapterMcrypt();
+
+		if (!$adapter->isSupported())
+		{
+			$adapter = new RemoteUtilsAdapterMcrypt();
+		}
+
+		return $adapter;
 	}
 }

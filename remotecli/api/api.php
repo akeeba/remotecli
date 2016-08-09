@@ -188,14 +188,12 @@ class RemoteApi
 
 			case 4:
 				$result->body->data = base64_decode($result->body->data);
-				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $key, 128);
+				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $key);
 				$result->body->data = rtrim($result->body->data, chr(0));
 				break;
 
 			case 5:
-				$result->body->data = base64_decode($result->body->data);
-				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $key, 256);
-				$result->body->data = rtrim($result->body->data, chr(0));
+				throw new RuntimeException('Rijndael 256-bit encryption is no longer supported. Please use AES-128 mode instead.');
 				break;
 		}
 
@@ -267,13 +265,13 @@ class RemoteApi
 				break;
 
 			case 4: // AES CBC 128
-				$jsonSource['body'] = $encrypt->AESEncryptCBC($jsonSource['body'], $this->_secret, 128);
+				$jsonSource['body'] = $encrypt->AESEncryptCBC($jsonSource['body'], $this->_secret);
 				$jsonSource['body'] = base64_encode($jsonSource['body']);
 				break;
 
 			case 5: // AES CBC 256
-				$jsonSource['body'] = $encrypt->AESEncryptCBC($jsonSource['body'], $this->_secret, 256);
-				$jsonSource['body'] = base64_encode($jsonSource['body']);
+				// No longer supported
+				throw new RuntimeException('Rijndael 256-bit encryption is no longer supported. Please use AES-128 mode instead.');
 				break;
 		}
 
@@ -324,11 +322,9 @@ class RemoteApi
 					break;
 
 				case 'AES128':
-					$ret = 4;
-					break;
-
 				case 'AES256':
-					$ret = 5;
+					// AES256 (which was in fact Rijndael-256) is always converted back to AES128.
+					$ret = 4;
 					break;
 
 				default:
