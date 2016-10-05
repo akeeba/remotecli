@@ -47,6 +47,13 @@
 
         <revremark>backupid information</revremark>
       </revision>
+
+      <revision>
+        <date>October 2016</date>
+
+        <revremark>Updated for Akeeba Backup 5.1.4 / Akeeba Solo
+        2.0.3</revremark>
+      </revision>
     </revhistory>
   </info>
 
@@ -1505,7 +1512,95 @@
       <bridgehead renderas="sect3">Response Data returned</bridgehead>
 
       <para>A JSON object with the configuration GUI definition and the
-      configuratioAn n values.</para>
+      configuration values.</para>
+    </section>
+
+    <section>
+      <title>exportConfiguration</title>
+
+      <para>Returns a hash table with the profile's description, engine
+      configuration and filters configuration. You can use it to export
+      profiles for use on the same or a different server. Available since API
+      version 341.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile to get the configuration for. Default:
+            1 (default backup profile)</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>An array with the profile information. The array keys are:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>The description of the exported backup profile</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>configuration</term>
+
+          <listitem>
+            <para>The engine configuration information in INI format</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>filters</term>
+
+          <listitem>
+            <para>The filters configuration information in JSON format</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section>
+      <title>importConfiguration</title>
+
+      <para>Imports a hash table with the profile information either as a new
+      profile or overwriting an existing profile. You can use it to import
+      profiles you exported from the same or a different server. Available
+      since API version 341.</para>
+
+      <bridgehead renderas="sect3">Request Data expected</bridgehead>
+
+      <variablelist>
+        <varlistentry>
+          <term>profile</term>
+
+          <listitem>
+            <para>Integer. The profile to save the configuration to. Default:
+            0 (create a new backup profile)</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>data</term>
+
+          <listitem>
+            <para>Array. The exported data array (see exportConfiguration).
+            The array must have all three keys defined by
+            exportConfiguration.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead renderas="sect3">Response Data returned</bridgehead>
+
+      <para>True on success.</para>
     </section>
 
     <section>
