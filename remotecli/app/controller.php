@@ -101,23 +101,25 @@ class RemoteAppController
 		{
 			throw new RemoteAppExceptionNoway();
 		}
-		else
+
+		// Check the response
+		if ($ret->body->status != 200)
 		{
-			// Check the response
-			if ($ret->body->status != 200)
-			{
-				throw new RemoteExceptionError('Error ' . $ret->body->status . " - " . $ret->body->data);
-			}
-
-			// Check the API version
-			if ($ret->body->data->api < ARCCLI_MINAPI)
-			{
-				throw new RemoteExceptionVersion();
-			}
-
-			RemoteUtilsRender::info('Successful connection to site', $force);
-			RemoteUtilsRender::info('', $force);
+			throw new RemoteExceptionError('Error ' . $ret->body->status . " - " . $ret->body->data);
 		}
+
+		// Check the API version
+		if ($this->_versionInfo->api < ARCCLI_MINAPI)
+		{
+			throw new RemoteExceptionVersion();
+		}
+
+		$version = $this->_versionInfo->component . ' (API level ' . $ret->body->data->api . ')';
+		$edition = ($this->_versionInfo->edition == 'pro') ? 'Professional' : 'Core';
+
+		RemoteUtilsRender::info("Successful connection to site", $force);
+		RemoteUtilsRender::info("Akeeba Backup / Solo $edition $version", $force);
+		RemoteUtilsRender::info('', $force);
 	}
 
 	/**
