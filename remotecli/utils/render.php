@@ -116,16 +116,22 @@ class RemoteUtilsRender
 	{
 		static $quiet = null;
 		static $nocolor = null;
+		static $mergeErrorOutput = null;
+
+		$options = RemoteUtilsCli::getInstance();
 
 		if (is_null($quiet))
 		{
-			$options = RemoteUtilsCli::getInstance();
 			$quiet   = $options->hasOption('quiet');
+		}
+
+		if (is_null($mergeErrorOutput))
+		{
+			$mergeErrorOutput   = $options->hasOption('mergeerror');
 		}
 
 		if (is_null($nocolor))
 		{
-			$options = RemoteUtilsCli::getInstance();
 			$nocolor = $options->hasOption('nocolour');
 			if ( !$nocolor)
 			{
@@ -152,10 +158,33 @@ class RemoteUtilsRender
 				break;
 
 			case REMOTE_STATUS_WARNING:
+				if ($mergeErrorOutput)
+				{
+					echo $nocolor ? $message . "\n" : "\033[0;36m$message\n\033[0m";
+
+					return;
+				}
+
 				fwrite(STDERR, $nocolor ? $message . "\n" : "\033[0;36m$message\n\033[0m");
 				break;
 
 			case REMOTE_STATUS_ERROR:
+				if ($mergeErrorOutput)
+				{
+					if ($nocolor)
+					{
+						echo ($quiet ? "" : "\n" . str_repeat('=', 79) . "\nERROR:\n") . $message . "\n" . ($quiet ? '' : str_repeat('=', 79) . "\n");
+					}
+					else
+					{
+						echo "\033[1;31m";
+						echo ($quiet ? '' : "\n" . str_repeat('=', 79) . "\nERROR:\n") . "\033[0;35m" . $message . "\n" . ($quiet ? '' : "\033[1;31m" . str_repeat('=', 79) . "\n");
+						echo "\033[0m";
+					}
+
+					return;
+				}
+
 				if ($nocolor)
 				{
 					fwrite(STDERR, ($quiet ? "" : "\n" . str_repeat('=', 79) . "\nERROR:\n") . $message . "\n" . ($quiet ? '' : str_repeat('=', 79) . "\n"));

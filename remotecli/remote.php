@@ -25,7 +25,7 @@ require_once($path . 'loader.php');
 
 // Initialize command-line option handling
 $options = RemoteUtilsCli::getInstance();
-$options->setMapping(array(
+$options->setMapping([
 	'host'             => 'h',
 	'secret'           => 's',
 	'action'           => 'a',
@@ -34,8 +34,8 @@ $options->setMapping(array(
 	'verbose'          => 'v',
 	'machine-readable' => 'm',
 	'filename'         => 'f',
-	'encapsulation'    => 'e'
-));
+	'encapsulation'    => 'e',
+]);
 
 
 if ( !$options->get('machine-readable', 0))
