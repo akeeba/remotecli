@@ -13,6 +13,7 @@
 
 /release
 
-/old_remotecli/arccli_version.php
-
+/remotecli/arccli_version.php
 /remotecli/vendor
+
+/old_remotecli/arccli_version.php
