@@ -5,7 +5,7 @@
  * @license    GNU General Public License version 3, or later
  */
 
-namespace Akeeba\RemoteCLI\Configuration;
+namespace Akeeba\RemoteCLI\Utility;
 
 /**
  * Local Configuration File Parser
@@ -19,6 +19,9 @@ class LocalFile
 	 */
 	const defaultFileName = '.akeebaremotecli';
 
+	/**
+	 * The default section name where we palce options outside any other section
+	 */
 	const defaultSection = 'remote';
 
 	/**
@@ -49,8 +52,7 @@ class LocalFile
 		}
 
 		$this->filePath = $filePath;;
-
-		$this->parse();
+		$this->configurations = $this->parse($this->filePath);
 	}
 
 	/**
@@ -108,30 +110,36 @@ class LocalFile
 
 	/**
 	 * Parses the configuration file, if it exists.
+	 *
+	 * @param   string  $filePath  The file path to parse
+	 *
+	 * @return  array
 	 */
-	private function parse()
+	private function parse($filePath)
 	{
-		if (!file_exists($this->filePath) || !is_readable($this->filePath))
+		$return = [];
+
+		if (!file_exists($filePath) || !is_readable($filePath))
 		{
-			return;
+			return $return;
 		}
 
-		$this->configurations = [];
+		// Use a safe INI file parser which falls back to a pure PHP implementation if all else fails
+		$results = IniParser::parse_ini_file($filePath, true);
 
-		// TODO Maybe backport our custom INI parser here...?
-		$results = parse_ini_file($this->filePath, true, INI_SCANNER_RAW);
-
-		// This bit is necessary to parse options outside of a section
+		// This bit is necessary to parse options outside of a section, assigning them to the default section
 		foreach ($results as $k => $v)
 		{
 			if (!is_array($v))
 			{
-				$this->configurations[self::defaultSection][$k] = $v;
+				$return[self::defaultSection][$k] = $v;
 
 				continue;
 			}
 
-			$this->configurations[$k] = $v;
+			$return[$k] = $v;
 		}
+
+		return $return;
 	}
 }
