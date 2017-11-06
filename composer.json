@@ -4,8 +4,7 @@
   "description": "Akeeba Remote Control CLI",
   "require": {
     "php": ">=5.4.0",
-    "ext-curl": "*",
-    "corneltek/getoptionkit": "^2.6.0"
+    "ext-curl": "*"
   },
   "keywords": [
     "backup",
