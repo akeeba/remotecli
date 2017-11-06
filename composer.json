@@ -1,0 +1,29 @@
+{
+  "name": "akeeba/remotecli",
+  "type": "project",
+  "description": "Akeeba Remote Control CLI",
+  "require": {
+    "php": ">=5.4.0",
+    "ext-curl": "*",
+    "corneltek/getoptionkit": "^2.6.0"
+  },
+  "keywords": [
+    "backup",
+    "php",
+    "mysql",
+    "akeeba"
+  ],
+  "homepage": "https://github.com/akeeba/remotecli",
+  "license": "GPL-3.0+",
+  "authors": [
+    {
+      "name": "Nicholas K. Dionysopoulos",
+      "email": "nicholas_NO_SPAM_PLEASE@akeebabackup.com",
+      "homepage": "https://www.dionysopoulos.me",
+      "role": "Lead Developer"
+    }
+  ],
+  "config": {
+    "vendor-dir": "remotecli/vendor"
+  }
+}
