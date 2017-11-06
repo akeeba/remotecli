@@ -2,7 +2,7 @@
 <project name="AkeebaRemoteCli" description="Akeeba Remote CLI" default="all" >
 	<import file="${phing.dir}/../../buildfiles/phing/common.xml" />
 
-	<property name="dirs.remotecli" value="${dirs.root}/remotecli" />
+	<property name="dirs.remotecli" value="/old_remotecli" />
 
 	<!--
 	====================================================================================================
@@ -25,7 +25,7 @@
 	-->
 
 	<target name="remotecli" depends="setup-properties">
-		<copy file="./templates/arccli_version.php" tofile="${dirs.remotecli}/arccli_version.php" overwrite="true">
+		<copy file="./templates/arccli_version.php" tofile="/old_remotecli/arccli_version.php" overwrite="true">
 			<filterchain id="arccli-tokens">
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="DATE" value="${build.date}" />
@@ -38,12 +38,12 @@
 
 		<pharpackage 
 			destfile="${dirs.release}/remote.phar"
-			basedir="${dirs.remotecli}"
+			basedir="/old_remotecli"
 			compression="gzip"
-			stub="${dirs.remotecli}/index.php"
+			stub="/old_remotecli/index.php"
 			signature="sha1"
 		>
-		<fileset dir="${dirs.remotecli}">
+		<fileset dir="/old_remotecli">
 			<include name="**" />
 		</fileset>
 		<metadata>
