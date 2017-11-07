@@ -20,9 +20,9 @@ class LocalFile
 	const defaultFileName = '.akeebaremotecli';
 
 	/**
-	 * The default section name where we palce options outside any other section
+	 * The default section name where we place options outside any other section
 	 */
-	const defaultSection = 'remote';
+	const defaultSection = 'akeebaremotecli';
 
 	/**
 	 * The path to the local file storing the configuration parameters.

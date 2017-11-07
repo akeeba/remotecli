@@ -48,7 +48,7 @@ $autoloader->addPsr4("Akeeba\\RemoteCLI\\", __DIR__);
 
 // Get the options from the CLI parameters and merge the configuration file data
 $input = new Cli();
-$input->mergeData((new LocalFile())->getConfiguration($input->getCmd('host')));
+$input->mergeData((new LocalFile())->getConfiguration($input->getCmd('host', 'akeebaremotecli')));
 
 // Create the output object
 $output        = new Output(
