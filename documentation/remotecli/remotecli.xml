@@ -13,11 +13,11 @@
       <personname><firstname>Nicholas</firstname><othername>K.</othername><surname>Dionysopoulos</surname></personname>
 
       <affiliation>
-        <orgname>AkeebaBackup.com</orgname>
+        <orgname>Akeeba Ltd</orgname>
       </affiliation>
     </author>
 
-    <pubdate>December 2011</pubdate>
+    <pubdate>December 2017</pubdate>
   </info>
 
   <chapter>
@@ -35,7 +35,7 @@
       any number of sites, across different hosts, remotely.</para>
 
       <para>The script is shipped as a PHAR file. This is an executable PHP
-      package which can be used with PHP 5.4.0 or later (PHP 7.0 or 7.1
+      package which can be used with PHP 5.5.0 or later (PHP 7.0 or 7.1
       recommended). The script is available for download free of charge from
       our site.</para>
     </section>
@@ -50,7 +50,7 @@
       <para>You can use Remote CLI from the command line of your operating
       system with a command like this:</para>
 
-      <programlisting>php remote.phar --action=<replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
+      <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para>Remote CLI requires a command line version of PHP (a.k.a. PHP-CLI)
       to be installed on your machine. In the command line above, please
@@ -71,13 +71,9 @@
       </tip>
 
       <important>
-        <para>Remote CLI requires PHP 5.3 or PHP 5.2 with the optional "phar"
-        extension installed and activated. If you get a fatal error regarding
-        the Phar class when you try to run Remote CLI, you are running PHP 5.2
-        without the "phar" extension activated. The easiest workaround is to
-        install PHP 5.3 which has that extension built in. In any case, PHP
-        5.2 is end of life, so using PHP 5.3 is a more sane choice
-        anyway.</para>
+        <para>Remote CLI requires PHP 5.5 with the optional "phar" extension
+        installed and activated. This is the default setup of PHP in most
+        cases.</para>
       </important>
 
       <para><replaceable>hostName</replaceable> is the URL to your site's
@@ -183,6 +179,12 @@
           </listitem>
         </varlistentry>
       </variablelist>
+
+      <tip>
+        <para>You can also use the legacy
+        <option>--action=<replaceable>actionName</replaceable></option> syntax
+        for backwards compatibility with version 1.x.</para>
+      </tip>
 
       <warning>
         <para>Before you can use Remote CLI with your site, you will need to
@@ -313,30 +315,18 @@
 
               <listitem>
                 <para><emphasis role="bold">CTR128</emphasis> Use AES in CTR
-                mode with a 128 bit key. This method works with all servers
-                but it's slow.</para>
-              </listitem>
-
-              <listitem>
-                <para><emphasis role="bold">CTR256</emphasis> Same as above,
-                uses a 256 bit key which is better but a lot slower.</para>
+                mode with a 128 bit key. Not recommended.</para>
               </listitem>
 
               <listitem>
                 <para><emphasis role="bold">AES128</emphasis> Use AES in CBC
                 mode with a 128 bit key. This method requires that BOTH the
                 remote site AND the machine you're executing ARC CLI from have
-                the mcrypt PHP module installed and enabled and the mcrypt
-                module supports the rijndael-128 algorithm. If either server
-                does not meet these requirements the encryption will be
-                downgraded to CTR128 or, in some cases, result in an error
-                message.</para>
-              </listitem>
-
-              <listitem>
-                <para><emphasis role="bold">AES256</emphasis> Same as above,
-                uses a 256 bit key which is better but just a bit
-                slower.</para>
+                the mcrypt (NOT recommended) or OpenSSL PHP modules installed
+                and enabled and that these PHP modules support the
+                rijndael-128 algorithm. If either server does not meet these
+                requirements the encryption will be downgraded to CTR128 or,
+                in some cases, result in an error message.</para>
               </listitem>
             </itemizedlist>
 
@@ -600,6 +590,12 @@
       <para>There are no options. Calling this action will check if an update
       is available and, if there is, will install it automatically on your
       site.</para>
+    </section>
+
+    <section>
+      <title>Configuration files</title>
+
+      <para/>
     </section>
 
     <section xml:id="walkthrough">

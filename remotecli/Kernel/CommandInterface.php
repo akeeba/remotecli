@@ -17,21 +17,7 @@ use Akeeba\RemoteCLI\Output\Output;
 interface CommandInterface
 {
 	/**
-	 * Returns the name of the command.
-	 *
-	 * @return  string
-	 */
-	public function getName();
-
-	/**
-	 * Returns the options specifications. Used to print help.
-	 *
-	 * @return  mixed
-	 */
-	public function getOptionSpecs();
-
-	/**
-	 * Executes the command. Dependencies are passed to the object at this point.
+	 * Executes the command.
 	 *
 	 * @return  void
 	 *

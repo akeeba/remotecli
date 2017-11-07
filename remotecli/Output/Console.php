@@ -117,6 +117,11 @@ class Console implements OutputAdapterInterface
 				break;
 
 			case Output::DEBUG:
+				if (!$this->options->debug)
+				{
+					return;
+				}
+
 				$message = $this->apply(self::COLOR_FG_LIGHT_GRAY) .
 					$message . $this->apply(self::COLOR_RESET);
 				break;
@@ -305,7 +310,7 @@ class Console implements OutputAdapterInterface
 		// Maybe I can shell out and run tput on *NIX...?
 		if (function_exists('exec') && (DIRECTORY_SEPARATOR != '\\'))
 		{
-			$cols = exec('tput cols');
+			$cols = exec('tput cols 2>/dev/null');
 		}
 
 		if (!empty($cols))

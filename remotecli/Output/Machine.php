@@ -46,6 +46,11 @@ class Machine implements OutputAdapterInterface
 				break;
 
 			case Output::DEBUG:
+				if (!$this->options->debug)
+				{
+					return;
+				}
+
 				$message = sprintf('DEBUG|%s', $message);
 				break;
 

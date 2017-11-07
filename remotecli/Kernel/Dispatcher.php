@@ -17,7 +17,7 @@ use Akeeba\RemoteCLI\Output\Output;
 class Dispatcher
 {
 	/** @var   string  The name of the default command, in case none is specified */
-	protected $defaultCommand = 'help';
+	protected $defaultCommand = '';
 
 	/** @var   Cli  Input variables */
 	protected $input = array();
@@ -94,7 +94,10 @@ class Dispatcher
 		/** @var CommandInterface $o */
 		foreach ($this->commands as $o)
 		{
-			if ($o->getName() != $this->command)
+			$parts       = explode('\\', get_class($o));
+			$commandName = array_pop($parts);
+
+			if (strtolower($commandName) != strtolower($this->command))
 			{
 				continue;
 			}

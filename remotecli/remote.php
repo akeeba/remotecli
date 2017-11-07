@@ -9,6 +9,7 @@ use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Kernel\Dispatcher;
 use Akeeba\RemoteCLI\Output\Output;
 use Akeeba\RemoteCLI\Output\OutputOptions;
+use Akeeba\RemoteCLI\Utility\LocalFile;
 
 // PHP Version check
 if (version_compare(PHP_VERSION, '5.5.0', 'lt'))
@@ -45,16 +46,24 @@ if ($autoloader === false)
 
 $autoloader->addPsr4("Akeeba\\RemoteCLI\\", __DIR__);
 
-// Set up dependencies
-$input         = new Cli();
-$outputOptions = new OutputOptions($input->getData());
-$adapter       = $input->getBool('machine-readable', false) ? 'machine' : 'console';
-$output        = new Output($outputOptions, $adapter);
+// Get the options from the CLI parameters and merge the configuration file data
+$input = new Cli();
+$input->mergeData((new LocalFile())->getConfiguration($input->getCmd('host')));
 
+// Create the output object
+$output        = new Output(
+	new OutputOptions(
+		$input->getData()
+	),
+	$input->getBool('machine-readable', false) ? 'machine' : 'console'
+);
+
+// Create the dispatcher with all the commands
 $dispatcher = new Dispatcher([
 	// TODO Add commands here
 ], $input, $output);
 
+// Dispatch the application
 try
 {
 	$dispatcher->dispatch();
@@ -69,5 +78,4 @@ catch (Exception $e)
 	{
 		$output->debug($line);
 	}
-
 }

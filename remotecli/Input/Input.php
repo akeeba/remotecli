@@ -13,21 +13,21 @@ namespace Akeeba\RemoteCLI\Input;
  * Handles the input to the application and allows developers to manipulate
  * it in a safe manner.
  *
- * @method    integer  getInt($name, $default)
- * @method    integer  getInteger($name, $default)
- * @method    integer  getUint($name, $default)
- * @method    float    getFloat($name, $default)
- * @method    float    getDouble($name, $default)
- * @method    boolean  getBool($name, $default)
- * @method    boolean  getBoolean($name, $default)
- * @method    string   getWord($name, $default)
- * @method    string   getAlnum($name, $default)
- * @method    string   getCmd($name, $default)
- * @method    string   getBase64($name, $default)
- * @method    string   getString($name, $default)
- * @method    string   getHtml($name, $default)
- * @method    string   getPath($name, $default)
- * @method    string   getUsername($name, $default)
+ * @method    integer  getInt($name, $default = null)
+ * @method    integer  getInteger($name, $default = null)
+ * @method    integer  getUint($name, $default = null)
+ * @method    float    getFloat($name, $default = null)
+ * @method    float    getDouble($name, $default = null)
+ * @method    boolean  getBool($name, $default = null)
+ * @method    boolean  getBoolean($name, $default = null)
+ * @method    string   getWord($name, $default = null)
+ * @method    string   getAlnum($name, $default = null)
+ * @method    string   getCmd($name, $default = null)
+ * @method    string   getBase64($name, $default = null)
+ * @method    string   getString($name, $default = null)
+ * @method    string   getHtml($name, $default = null)
+ * @method    string   getPath($name, $default = null)
+ * @method    string   getUsername($name, $default = null)
  */
 class Input implements \Serializable, \Countable
 {
@@ -384,12 +384,23 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Replaces the (raw) input data with the given array
 	 *
-	 * @param   array|object $data The raw input data to use
+	 * @param   array|object  $data  The raw input data to use
 	 *
 	 * @return  void
 	 */
 	public function setData($data)
 	{
 		$this->data = (array) $data;
+	}
+
+	/**
+	 * Merges $data into the raw input data
+	 *
+	 * @param   array|object  $data  The raw input data to merge
+	 */
+	public function mergeData($data)
+	{
+		$data = (array) $data;
+		$this->data = array_merge_recursive($this->data, $data);
 	}
 }
