@@ -3,7 +3,7 @@
   "type": "project",
   "description": "Akeeba Remote Control CLI",
   "require": {
-    "php": ">=5.4.0",
+    "php": ">=5.5.0",
     "ext-curl": "*"
   },
   "keywords": [

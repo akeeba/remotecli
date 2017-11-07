@@ -5,12 +5,36 @@
  * @license    GNU General Public License version 3, or later
  */
 
+use Akeeba\RemoteCLI\Input\Cli;
+use Akeeba\RemoteCLI\Kernel\Dispatcher;
+use Akeeba\RemoteCLI\Output\Output;
+use Akeeba\RemoteCLI\Output\OutputOptions;
+
+// PHP Version check
+if (version_compare(PHP_VERSION, '5.5.0', 'lt'))
+{
+	$yourPHP = PHP_VERSION;
+	echo <<< END
+
+! ! !    S T O P    ! ! !
+
+Akeeba Remote CLI requires PHP version 5.5.0 or later.
+
+You are currently using PHP $yourPHP as reported by PHP itself.
+
+Please ugprade PHP and retry running this script.
+
+END;
+
+}
+
 // Enable compatibility with PHAR archives
 if (Phar::running(false))
 {
 	Phar::interceptFileFuncs();
 }
 
+// Initialize Composer's autoloader (we use it to autoload our classes, too
 /** @var Composer\Autoload\ClassLoader $autoloader */
 $autoloader = include_once __DIR__ . '/vendor/autoload.php';
 
@@ -20,3 +44,30 @@ if ($autoloader === false)
 }
 
 $autoloader->addPsr4("Akeeba\\RemoteCLI\\", __DIR__);
+
+// Set up dependencies
+$input         = new Cli();
+$outputOptions = new OutputOptions($input->getData());
+$adapter       = $input->getBool('machine-readable', false) ? 'machine' : 'console';
+$output        = new Output($outputOptions, $adapter);
+
+$dispatcher = new Dispatcher([
+	// TODO Add commands here
+], $input, $output);
+
+try
+{
+	$dispatcher->dispatch();
+}
+catch (Exception $e)
+{
+	$output->error($e->getMessage());
+
+	$output->debug("Stack Trace (for debugging):");
+
+	foreach (explode("\n", $e->getTraceAsString()) as $line)
+	{
+		$output->debug($line);
+	}
+
+}

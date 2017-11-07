@@ -74,7 +74,7 @@ class Cli extends Input
 	 *
 	 * @param   string  $input  The serialized input.
 	 *
-	 * @return  Input  The input object.
+	 * @return  void
 	 */
 	public function unserialize($input)
 	{
