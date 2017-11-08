@@ -66,6 +66,19 @@ class Test
 						 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
 						 * you do?
 						 */
+
+						if ($options->verbose)
+						{
+							$output->debug(sprintf(
+								'Communication error with verb %s, format %s, endpoint %s. The error was ‘%s’.',
+								$verb,
+								$format,
+								$endpoint,
+								$communicationError->getMessage()
+								)
+							);
+						}
+
 						continue;
 					}
 					catch (ApiException $apiException)
@@ -75,6 +88,18 @@ class Test
 						 * with a broken third party plugin results in the output being ovewritten. So let's retry with
 						 * another way to connect to the site.
 						 */
+						if ($options->verbose)
+						{
+							$output->debug(sprintf(
+									'Remote API error with verb %s, format %s, endpoint %s. The error was ‘%s’.',
+									$verb,
+									$format,
+									$endpoint,
+									$apiException->getMessage()
+								)
+							);
+						}
+
 						continue;
 					}
 				}
