@@ -197,6 +197,8 @@ class RemoteApi
 				break;
 		}
 
+		// -- End expose
+
 		if ($verbose)
 		{
 			RemoteUtilsRender::debug('Parsed Result: ' . print_r($result, true));

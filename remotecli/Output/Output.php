@@ -52,21 +52,29 @@ class Output
 
 	public function info($message, $force = false)
 	{
+		// TODO Add logging
+
 		$this->adapter->writeln(self::INFO, $message, $force);
 	}
 
 	public function error($message)
 	{
+		// TODO Add logging
+
 		$this->adapter->writeln(self::ERROR, $message, true);
 	}
 
 	public function warning($message)
 	{
+		// TODO Add logging
+
 		$this->adapter->writeln(self::WARNING, $message, true);
 	}
 
 	public function debug($message)
 	{
+		// TODO Add logging
+
 		$this->adapter->writeln(self::DEBUG, $message, false);
 	}
 
