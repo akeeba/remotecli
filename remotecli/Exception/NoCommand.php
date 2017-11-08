@@ -9,11 +9,12 @@
 namespace Akeeba\RemoteCLI\Exception;
 
 
-use Throwable;
+use Exception;
+use RuntimeException;
 
-class NoCommand extends \RuntimeException
+class NoCommand extends RuntimeException
 {
-	public function __construct($code = 11, Throwable $previous = null)
+	public function __construct($code = 11, Exception $previous = null)
 	{
 		$message = 'You have not specified a command to run.';
 

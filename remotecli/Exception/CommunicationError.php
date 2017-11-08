@@ -12,11 +12,11 @@ namespace Akeeba\RemoteCLI\Exception;
 use Exception;
 use RuntimeException;
 
-class InvalidCommand extends RuntimeException
+class CommunicationError extends RuntimeException
 {
-	public function __construct($type, $code = 10, Exception $previous = null)
+	public function __construct($errCode, $errMessage, $code = 22, Exception $previous = null)
 	{
-		$message = sprintf('Invalid command ‘%s’.', $type);
+		$message = sprintf('Communication error %d with message “%s”. Please check the host name and the status of your network connectivity.', $errCode, $errMessage);
 
 		parent::__construct($message, $code, $previous);
 	}
