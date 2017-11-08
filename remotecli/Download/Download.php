@@ -185,7 +185,7 @@ class Download
 	{
 		try
 		{
-			return $this->adapter->postAndReturn($url, $data, $this->adapterOptions);
+			return $this->adapter->postAndReturn($url, $data, 'application/x-www-form-urlencoded', $this->adapterOptions);
 		}
 		catch (CommunicationError $e)
 		{
