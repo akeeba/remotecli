@@ -95,12 +95,14 @@ class Api
 		// Generate a random key the server will use to encrypt its response back to us
 		$this->genRandomKey();
 
-		$url     = $this->getURL($apiMethod, $data);
+		$url = $this->getURL($apiMethod, $data);
+
+		$this->output->debug('URL: ' . $url);
 
 		if ($this->options->verb == 'POST')
 		{
 			$payload = http_build_query($this->getQueryStringParameters($apiMethod, $data));
-			$raw = $this->fetcher->postToURL($url, $payload);
+			$raw     = $this->fetcher->postToURL($url, $payload);
 		}
 		else
 		{
@@ -156,17 +158,18 @@ class Api
 	 */
 	public function getURL($apiMethod, array $data = [])
 	{
-		// Get the base URL, possibly adding a non-empty endpoint.
+		// Extract options. DO NOT REMOVE. empty() does NOT work on magic properties!
 		$url      = rtrim($this->options->host, '/');
+		$endpoint = $this->options->endpoint;
+		$verb     = $this->options->verb;
 
-		if (!empty($this->options->endpoint))
+		if (!empty($endpoint))
 		{
-			$url .= '/' . $this->options->endpoint;
+			$url .= '/' . $endpoint;
 		}
 
-
 		// If we're doing POST requests there's nothing more to do
-		if ($this->options->verb == 'POST')
+		if ($verb == 'POST')
 		{
 			return $url;
 		}
@@ -179,6 +182,7 @@ class Api
 			$uri->setVar($k, $v);
 		}
 
+		// TODO toString screws up the encoding of the q.s.p., especially the json one. WTF.
 		return $uri->toString();
 	}
 
@@ -197,20 +201,24 @@ class Api
 			'json' => $this->encapsulateData($apiMethod, $data),
 		];
 
-		if (!empty($this->options->component))
+		// DO NOT REMOVE. empty() does NOT work on magic properties!
+		$component = $this->options->component;
+		$format    = $this->options->format;
+
+		if (!empty($component))
 		{
-			$params['option'] = $this->options->component;
+			$params['option'] = $component;
 		}
 
-		if (!empty($this->options->format))
+		if (!empty($format))
 		{
-			$params['format'] = $this->options->format;
+			$params['format'] = $format;
 
 			/**
 			 * If it's Joomla! we have to set tmpl=component to avoid template interference if the format is set to
 			 * 'html' on an empty string (which is equivalent to 'html' as it's the default).
 			 */
-			if ((($this->options->format == 'html') || empty($this->options->format)) && !empty($this->options->component))
+			if ((($format == 'html') || empty($format)) && !empty($component))
 			{
 				$params['tmpl'] = 'component';
 			}
