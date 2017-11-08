@@ -12,11 +12,11 @@ namespace Akeeba\RemoteCLI\Exception;
 use Exception;
 use RuntimeException;
 
-class NoCommand extends RuntimeException
+class NoConfiguredHost extends RuntimeException
 {
-	public function __construct($code = 38, Exception $previous = null)
+	public function __construct($code = 35, Exception $previous = null)
 	{
-		$message = 'You have not specified a valid command to run.';
+		$message = 'You did not specify a host name.';
 
 		parent::__construct($message, $code, $previous);
 	}

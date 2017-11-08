@@ -10,15 +10,13 @@ namespace Akeeba\RemoteCLI\Exception;
 
 
 use Exception;
-use RuntimeException;
 
-class NoCommand extends RuntimeException
+class RemoteError extends ApiException
 {
-	public function __construct($code = 38, Exception $previous = null)
+	public function __construct($errorMessage, $code = 101, Exception $previous = null)
 	{
-		$message = 'You have not specified a valid command to run.';
+		$message = sprintf('The remote JSON API on your server reports an error with message ‘%s’', $errorMessage);
 
 		parent::__construct($message, $code, $previous);
 	}
-
 }

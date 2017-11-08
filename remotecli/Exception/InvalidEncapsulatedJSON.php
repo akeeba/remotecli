@@ -10,9 +10,8 @@ namespace Akeeba\RemoteCLI\Exception;
 
 
 use Exception;
-use RuntimeException;
 
-class InvalidEncapsulatedJSON extends RuntimeException
+class InvalidEncapsulatedJSON extends ApiException
 {
 	public function __construct($type, $code = 23, Exception $previous = null)
 	{

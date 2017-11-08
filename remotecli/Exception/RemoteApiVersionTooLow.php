@@ -10,15 +10,13 @@ namespace Akeeba\RemoteCLI\Exception;
 
 
 use Exception;
-use RuntimeException;
 
-class NoCommand extends RuntimeException
+class RemoteApiVersionTooLow extends ApiException
 {
-	public function __construct($code = 38, Exception $previous = null)
+	public function __construct($code = 102, Exception $previous = null)
 	{
-		$message = 'You have not specified a valid command to run.';
+		$message = 'You need to install a newer version of Akeeba Backup / Akeeba Solo on your site';
 
 		parent::__construct($message, $code, $previous);
 	}
-
 }

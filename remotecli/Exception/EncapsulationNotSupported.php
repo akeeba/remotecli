@@ -10,9 +10,8 @@ namespace Akeeba\RemoteCLI\Exception;
 
 
 use Exception;
-use RuntimeException;
 
-class EncapsulationNotSupported extends RuntimeException
+class EncapsulationNotSupported extends ApiException
 {
 	public function __construct($type, $code = 66, Exception $previous = null)
 	{

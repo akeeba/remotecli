@@ -10,9 +10,8 @@ namespace Akeeba\RemoteCLI\Exception;
 
 
 use Exception;
-use RuntimeException;
 
-class InvalidJSONBody extends RuntimeException
+class InvalidJSONBody extends ApiException
 {
 	public function __construct($code = 21, Exception $previous = null)
 	{

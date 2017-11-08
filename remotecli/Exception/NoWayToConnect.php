@@ -10,15 +10,13 @@ namespace Akeeba\RemoteCLI\Exception;
 
 
 use Exception;
-use RuntimeException;
 
-class NoCommand extends RuntimeException
+class NoWayToConnect extends ApiException
 {
-	public function __construct($code = 38, Exception $previous = null)
+	public function __construct($code = 36, Exception $previous = null)
 	{
-		$message = 'You have not specified a valid command to run.';
+		$message = 'We cannot find a way to connect to your server. It seems that your server is incompatible with Akeeba Remote Control CLI.';
 
 		parent::__construct($message, $code, $previous);
 	}
-
 }
