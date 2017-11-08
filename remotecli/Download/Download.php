@@ -442,7 +442,7 @@ class Download
 
 			$return[] = array(
 				'fullpath'  => $file,
-				'classname' => '\\Awf\\Download\\Adapter\\' . ucfirst(basename($parts[0], '.php')),
+				'classname' => '\\Akeeba\\RemoteCLI\\Download\\Adapter\\' . ucfirst(basename($parts[0], '.php')),
 			);
 		}
 
