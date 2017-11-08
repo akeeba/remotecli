@@ -118,6 +118,18 @@ class Api
 	}
 
 	/**
+	 * Gets a copy of the Api options being used. You can supply $overrides to override some or all of these options.
+	 *
+	 * @param   array  $overrides  Option overrides. Leave empty to get a copy of the options currently in use.
+	 *
+	 * @return  Options
+	 */
+	public function getOptions(array $overrides = [])
+	{
+		return $this->options->getModifiedClone($overrides);
+	}
+
+	/**
 	 * Get the URL for an API call.
 	 *
 	 * @param   string  $apiMethod  The Akeeba Backup / Solo JSON API method to execute.
