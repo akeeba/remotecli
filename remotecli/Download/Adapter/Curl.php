@@ -141,7 +141,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			sprintf('Content-Type: %s', $contentType),
+			sprintf('Content-Type: %s', $contentType)
 		]);
 		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);

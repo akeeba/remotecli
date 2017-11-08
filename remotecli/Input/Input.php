@@ -401,6 +401,6 @@ class Input implements \Serializable, \Countable
 	public function mergeData($data)
 	{
 		$data = (array) $data;
-		$this->data = array_merge_recursive($this->data, $data);
+		$this->data = array_replace_recursive($this->data, $data);
 	}
 }

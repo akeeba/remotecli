@@ -206,7 +206,7 @@ class Options
 			$currentOptions[$k] = $v;
 		}
 
-		$options = array_merge_recursive($currentOptions, $options);
+		$options = array_replace_recursive($currentOptions, $options);
 
 		return new self($options);
 	}

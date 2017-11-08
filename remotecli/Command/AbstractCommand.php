@@ -49,7 +49,7 @@ abstract class AbstractCommand implements CommandInterface
 	 */
 	protected function getApiOptions(Cli $input, array $additional = [])
 	{
-		$options = array_merge_recursive($input->getData(), $additional);
+		$options = array_replace_recursive($input->getData(), $additional);
 
 		return new Options($options, false);
 	}
