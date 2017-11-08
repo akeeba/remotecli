@@ -7,6 +7,7 @@
 
 namespace Akeeba\RemoteCLI\Download;
 
+use Akeeba\RemoteCLI\Exception\CommunicationError;
 use Akeeba\RemoteCLI\Utility\Timer;
 
 class Download
@@ -143,18 +144,56 @@ class Download
 	/**
 	 * Download data from a URL and return it
 	 *
-	 * @param   string  $url  The URL to download from
+	 * @param   string  $url            The URL to download from.
+	 * @param   bool    $useExceptions  Set to false to return false on failure instead of throwing an exception.
 	 *
-	 * @return  bool|string  The downloaded data or false on failure
+	 * @return  bool|string  The downloaded data. If $useExceptions is true it returns false on failure.
+	 *
+	 * @throws  CommunicationError  When there is an error communicating with the server
 	 */
-	public function getFromURL($url)
+	public function getFromURL($url, $useExceptions = true)
 	{
 		try
 		{
             return $this->adapter->downloadAndReturn($url, null, null, $this->adapterOptions);
 		}
-		catch (\Exception $e)
+		catch (CommunicationError $e)
 		{
+			if ($useExceptions)
+			{
+				throw $e;
+			}
+
+			return false;
+		}
+	}
+
+	/**
+	 * POST data to a URL and return the response
+	 *
+	 * @param   string  $url            The URL to send the data to.
+	 * @param   string  $data           The data to send to the server. If they need to be URL-encoded you have to do it
+	 *                                  yourself.
+	 * @param   string  $contentType    The type of the form data. The default is application/x-www-form-urlencoded.
+	 * @param   bool    $useExceptions  Set to false to return false on failure instead of throwing an exception.
+	 *
+	 * @return  bool|string  The downloaded data. If $useExceptions is true it returns false on failure.
+	 *
+	 * @throws  CommunicationError  When there is an error communicating with the server
+	 */
+	public function postToURL($url, $data = '', $contentType = 'application/x-www-form-urlencoded', $useExceptions = true)
+	{
+		try
+		{
+			return $this->adapter->postAndReturn($url, $data, $this->adapterOptions);
+		}
+		catch (CommunicationError $e)
+		{
+			if ($useExceptions)
+			{
+				throw $e;
+			}
+
 			return false;
 		}
 	}

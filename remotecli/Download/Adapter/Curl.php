@@ -8,6 +8,7 @@
 namespace Akeeba\RemoteCLI\Download\Adapter;
 
 use Akeeba\RemoteCLI\Download\DownloadInterface;
+use Akeeba\RemoteCLI\Exception\CommunicationError;
 
 /**
  * A download adapter using the cURL PHP integration
@@ -40,7 +41,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  string  The raw file data retrieved from the remote URL.
 	 *
-	 * @throws  \Exception  A generic exception is thrown on error
+	 * @throws  CommunicationError  When there is an error communicating with the server
 	 */
 	public function downloadAndReturn($url, $from = null, $to = null, array $params = array())
 	{
@@ -109,13 +110,83 @@ class Curl extends AbstractAdapter implements DownloadInterface
 
 		if ($result === false)
 		{
-			throw new \Exception($error, $errno);
+			throw new CommunicationError($errno, $error);
 		}
 		else
 		{
 			return $result;
 		}
 	}
+
+	/**
+	 * Send data to the server using a POST request and return the server response.
+	 *
+	 * @param   string  $url          The URL to send the data to.
+	 * @param   string  $data         The data to send to the server. If they need to be URL-encoded you have to do it
+	 *                                yourself.
+	 * @param   string  $contentType  The type of the form data. The default is application/x-www-form-urlencoded.
+	 * @param   array   $params       Additional params that will be added before performing the download
+	 *
+	 * @return  string  The raw response
+	 */
+	public function postAndReturn($url, $data, $contentType = 'application/x-www-form-urlencoded', array $params = array())
+	{
+		$ch = curl_init();
+
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+		curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			sprintf('Content-Type: %s', $contentType),
+		]);
+		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
+		curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
+
+		if (!empty($params))
+		{
+			foreach ($params as $k => $v)
+			{
+				@curl_setopt($ch, $k, $v);
+			}
+		}
+
+		$result = curl_exec($ch);
+
+		$errno       = curl_errno($ch);
+		$errmsg      = curl_error($ch);
+		$error       = '';
+		$http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+		if ($result === false)
+		{
+			$error = sprintf('PHP cURL library error #%d with message ‘%s’', $errno, $errmsg);
+		}
+		elseif ($http_status > 299)
+		{
+			$result = false;
+			$errno  = $http_status;
+			$error  = sprintf('Unexpected HTTP status %d', $http_status);
+		}
+
+		curl_close($ch);
+
+		if ($result === false)
+		{
+			throw new CommunicationError($errno, $error);
+		}
+		else
+		{
+			return $result;
+		}
+	}
+
 
 	/**
 	 * Get the size of a remote file in bytes

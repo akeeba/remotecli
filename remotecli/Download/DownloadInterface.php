@@ -75,6 +75,19 @@ interface DownloadInterface
     public function downloadAndReturn($url, $from = null, $to = null, array $params = array());
 
 	/**
+	 * Send data to the server using a POST request and return the server response.
+	 *
+	 * @param   string  $url          The URL to send the data to.
+	 * @param   string  $data         The data to send to the server. If they need to be URL-encoded you have to do it
+	 *                                yourself.
+	 * @param   string  $contentType  The type of the form data. The default is application/x-www-form-urlencoded.
+	 * @param   array   $params       Additional params that will be added before performing the download
+	 *
+	 * @return  string  The raw response
+	 */
+    public function postAndReturn($url, $data, $contentType = 'application/x-www-form-urlencoded', array $params = array());
+
+	/**
 	 * Get the size of a remote file in bytes
 	 *
 	 * @param   string  $url  The remote file's URL

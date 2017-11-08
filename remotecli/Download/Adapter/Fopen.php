@@ -8,6 +8,7 @@
 namespace Akeeba\RemoteCLI\Download\Adapter;
 
 use Akeeba\RemoteCLI\Download\DownloadInterface;
+use Akeeba\RemoteCLI\Exception\CommunicationError;
 
 /**
  * A download adapter using URL fopen() wrappers
@@ -50,7 +51,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  string  The raw file data retrieved from the remote URL.
 	 *
-	 * @throws  \Exception  A generic exception is thrown on error
+	 * @throws  CommunicationError  When there is an error communicating with the server
 	 */
 	public function downloadAndReturn($url, $from = null, $to = null, array $params = array())
 	{
@@ -113,51 +114,101 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 			$result  = @file_get_contents($url, false, $context);
 		}
 
+		return $this->evaluateHTTPResponse($result);
+	}
+
+	/**
+	 * Send data to the server using a POST request and return the server response.
+	 *
+	 * @param   string  $url          The URL to send the data to.
+	 * @param   string  $data         The data to send to the server. If they need to be URL-encoded you have to do it
+	 *                                yourself.
+	 * @param   string  $contentType  The type of the form data. The default is application/x-www-form-urlencoded.
+	 * @param   array   $params       Additional params that will be added before performing the download
+	 *
+	 * @return  string  The raw response
+	 */
+	public function postAndReturn($url, $data, $contentType = 'application/x-www-form-urlencoded', array $params = array())
+	{
+		$options = array(
+			'http' => array(
+				'method'          => 'POST',
+				'header'          => sprintf("Content-type: %s\r\n", $contentType),
+				'content'         => $data,
+				'follow-location' => 1,
+			),
+			'ssl'  => array(
+				'verify_peer'  => true,
+				'cafile'       => __DIR__ . '/cacert.pem',
+				'verify_depth' => 5,
+			),
+		);
+
+		$options = array_merge($options, $params);
+
+		$context = stream_context_create($options);
+		$result  = @file_get_contents($url, false, $context);
+
+		return $this->evaluateHTTPResponse($result);
+	}
+
+	/**
+	 * Evaluate the server response, including the HTTP status, and the response itself. If an error has occurred we
+	 * throw a CommunicationError exception, otherwise we return the raw response content.
+	 *
+	 * @param   string  $result  The raw response content
+	 *
+	 * @return  string  The raw response content
+	 *
+	 * @throws  CommunicationError  In case a communications error has been detected
+	 */
+	private function evaluateHTTPResponse($result)
+	{
 		global $http_response_header_test;
 
 		if (!isset($http_response_header) && empty($http_response_header_test))
 		{
 			$error = 'Could not open the download URL using URL fopen() wrappers.';
-			throw new \Exception($error, 404);
+
+			throw new CommunicationError(61, $error);
 		}
-		else
+
+		// Used for testing
+		if (!isset($http_response_header) && !empty($http_response_header_test))
 		{
-			// Used for testing
-			if (!isset($http_response_header) && !empty($http_response_header_test))
-			{
-				$http_response_header = $http_response_header_test;
-			}
+			$http_response_header = $http_response_header_test;
+		}
 
-			$http_code = 200;
-			$nLines    = count($http_response_header);
+		$http_code = 200;
+		$nLines    = count($http_response_header);
 
-			for ($i = $nLines - 1; $i >= 0; $i--)
-			{
-				$line = $http_response_header[$i];
-				if (strncasecmp("HTTP", $line, 4) == 0)
-				{
-					$response  = explode(' ', $line);
-					$http_code = $response[1];
-					break;
-				}
-			}
+		for ($i = $nLines - 1; $i >= 0; $i--)
+		{
+			$line = $http_response_header[$i];
 
-			if ($http_code >= 299)
+			if (strncasecmp("HTTP", $line, 4) == 0)
 			{
-				$error = sprintf('Unexpected HTTP stats %d', $http_code);
-				throw new \Exception($error, $http_code);
+				$response  = explode(' ', $line);
+				$http_code = $response[1];
+
+				break;
 			}
+		}
+
+		if ($http_code >= 299)
+		{
+			$error = sprintf('Unexpected HTTP status %d', $http_code);
+
+			throw new CommunicationError($http_code, $error);
 		}
 
 		if ($result === false)
 		{
 			$error = sprintf('Could not open the download URL using URL fopen() wrappers.');
 
-			throw new \Exception($error, 1);
+			throw new CommunicationError(62, $error);
 		}
-		else
-		{
-			return $result;
-		}
+
+		return $result;
 	}
 }
