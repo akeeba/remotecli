@@ -89,7 +89,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 				),
 			);
 
-			$options = array_merge($options, $params);
+			$options = array_merge_recursive($options, $params);
 
 			$context = stream_context_create($options);
 			$result  = @file_get_contents($url, false, $context, $from - $to + 1);
@@ -108,7 +108,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 				),
 			);
 
-			$options = array_merge($options, $params);
+			$options = array_merge_recursive($options, $params);
 
 			$context = stream_context_create($options);
 			$result  = @file_get_contents($url, false, $context);
@@ -144,7 +144,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 			),
 		);
 
-		$options = array_merge($options, $params);
+		$options = array_merge_recursive($options, $params);
 
 		$context = stream_context_create($options);
 		$result  = @file_get_contents($url, false, $context);

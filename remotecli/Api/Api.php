@@ -59,6 +59,23 @@ class Api
 		$this->options = $options;
 		$this->output  = $output;
 		$this->fetcher = new Download();
+
+		switch (strtolower($this->fetcher->getAdapterName()))
+		{
+			case 'curl':
+				$this->fetcher->setAdapterOptions([
+					CURLOPT_CAINFO => $options->capath,
+				]);
+				break;
+
+			case 'fopen':
+				$this->fetcher->setAdapterOptions([
+					'ssl' => [
+						'cafile'       => $options->capath,
+					],
+				]);
+				break;
+		}
 	}
 
 	/**

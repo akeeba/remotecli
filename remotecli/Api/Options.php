@@ -20,6 +20,7 @@ use Akeeba\RemoteCLI\Utility\Uri;
  * @property-read   string  $verb           HTTP verb to use in the API< defaults to GET
  * @property-read   string  $format         Format used for Joomla! sites, defaults to html
  * @property-read   string  $ua             User Agent string to use
+ * @property-read   string  $capath         Certificate Authority cache path
  * @property-read   bool    $verbose        Should I be verbose about what I'm doing?
  * @property-read   int     $encapsulation  The API encapsulation, defaults to AES-128 CBC
  * @property-read   bool    $legacy         Use legacy, unsafe AES CBC encryption (for old versions of Akeeba Backup / Solo)
@@ -42,6 +43,7 @@ class Options
 	private $verbose = false;
 	private $encapsulation = self::ENC_CBC128;
 	private $legacy = false;
+	private $capath = null;
 
 	/**
 	 * OutputOptions constructor. The options you pass initialize the immutable object.
@@ -76,6 +78,7 @@ class Options
 			$this->component = '';
 		}
 
+		// Make sure I have a valid encapsulation
 		if (is_string($this->encapsulation))
 		{
 			switch (strtoupper($this->encapsulation))
@@ -85,16 +88,28 @@ class Options
 					break;
 
 				case 'CTR128':
-				case 'CTR256':
 					$this->encapsulation = self::ENC_CTR128;
 					break;
 
-				case 'CBC128':
-				case 'CBC256':
+				case 'CTR256':
+					$this->encapsulation = self::ENC_CTR256;
+					break;
+
 				default:
+				case 'CBC128':
 					$this->encapsulation = self::ENC_CBC128;
 					break;
+
+				case 'CBC256':
+					$this->encapsulation = self::ENC_CBC256;
+					break;
 			}
+		}
+
+		// Make sure I have a valid CA cache path
+		if (empty($this->capath))
+		{
+			$this->capath = __DIR__ . '/../Download/Adapter/cacert.pem';
 		}
 	}
 
