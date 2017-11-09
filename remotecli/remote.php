@@ -35,6 +35,9 @@ if (Phar::running(false))
 	Phar::interceptFileFuncs();
 }
 
+// Load the Remote CLI version file
+require_once __DIR__ . '/arccli_version.php';
+
 // Initialize Composer's autoloader (we use it to autoload our classes, too
 /** @var Composer\Autoload\ClassLoader $autoloader */
 $autoloader = include_once __DIR__ . '/vendor/autoload.php';
