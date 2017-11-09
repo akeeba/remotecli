@@ -144,18 +144,19 @@ class Download
 	/**
 	 * Download data from a URL and return it
 	 *
-	 * @param   string  $url            The URL to download from.
-	 * @param   bool    $useExceptions  Set to false to return false on failure instead of throwing an exception.
+	 * @param   string    $url            The URL to download from.
+	 * @param   bool      $useExceptions  Set to false to return false on failure instead of throwing an exception.
+	 * @param   resource  $fp             A file pointer to download to. If provided, the method returns null.
 	 *
 	 * @return  bool|string  The downloaded data. If $useExceptions is true it returns false on failure.
 	 *
 	 * @throws  CommunicationError  When there is an error communicating with the server
 	 */
-	public function getFromURL($url, $useExceptions = true)
+	public function getFromURL($url, $useExceptions = true, $fp = null)
 	{
 		try
 		{
-            return $this->adapter->downloadAndReturn($url, null, null, $this->adapterOptions);
+            return $this->adapter->downloadAndReturn($url, null, null, $this->adapterOptions, $fp);
 		}
 		catch (CommunicationError $e)
 		{

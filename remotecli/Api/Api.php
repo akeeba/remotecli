@@ -156,10 +156,11 @@ class Api
 	 *
 	 * @param   string  $apiMethod  The Akeeba Backup / Solo JSON API method to execute.
 	 * @param   array   $data       The data being sent to the JSON API in array format.
+	 * @param   bool    $forceGET   Force use of GET? Default false. Use to make signed download URLs.
 	 *
 	 * @return  string  The URL we are supposed to access
 	 */
-	public function getURL($apiMethod, array $data = [])
+	public function getURL($apiMethod, array $data = [], $forceGET = false)
 	{
 		// Extract options. DO NOT REMOVE. empty() does NOT work on magic properties!
 		$url      = rtrim($this->options->host, '/');
@@ -172,7 +173,7 @@ class Api
 		}
 
 		// If we're doing POST requests there's nothing more to do
-		if ($verb == 'POST')
+		if (!$forceGET && ($verb == 'POST'))
 		{
 			return $url;
 		}

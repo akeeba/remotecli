@@ -108,16 +108,17 @@ abstract class AbstractAdapter implements DownloadInterface
 	 * If this class' supportsChunkDownload returns false you should assume
 	 * that the $from and $to parameters will be ignored.
 	 *
-	 * @param   string   $url   The remote file's URL
-	 * @param   integer  $from  Byte range to start downloading from. Use null for start of file.
-	 * @param   integer  $to    Byte range to stop downloading. Use null to download the entire file ($from is ignored)
+	 * @param   string   $url     The remote file's URL
+	 * @param   integer  $from    Byte range to start downloading from. Use null for start of file.
+	 * @param   integer  $to      Byte range to stop downloading. Use null to download the entire file ($from is ignored)
      * @param   array    $params  Additional params that will be added before performing the download
+	 * @param   resource $fp      A file pointer to download to. If provided, the method returns null.
 	 *
 	 * @return  string  The raw file data retrieved from the remote URL.
 	 *
 	 * @throws  \Exception  A generic exception is thrown on error
 	 */
-    public function downloadAndReturn($url, $from = null, $to = null, array $params = array())
+	public function downloadAndReturn($url, $from = null, $to = null, array $params = array(), $fp = null)
 	{
 		return '';
 	}

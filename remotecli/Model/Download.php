@@ -11,6 +11,7 @@ namespace Akeeba\RemoteCLI\Model;
 
 use Akeeba\RemoteCLI\Api\Api;
 use Akeeba\RemoteCLI\Api\Options;
+use Akeeba\RemoteCLI\Download\Download as Fetcher;
 use Akeeba\RemoteCLI\Exception\NoBackupID;
 use Akeeba\RemoteCLI\Exception\NoDownloadMode;
 use Akeeba\RemoteCLI\Exception\NoDownloadPath;
@@ -18,6 +19,7 @@ use Akeeba\RemoteCLI\Exception\NoDownloadURL;
 use Akeeba\RemoteCLI\Exception\RemoteError;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Output\Output;
+use Exception;
 
 class Download
 {
@@ -167,23 +169,134 @@ class Download
 		return array($url, $authentication);
 	}
 
-	private function downloadHTTP(array $options, Output $output, Options $options)
+	private function downloadHTTP(array $params, Output $output, Options $options)
+	{
+		// Get the backup info
+		list(, $parts, $fileInformation) = $this->getBackupArchiveInformation($params, $output, $options);
+
+		$api  = new Api($options, $output);
+		$path = $params['path'];
+
+		for ($part = 1; $part <= $parts; $part++)
+		{
+			// Open file pointer
+			$name     = $fileInformation[$part]->name;
+			$size     = $fileInformation[$part]->size;
+			$filePath = $path . DIRECTORY_SEPARATOR . $name;
+			$fp       = @fopen($filePath, 'wb');
+
+			if ($fp == false)
+			{
+				throw new RemoteExceptionFilewrite("Could not open $filePath for writing");
+			}
+
+			try
+			{
+				// Get the signed URL
+				$url = $api->getURL('downloadDirect', [
+					'backup_id' => $params['id'],
+					'part_id'   => $part,
+				], true);
+
+				$fetcher = new Fetcher();
+				$fetcher->getFromURL($url, true, $fp);
+			}
+			catch (Exception $e)
+			{
+				// Close the file pointer before re-throwing the exception
+				fclose($fp);
+
+				throw new RemoteExceptionCurl("Could not download $filePath -- " . $e->getMessage(), 105, $e);
+			}
+
+			// Check file size
+			clearstatcache();
+			$sizematch = true;
+			$filesize = @filesize($filePath);
+
+			if (($filesize !== false) && ($filesize != $size))
+			{
+				$output->warning(sprintf("Filesize mismatch on %s", $filePath));
+
+				$sizematch = false;
+			}
+
+			if ($sizematch)
+			{
+				$filename = $params['filename'];
+
+				// Try renaming
+				if (strlen($filename))
+				{
+					@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
+
+					if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
+					{
+						$output->info(sprintf("Successfully renamed %s to %s", $name, $filename));
+					}
+					else
+					{
+						$output->info(sprintf("Failed to rename %s to %s", $name, $filename));
+					}
+				}
+
+				$output->info(sprintf("Successfully downloaded %s", $name), true);
+			}
+		}
+	}
+
+	private function downloadChunk(array $params, Output $output, Options $options)
 	{
 		// TODO
 	}
 
-	private function downloadChunk(array $options, Output $output, Options $options)
+	private function downloadCURL(array $params, Output $output, Options $options)
 	{
 		// TODO
 	}
 
-	private function downloadCURL(array $options, Output $output, Options $options)
+	private function deleteFiles(array $params, Output $output, Options $options)
 	{
 		// TODO
 	}
 
-	private function deleteFiles(array $options, Output $output, Options $options)
+	/**
+	 * @param array   $params
+	 * @param Output  $output
+	 * @param Options $options
+	 *
+	 * @return array
+	 */
+	private function getBackupArchiveInformation(array $params, Output $output, Options $options)
 	{
-		// TODO
+		$api             = new Api($options, $output);
+		$data            = $api->doQuery('getBackupInfo', array('backup_id' => $params['id']));
+		$parts           = $data->body->data->multipart;
+		$fileDefinitions = $data->body->data->filenames;
+		$fileRecords     = array();
+
+		foreach ($fileDefinitions as $fileDefinition)
+		{
+			$fileRecords[$fileDefinition->part] = (object) [
+				'name' => $fileDefinition->name,
+				'size' => $fileDefinition->size,
+			];
+		}
+
+		if ($parts <= 0)
+		{
+			$parts = 1;
+		}
+
+		if (!count($fileDefinitions))
+		{
+			throw new RemoteExceptionNofiles();
+		}
+
+		return [
+			'apiResponse'     => $data,
+			'parts'           => $parts,
+			'fileDefinitions' => $fileDefinitions,
+		];
 	}
 }
