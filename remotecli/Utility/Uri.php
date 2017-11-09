@@ -292,7 +292,7 @@ class Uri
 			return false;
 		}
 
-		return urldecode(http_build_query($params, '', '&'));
+		return http_build_query($params, '', '&');
 	}
 
 	/**
