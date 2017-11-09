@@ -174,7 +174,7 @@ class Test
 	 */
 	private function getVerbs(Cli $input)
 	{
-		$defaultList = ['GET', 'POST'];
+		$defaultList = ['POST', 'GET'];
 		$verb        = $input->getCmd('verb', '');
 		$verb        = strtoupper($verb);
 

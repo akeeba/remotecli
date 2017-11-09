@@ -63,8 +63,9 @@ $output        = new Output(
 
 // Create the dispatcher with all the commands
 $dispatcher = new Dispatcher([
-	// TODO Add commands here
-	\Akeeba\RemoteCLI\Command\Test::class
+	\Akeeba\RemoteCLI\Command\Test::class,
+	\Akeeba\RemoteCLI\Command\Backup::class,
+	\Akeeba\RemoteCLI\Command\Download::class,
 ], $input, $output);
 
 // Dispatch the application

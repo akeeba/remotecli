@@ -95,6 +95,9 @@ class Api
 		// Generate a random key the server will use to encrypt its response back to us
 		$this->genRandomKey();
 
+		$this->output->debug('Data: ' . print_r($data, true));
+		$this->output->debug('Response Key: ' . $this->responseKey);
+
 		$url = $this->getURL($apiMethod, $data);
 
 		$this->output->debug('URL: ' . $url);

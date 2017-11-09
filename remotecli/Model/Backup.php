@@ -54,16 +54,19 @@ class Backup
 			if (isset($data->body->data->BackupID))
 			{
 				$backupRecordID = $data->body->data->BackupID;
+				$output->debug('Got backup record ID: ' . $backupRecordID);
 			}
 
 			if (isset($data->body->data->backupid))
 			{
 				$backupID = $data->body->data->backupid;
+				$output->debug('Got backupID: ' . $backupID);
 			}
 
 			if (isset($data->body->data->Archive))
 			{
 				$archive = $data->body->data->Archive;
+				$output->debug('Got archive name: ' . $archive);
 			}
 
 			if (isset($data->body->data->Progress))
@@ -98,6 +101,8 @@ class Backup
 		}
 
 		$output->header('Backup finished successfully');
+		$output->debug('Backup record ID: ' . $backupRecordID);
+		$output->debug('Archive name: ' . $archive);
 
 		return [$backupRecordID, $archive];
 	}
