@@ -23,15 +23,52 @@ class Test
 {
 	/**
 	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
-	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script.
+	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
+	 * returns the Options for the best detected connection method.
 	 *
 	 * @param   Cli      $input            The input object.
 	 * @param   Output   $output           The output object.
 	 * @param   Options  $originalOptions  The API options. The format, verb and endpoint options _may_ be overwritten.
 	 *
-	 * @return  Api
+	 * @return  Options
 	 */
-	public function getBestApi(Cli $input, Output $output, Options $originalOptions)
+	public function getBestOptions(Cli $input, Output $output, Options $originalOptions)
+	{
+		list($options, ) = $this->getBestApiAndInformation($input, $output, $originalOptions);
+
+		return $options;
+	}
+
+	/**
+	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
+	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
+	 * returns only the API return object.
+	 *
+	 * @param   Cli      $input            The input object.
+	 * @param   Output   $output           The output object.
+	 * @param   Options  $originalOptions  The API options. The format, verb and endpoint options _may_ be overwritten.
+	 *
+	 * @return  Options
+	 */
+	public function getApiInformation(Cli $input, Output $output, Options $originalOptions)
+	{
+		list(, $apiresult) = $this->getBestApiAndInformation($input, $output, $originalOptions);
+
+		return $apiresult;
+	}
+
+	/**
+	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
+	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
+	 * returns both the API options and the API test information.
+	 *
+	 * @param   Cli      $input            The input object.
+	 * @param   Output   $output           The output object.
+	 * @param   Options  $originalOptions  The API options. The format, verb and endpoint options _may_ be overwritten.
+	 *
+	 * @return  array  [Api, Options]
+	 */
+	private function getBestApiAndInformation(Cli $input, Output $output, Options $originalOptions)
 	{
 		$verbs     = $this->getVerbs($input);
 		$formats   = $this->getFormats($input);
@@ -70,11 +107,11 @@ class Test
 						if ($options->verbose)
 						{
 							$output->debug(sprintf(
-								'Communication error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
-								$verb,
-								$format,
-								$endpoint,
-								$communicationError->getMessage()
+									'Communication error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+									$verb,
+									$format,
+									$endpoint,
+									$communicationError->getMessage()
 								)
 							);
 						}
@@ -125,14 +162,7 @@ class Test
 			throw new RemoteApiVersionTooLow();
 		}
 
-		$version = $versionInfo->component . ' (API level ' . $apiResult->body->data->api . ')';
-		$edition = ($versionInfo->edition == 'pro') ? 'Professional' : 'Core';
-
-		$output->info("Successful connection to site");
-		$output->info("Akeeba Backup / Solo $edition $version");
-		$output->info('');
-
-		return $api;
+		return [$api->getOptions(), $apiResult];
 	}
 
 	/**

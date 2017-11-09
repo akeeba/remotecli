@@ -19,10 +19,16 @@ class Test extends AbstractCommand
 	{
 		$this->assertConfigured($input);
 
-		$options = $this->getApiOptions($input);
-		$model   = new TestModel();
+		$options     = $this->getApiOptions($input);
+		$model       = new TestModel();
+		$apiResult   = $model->getApiInformation($input, $output, $options);
+		$versionInfo = $apiResult->body->data;
+		$version     = $versionInfo->component . ' (API level ' . $apiResult->body->data->api . ')';
+		$edition     = ($versionInfo->edition == 'pro') ? 'Professional' : 'Core';
 
-		$model->getBestApi($input, $output, $options);
+		$output->info("Successful connection to site");
+		$output->info("Akeeba Backup / Solo $edition $version");
+		$output->info('');
 	}
 
 }
