@@ -182,7 +182,6 @@ class Api
 			$uri->setVar($k, $v);
 		}
 
-		// TODO toString screws up the encoding of the q.s.p., especially the json one. WTF.
 		return $uri->toString();
 	}
 
@@ -250,7 +249,7 @@ class Api
 			$body['challenge'] = $challenge;
 		}
 
-		if ((Options::ENC_RAW != 1) && !empty($this->responseKey))
+		if (($this->options->encapsulation != Options::ENC_RAW) && !empty($this->responseKey))
 		{
 			$body['key'] = $this->responseKey;
 		}
