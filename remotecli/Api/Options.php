@@ -182,13 +182,19 @@ class Options
 		$lastSlashPost = strrpos($originalPath, '/');
 
 		// Normally should not happen since I've stripped the slashes.
-		if ($lastSlashPost == 0)
+		if ($lastSlashPost === 0)
 		{
 			throw new \LogicException("I found a misplaced slash in a path. Notify the developer. This must never happen.");
 		}
 
-		$endpoint = substr($originalPath, $lastSlashPost + 1);
-		$path     = substr($originalPath, 0, $lastSlashPost - 1);
+		$endpoint = $originalPath;
+		$path     = '';
+
+		if ($lastSlashPost !== false)
+		{
+			$endpoint = substr($originalPath, $lastSlashPost + 1);
+			$path     = substr($originalPath, 0, $lastSlashPost - 1);
+		}
 
 		// The path is "some/thing/or/another"
 		if (strpos($endpoint, '.') === false)

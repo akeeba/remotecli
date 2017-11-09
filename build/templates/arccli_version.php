@@ -8,4 +8,4 @@
 
 define('ARCCLI_VERSION', '##VERSION##');
 define('ARCCLI_DATE', '##DATE##');
-define('ARCCLI_MINAPI', 350);
+define('ARCCLI_MINAPI', 340);
