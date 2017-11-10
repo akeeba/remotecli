@@ -12,11 +12,14 @@ namespace Akeeba\RemoteCLI\Model;
 use Akeeba\RemoteCLI\Api\Api;
 use Akeeba\RemoteCLI\Api\Options;
 use Akeeba\RemoteCLI\Download\Download as Fetcher;
+use Akeeba\RemoteCLI\Exception\CannotDeleteFiles;
+use Akeeba\RemoteCLI\Exception\CannotDownloadFile;
+use Akeeba\RemoteCLI\Exception\CannotWriteFile;
 use Akeeba\RemoteCLI\Exception\NoBackupID;
 use Akeeba\RemoteCLI\Exception\NoDownloadMode;
 use Akeeba\RemoteCLI\Exception\NoDownloadPath;
 use Akeeba\RemoteCLI\Exception\NoDownloadURL;
-use Akeeba\RemoteCLI\Exception\RemoteError;
+use Akeeba\RemoteCLI\Exception\NoFilesInBackupRecord;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Output\Output;
 use Exception;
@@ -114,6 +117,8 @@ class Download
 				break;
 		}
 
+		$output->header("Finished downloading the backup archive");
+
 		// Do I also have to delete the files after I download them?
 		if ($params['delete'])
 		{
@@ -187,7 +192,7 @@ class Download
 
 			if ($fp == false)
 			{
-				throw new RemoteExceptionFilewrite("Could not open $filePath for writing");
+				throw new CannotWriteFile($filePath);
 			}
 
 			try
@@ -206,7 +211,7 @@ class Download
 				// Close the file pointer before re-throwing the exception
 				fclose($fp);
 
-				throw new RemoteExceptionCurl("Could not download $filePath -- " . $e->getMessage(), 105, $e);
+				throw new CannotDownloadFile(sprintf("Could not download file ‘%s’ -- Network error “%s”", $filePath, $e->getMessage()), 105, $e);
 			}
 
 			// Check file size
@@ -247,17 +252,223 @@ class Download
 
 	private function downloadChunk(array $params, Output $output, Options $options)
 	{
-		// TODO
+		// Get the backup info
+		list(, $parts, $fileInformation) = $this->getBackupArchiveInformation($params, $output, $options);
+
+		$api  = new Api($options, $output);
+		$path = $params['path'];
+		$chunk_size = $params['chunkSize'];
+
+		for ($part = 1; $part <= $parts; $part++)
+		{
+			// Open file pointer
+			$name     = $fileInformation[$part]->name;
+			$size     = $fileInformation[$part]->size;
+			$filePath = $path . DIRECTORY_SEPARATOR . $name;
+			$fp       = @fopen($filePath, 'wb');
+
+			if ($fp == false)
+			{
+				throw new CannotWriteFile($filePath);
+			}
+
+			$frag = 0;
+			$done = false;
+
+			while ( !$done)
+			{
+				$data = $api->doQuery('download', [
+					'backup_id'  => $params['id'],
+					'part'       => $part,
+					'segment'    => ++$frag,
+					'chunk_size' => $chunk_size
+				]);
+
+				switch ($data->body->status)
+				{
+					case 200:
+						$rawData = base64_decode($data->body->data);
+						$len     = strlen($rawData); //echo "\tWriting $len bytes\n";
+						$output->debug(sprintf('Writing a chunk of %d bytes', $len));
+						fwrite($fp, $rawData);
+						unset($rawData);
+						unset($data);
+						break;
+
+					case 404:
+						if ($frag == 1)
+						{
+							throw new NoFilesInBackupRecord($params['id']);
+						}
+
+						$done = true;
+
+						break;
+
+					default:
+						throw new CannotDownloadFile(sprintf("Could not download chunk #%02u of file ‘%s’ -- Remote API error %d : %s", $frag, $filePath, $data->body->status, $data->body->data));
+						break;
+				}
+			}
+
+			@fclose($fp);
+
+			// Check file size
+			clearstatcache();
+			$sizematch = true;
+			$filesize = @filesize($filePath);
+
+			if (($filesize !== false) && ($filesize != $size))
+			{
+				$output->warning(sprintf("Filesize mismatch on %s", $filePath));
+
+				$sizematch = false;
+			}
+
+			if ($sizematch)
+			{
+				$filename = $params['filename'];
+
+				// Try renaming
+				if (strlen($filename))
+				{
+					@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
+
+					if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
+					{
+						$output->info(sprintf("Successfully renamed %s to %s", $name, $filename));
+					}
+					else
+					{
+						$output->info(sprintf("Failed to rename %s to %s", $name, $filename));
+					}
+				}
+
+				$output->info(sprintf("Successfully downloaded %s", $name), true);
+			}
+		}
+
 	}
 
 	private function downloadCURL(array $params, Output $output, Options $options)
 	{
-		// TODO
+		// Get the backup info
+		list(, $parts, $fileInformation) = $this->getBackupArchiveInformation($params, $output, $options);
+
+		$path = $params['path'];
+		$url = $params['url'];
+		$authentication = $params['authentication'];
+
+		for ($part = 1; $part <= $parts; $part++)
+		{
+			// Open file pointer
+			$name     = $fileInformation[$part]->name;
+			$size     = $fileInformation[$part]->size;
+			$filePath = $path . DIRECTORY_SEPARATOR . $name;
+			$fp       = @fopen($filePath, 'wb');
+
+			if ($fp == false)
+			{
+				throw new CannotWriteFile($filePath);
+			}
+
+			// Get the target path
+			$url = $url . '/' . $name;
+
+			$ch = curl_init($url);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($ch, CURLOPT_FAILONERROR, true);
+			curl_setopt($ch, CURLOPT_HEADER, false);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
+			//curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+			curl_setopt($ch, CURLOPT_FILE, $fp);
+			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0.1) Gecko/20110506 Firefox/4.0.1');
+
+			if ( !empty($authentication))
+			{
+				curl_setopt($ch, CURLOPT_USERPWD, $authentication);
+			}
+
+			$status = curl_exec($ch);
+
+			@fclose($fp);
+
+			$errno      = curl_errno($ch);
+			$errmessage = curl_error($ch);
+
+			curl_close($ch);
+
+			if ($errno !== 0)
+			{
+				throw new CannotDownloadFile(sprintf("Could not download ‘%s’ over cURL -- cURL error #%d : %s", $filePath, $errno, $errmessage));
+			}
+
+			if ($status === false)
+			{
+				throw new NoFilesInBackupRecord($params['id']);
+			}
+
+			// Check file size
+			clearstatcache();
+			$sizematch = true;
+			$filesize = @filesize($filePath);
+
+			if (($filesize !== false) && ($filesize != $size))
+			{
+				$output->warning(sprintf("Filesize mismatch on %s", $filePath));
+
+				$sizematch = false;
+			}
+
+			if ($sizematch)
+			{
+				$filename = $params['filename'];
+
+				// Try renaming
+				if (strlen($filename))
+				{
+					@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
+
+					if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
+					{
+						$output->info(sprintf("Successfully renamed %s to %s", $name, $filename));
+					}
+					else
+					{
+						$output->info(sprintf("Failed to rename %s to %s", $name, $filename));
+					}
+				}
+
+				$output->info(sprintf("Successfully downloaded %s", $name), true);
+			}
+		}
+
 	}
 
 	private function deleteFiles(array $params, Output $output, Options $options)
 	{
-		// TODO
+		$api     = new Api($options, $output);
+
+		$id = $params['id'];
+
+		if ($id <= 0)
+		{
+			throw new NoBackupID();
+		}
+
+		$data = $api->doQuery('deleteFiles', [
+			'backup_id' => $id
+		]);
+
+		if ($data->body->status != 200)
+		{
+			throw new CannotDeleteFiles($id, $data->body->status, $data->body->data);
+		}
+
+		$output->header("Files of backup record $id were successfully deleted");
+
 	}
 
 	/**
@@ -290,7 +501,7 @@ class Download
 
 		if (!count($fileDefinitions))
 		{
-			throw new RemoteExceptionNofiles();
+			throw new NoFilesInBackupRecord($params['id']);
 		}
 
 		return [

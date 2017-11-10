@@ -12,12 +12,10 @@ namespace Akeeba\RemoteCLI\Exception;
 use Exception;
 use RuntimeException;
 
-class CommunicationError extends RuntimeException
+class CannotDownloadFile extends RuntimeException
 {
-	public function __construct($errCode, $errMessage, $code = 22, Exception $previous = null)
+	public function __construct($message, $code = 105, Exception $previous = null)
 	{
-		$message = sprintf('Network error %d with message “%s”. Please check the host name and the status of your network connectivity.', $errCode, $errMessage);
-
 		parent::__construct($message, $code, $previous);
 	}
 

@@ -12,11 +12,11 @@ namespace Akeeba\RemoteCLI\Exception;
 use Exception;
 use RuntimeException;
 
-class CommunicationError extends RuntimeException
+class CannotWriteFile extends RuntimeException
 {
-	public function __construct($errCode, $errMessage, $code = 22, Exception $previous = null)
+	public function __construct($filePath, $code = 104, Exception $previous = null)
 	{
-		$message = sprintf('Network error %d with message “%s”. Please check the host name and the status of your network connectivity.', $errCode, $errMessage);
+		$message = sprintf('Cannot open file ‘%s’ for writing.', $filePath);
 
 		parent::__construct($message, $code, $previous);
 	}
