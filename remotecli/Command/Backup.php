@@ -64,6 +64,12 @@ class Backup extends AbstractCommand
 		 */
 		$downloadParameters = $downloadModel->getValidatedParameters($input);
 		$downloadModel->download($downloadParameters, $output, $options);
+
+		// Do I also have to delete the files after I download them?
+		if ($downloadParameters['delete'])
+		{
+			$downloadModel->deleteFiles($downloadParameters, $output, $options);
+		}
 	}
 
 }

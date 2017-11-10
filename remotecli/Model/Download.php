@@ -37,9 +37,9 @@ class Download
 	{
 		$parameters = [
 			'mode'     => strtolower($input->getCmd('dlmode', 'http')),
-			'path'     => $input->getPath('dlpath', getcwd()),
+			'path'     => $input->getString('dlpath', getcwd()),
 			'id'       => $input->getInt('id', 0),
-			'filename' => $input->getPath('filename', ''),
+			'filename' => $input->getString('filename', ''),
 			'delete'   => $input->getBool('delete', false),
 		];
 
@@ -118,12 +118,6 @@ class Download
 		}
 
 		$output->header("Finished downloading the backup archive");
-
-		// Do I also have to delete the files after I download them?
-		if ($params['delete'])
-		{
-			$this->deleteFiles($params, $output, $options);
-		}
 	}
 
 	/**
@@ -204,6 +198,24 @@ class Download
 				], true);
 
 				$fetcher = new Fetcher();
+
+				switch (strtolower($fetcher->getAdapterName()))
+				{
+					case 'curl':
+						$fetcher->setAdapterOptions([
+							CURLOPT_CAINFO => $options->capath,
+						]);
+						break;
+
+					case 'fopen':
+						$fetcher->setAdapterOptions([
+							'ssl' => [
+								'cafile'       => $options->capath,
+							],
+						]);
+						break;
+				}
+
 				$fetcher->getFromURL($url, true, $fp);
 			}
 			catch (Exception $e)
@@ -385,6 +397,7 @@ class Download
 			//curl_setopt($ch, CURLOPT_TIMEOUT, 180);
 			curl_setopt($ch, CURLOPT_FILE, $fp);
 			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0.1) Gecko/20110506 Firefox/4.0.1');
+			curl_setopt($ch, CURLOPT_CAINFO, $options->capath);
 
 			if ( !empty($authentication))
 			{
@@ -447,7 +460,7 @@ class Download
 
 	}
 
-	private function deleteFiles(array $params, Output $output, Options $options)
+	public function deleteFiles(array $params, Output $output, Options $options)
 	{
 		$api     = new Api($options, $output);
 
@@ -505,9 +518,9 @@ class Download
 		}
 
 		return [
-			'apiResponse'     => $data,
-			'parts'           => $parts,
-			'fileDefinitions' => $fileDefinitions,
+			$data,
+			$parts,
+			$fileRecords,
 		];
 	}
 }
