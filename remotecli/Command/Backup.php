@@ -17,6 +17,19 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class Backup extends AbstractCommand
 {
+	public function prepare(Cli $input)
+	{
+		if ($input->getBool('d', false))
+		{
+			$input->set('download', true);
+		}
+
+		if ($input->getBool('D', false))
+		{
+			$input->set('delete', true);
+		}
+	}
+
 	public function execute(Cli $input, Output $output)
 	{
 		$this->assertConfigured($input);

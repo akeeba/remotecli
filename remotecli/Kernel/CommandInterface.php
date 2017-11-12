@@ -17,6 +17,16 @@ use Akeeba\RemoteCLI\Output\Output;
 interface CommandInterface
 {
 	/**
+	 * Prepare for the command execution. This is a great place to check for the existence of short options and map them to the
+	 * long options expected by your command object.
+	 *
+	 * @return  void
+	 *
+	 * @throws  \Exception
+	 */
+	public function prepare(Cli $input);
+
+	/**
 	 * Executes the command.
 	 *
 	 * @return  void

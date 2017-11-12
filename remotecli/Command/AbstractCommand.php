@@ -14,9 +14,28 @@ use Akeeba\RemoteCLI\Exception\NoConfiguredHost;
 use Akeeba\RemoteCLI\Exception\NoConfiguredSecret;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Kernel\CommandInterface;
+use Akeeba\RemoteCLI\Output\Output;
 
 abstract class AbstractCommand implements CommandInterface
 {
+	public function prepare(Cli $input)
+	{
+		if ($input->getBool('m', false))
+		{
+			$input->set('machine-readable', true);
+		}
+
+		if ($opt = $input->get('h', null))
+		{
+			$input->set('host', $opt);
+		}
+
+		if ($opt = $input->get('s', null))
+		{
+			$input->set('secret', $opt);
+		}
+	}
+
 	/**
 	 * Make sure that the user has provided enough and correct configuration for this command to run. By default we are
 	 * only checking that a host name and a secret key have been provided and are not empty. If the configuration check

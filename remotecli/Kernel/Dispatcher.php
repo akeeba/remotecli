@@ -79,6 +79,31 @@ class Dispatcher
 	 */
 	public function dispatch()
 	{
+		if (!$this->input->getBool('quiet'))
+		{
+			$version = ARCCLI_VERSION;
+			$date    = ARCCLI_DATE;
+			$year    = gmdate('Y');
+
+			echo <<< BANNER
+Akeeba Remote Control CLI $version ($date)
+Copyright ©2006-$year Nicholas K. Dionysopoulos / Akeeba Ltd.
+--------------------------------------------------------------------------------
+ This program comes with ABSOLUTELY NO WARRANTY. This is Free Software and you
+ are welcome to redistribute it under certain conditions. Use command license
+ for details.
+--------------------------------------------------------------------------------
+
+BANNER;
+
+		}
+
+		// TODO Map legacy --license option to the license command
+		if ($this->input->getBool('license', false))
+		{
+			$this->command = 'license';
+		}
+
 		if (empty($this->command))
 		{
 			$this->command = $this->defaultCommand;
