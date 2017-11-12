@@ -13,6 +13,7 @@ use Akeeba\RemoteCLI\Api\Api;
 use Akeeba\RemoteCLI\Api\Options;
 use Akeeba\RemoteCLI\Download\Download as Fetcher;
 use Akeeba\RemoteCLI\Exception\CannotDeleteFiles;
+use Akeeba\RemoteCLI\Exception\CannotDeleteRecord;
 use Akeeba\RemoteCLI\Exception\CannotDownloadFile;
 use Akeeba\RemoteCLI\Exception\CannotWriteFile;
 use Akeeba\RemoteCLI\Exception\NoBackupID;
@@ -514,8 +515,35 @@ class Download
 			throw new CannotDeleteFiles($id, $data->body->status, $data->body->data);
 		}
 
-		$output->header("Files of backup record $id were successfully deleted");
+		$output->header(sprintf("Files of backup record %d were successfully deleted.", $id));
+	}
 
+	/**
+	 * Delete the backup archives AND the backup record itself.
+	 *
+	 * @param   int      $id       The backup record ID.
+	 * @param   Output   $output   The output handler object
+	 * @param   Options  $options  API options
+	 */
+	public function delete($id, Output $output, Options $options)
+	{
+		$api     = new Api($options, $output);
+
+		if ($id <= 0)
+		{
+			throw new NoBackupID();
+		}
+
+		$data = $api->doQuery('delete', [
+			'backup_id' => $id
+		]);
+
+		if ($data->body->status != 200)
+		{
+			throw new CannotDeleteRecord($id, $data->body->status, $data->body->data);
+		}
+
+		$output->header(sprintf("Backup record %d was successfully deleted.", $id));
 	}
 
 	/**
