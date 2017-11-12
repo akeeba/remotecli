@@ -31,8 +31,8 @@
       Backup for Joomla! or WordPress; or Akeeba Solo. It is designed for
       power users and system administrators who want to automate these
       backup-related tasks. It uses our remote JSON API, which means that you
-      can install the script on one machine (even your own PC!) and control
-      any number of sites, across different hosts, remotely.</para>
+      can install the script on one machine (even your own PC) and control any
+      number of sites, across different hosts, remotely.</para>
 
       <para>The script is shipped as a PHAR file. This is an executable PHP
       package which can be used with PHP 5.5.0 or later (PHP 7.0 or 7.1
@@ -46,11 +46,6 @@
 
     <section xml:id="usage">
       <title>Usage</title>
-
-      <para>You can use Remote CLI from the command line of your operating
-      system with a command like this:</para>
-
-      <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para>Remote CLI requires a command line version of PHP (a.k.a. PHP-CLI)
       to be installed on your machine. In the command line above, please
@@ -76,12 +71,21 @@
         cases.</para>
       </important>
 
+      <para>You can use Remote CLI from the command line of your operating
+      system with a command like this:</para>
+
+      <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
+
+      <para><replaceable>php</replaceable> is the path to your PHP CLI
+      exectuable. If this is not in your path or you are not sure, please ask
+      your host or your system administrator.</para>
+
       <para><replaceable>hostName</replaceable> is the URL to your site's
-      root, without a trailing slash, e.g. http://www.example.com. If you are
-      using Akeeba Backup for WordPress the
+      root, without a trailing slash, e.g. <uri>http://www.example.com</uri>.
+      If you are using Akeeba Backup for WordPress the
       <replaceable>hostName</replaceable> must also include the path to Akeeba
       Backup's index.php file tasked with handling the JSON API, e.g.
-      http://www.example.com/wp-content/plugins/akeebabackupwp/app/index.php
+      <uri>http://www.example.com/wp-content/plugins/akeebabackupwp/app/remote.php</uri>
       where http://www.example.com is the URL to your site and akeebabackupwp
       is the name of the folder where the Akeeba Backup for WordPress plugin
       is installed.</para>
@@ -102,6 +106,14 @@
       <para><replaceable>actionName</replaceable> can be one of:</para>
 
       <variablelist>
+        <varlistentry>
+          <term>license</term>
+
+          <listitem>
+            <para>Displays the license of the software and quits.</para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry>
           <term>test</term>
 
@@ -223,7 +235,8 @@
       <para>Moreover, you can specify the <option>--license</option> parameter
       to display the text of the GNU General Public License version 3, under
       which the software is distributed. In this case, the action and all
-      options will be silently ignored.</para>
+      options will be silently ignored. This has the same effect as specifying
+      the license command.</para>
 
       <para>Each action can be used with one or several options. Some of them
       are mandatory for the correct operation of Remote CLI. The following
@@ -310,7 +323,9 @@
             <itemizedlist>
               <listitem>
                 <para><emphasis role="bold">RAW</emphasis> The default. No
-                encryption takes place. Only use with HTTPS sites.</para>
+                encryption takes place. Only use with HTTPS sites. This is the
+                recommended connection method: HTTPS site with RAW
+                encapsulation.</para>
               </listitem>
 
               <listitem>
@@ -513,6 +528,17 @@
             <para><option>--dlurl="ftp://myuser:
             mypassword@ftp.example.com:21/public_html/administrator/components/com_akeeba/backup
             </option></para>
+
+            <important>
+              <para>FTP is an unencrypted protocol. It is trivial for a third
+              party to snoop into your connection and find the username and
+              password you are using to connect to your server. We very
+              strongly recommend using SFTP which is a file transfer protocol
+              implemented over the very secure SSH remote server connection
+              protocol. As a second best, you can use FTPS which is an
+              encrypted version of FTP (exactly the same way HTTPS is an
+              encrypted version of HTTP).</para>
+            </important>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -590,12 +616,63 @@
       <para>There are no options. Calling this action will check if an update
       is available and, if there is, will install it automatically on your
       site.</para>
+
+      <important>
+        <para>This feature IS NOT available on Joomla!. Extension updates are
+        handled by Joomla! itself, not Akeeba Backup. Please refer to
+        Joomla!'s documentation for information on updating extensions.</para>
+      </important>
     </section>
 
     <section>
       <title>Configuration files</title>
 
-      <para/>
+      <para>Akeeba Remote CLI is looking for a personalized configuration
+      file. This is true on every Operating System <emphasis>except</emphasis>
+      Microsoft Windows which does not make available the necessary
+      information to do so.</para>
+
+      <para>The file is named <filename>.akeebaremotecli</filename> (mind the
+      leading dot!) and is located in your home directory. In standard Unix
+      notation that would be <filename>~/.akeebaremotecli</filename> </para>
+
+      <para>This is a plain text file which follows the INI format. Each
+      configuration section can define a set of options which have the same
+      effect as being passed to the command line itself. Each section is
+      referenced by the <parameter>--host</parameter> command line parameter.
+      If you do not define a host, the default entry [akeebaremotecli] will be
+      used instead.</para>
+
+      <para>Configuration file example:</para>
+
+      <programlisting>[akeebaremotecli]
+host=https://www.example.com
+secret=0123456789abcdef0123456789abcdef
+
+[mybackup]
+host=https://www.example.com
+secret=0123456789abcdef0123456789abcdef
+action=backup
+profile=2
+
+[example]
+host=https://www.example.com
+secret=0123456789abcdef0123456789abcdef
+profile=3</programlisting>
+
+      <para>Example using the default section (tests the connection):</para>
+
+      <para>remote.phar test</para>
+
+      <para>Example using a named section, without having to specify a command
+      (takes a backup with profile #2):</para>
+
+      <para>remote.phar backup --host=mybackup</para>
+
+      <para>Example using a named section, specifying commands and overriding
+      options (takes a backup with profile #1);</para>
+
+      <para>remote.phar backup --host=example --profile=1</para>
     </section>
 
     <section xml:id="walkthrough">
