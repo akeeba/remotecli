@@ -11,6 +11,7 @@ namespace Akeeba\RemoteCLI\Model;
 
 use Akeeba\RemoteCLI\Api\Api;
 use Akeeba\RemoteCLI\Api\Options;
+use Akeeba\RemoteCLI\Exception\CannotListBackupRecords;
 use Akeeba\RemoteCLI\Exception\RemoteError;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Output\Output;
@@ -105,5 +106,29 @@ class Backup
 		$output->debug('Archive name: ' . $archive);
 
 		return [$backupRecordID, $archive];
+	}
+
+	public function getBackups(Cli $input, Output $output, Options $options)
+	{
+		$api = new Api($options, $output);
+
+		// From is >= 1
+		$from = max(1, $input->getInt('from', 0));
+
+		// Limit is between 10 and 200
+		$limit = $input->getInt('limit', 50);
+		$limit = min(max(1, $limit), 200);
+
+		$data = $api->doQuery('listBackups', [
+			'from'  => $from,
+			'limit' => $limit,
+		]);
+
+		if ($data->body->status != 200)
+		{
+			throw new CannotListBackupRecords("Could not list backup records");
+		}
+
+		return $data->body->data;
 	}
 }

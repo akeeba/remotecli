@@ -10,38 +10,40 @@ namespace Akeeba\RemoteCLI\Command;
 
 
 use Akeeba\RemoteCLI\Input\Cli;
-use Akeeba\RemoteCLI\Model\Profiles as ProfilesModel;
+use Akeeba\RemoteCLI\Model\Backup;
 use Akeeba\RemoteCLI\Model\Test as TestModel;
 use Akeeba\RemoteCLI\Output\Output;
 
-class Profiles extends AbstractCommand
+class Listbackups extends AbstractCommand
 {
 	public function execute(Cli $input, Output $output)
 	{
 		$this->assertConfigured($input);
 
 		$testModel = new TestModel();
-		$model     = new ProfilesModel();
+		$model     = new Backup();
 
 		// Find the best options to connect to the API
 		$options = $this->getApiOptions($input);
 		$options = $testModel->getBestOptions($input, $output, $options);
 
-		// Get and print the backup profiles
-		$profiles = $model->getProfiles($input, $output, $options);
+		// Get and print the backup records
+		$backups = $model->getBackups($input, $output, $options);
 
-		$output->header("List of profiles");
+		$output->header("List of backup records");
 
-		if (empty($profiles))
+		if (empty($backups))
 		{
-			$output->warning('No backup profiles were found');
+			$output->warning('No backup records were found');
 
 			return;
 		}
 
-		foreach ($profiles as $profile)
+		foreach ($backups as $record)
 		{
-			$line = sprintf('%4u|%s', $profile->id, $profile->name);
+			$status = ($record->status == 'complete') && !($record->filesexist) ? 'obsolete' : $record->status;
+			$status = str_pad($status, 8);
+			$line   = sprintf('%6u|%s|%s|%s', $record->id, $record->backupstart, $status, $record->description);
 
 			$output->info($line, true);
 		}

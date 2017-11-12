@@ -69,6 +69,7 @@ $dispatcher = new Dispatcher([
 	\Akeeba\RemoteCLI\Command\Deletefiles::class,
 	\Akeeba\RemoteCLI\Command\Delete::class,
 	\Akeeba\RemoteCLI\Command\Profiles::class,
+	\Akeeba\RemoteCLI\Command\Listbackups::class,
 ], $input, $output);
 
 // Dispatch the application
