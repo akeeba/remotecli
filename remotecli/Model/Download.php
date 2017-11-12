@@ -63,7 +63,7 @@ class Download
 
 				if ($parameters['chunkSize'] <= 1)
 				{
-					$parameters['chunkSize'] = 1;
+					$parameters['chunkSize'] = 10;
 				}
 				break;
 
@@ -168,6 +168,15 @@ class Download
 		return array($url, $authentication);
 	}
 
+	/**
+	 * Download a backup archive using a single chunk HTTP download through the JSON API.
+	 *
+	 * @param   array    $params   The download parameters, as determined by getValidatedParameters
+	 * @param   Output   $output   The output handler object
+	 * @param   Options  $options  API options
+	 *
+	 * @return  void
+	 */
 	private function downloadHTTP(array $params, Output $output, Options $options)
 	{
 		// Get the backup info
@@ -262,6 +271,15 @@ class Download
 		}
 	}
 
+	/**
+	 * Download a backup archive using multiple chunk HTTP download through the JSON API. Recommended for larger archives.
+	 *
+	 * @param   array    $params   The download parameters, as determined by getValidatedParameters
+	 * @param   Output   $output   The output handler object
+	 * @param   Options  $options  API options
+	 *
+	 * @return  void
+	 */
 	private function downloadChunk(array $params, Output $output, Options $options)
 	{
 		// Get the backup info
@@ -362,6 +380,16 @@ class Download
 
 	}
 
+	/**
+	 * Download a backup archive using cURL, bypassing the JSON API. This is useful when you have (S)FTP or WebDAV access to the
+	 * location of your backup archives.
+	 *
+	 * @param   array    $params   The download parameters, as determined by getValidatedParameters
+	 * @param   Output   $output   The output handler object
+	 * @param   Options  $options  API options
+	 *
+	 * @return  void
+	 */
 	private function downloadCURL(array $params, Output $output, Options $options)
 	{
 		// Get the backup info
@@ -460,11 +488,17 @@ class Download
 
 	}
 
-	public function deleteFiles(array $params, Output $output, Options $options)
+	/**
+	 * Delete the backup archives of a backup record. Useful to delete the backup archive files from the server after downloading
+	 * them to your internal network.
+	 *
+	 * @param   int      $id       The backup record ID.
+	 * @param   Output   $output   The output handler object
+	 * @param   Options  $options  API options
+	 */
+	public function deleteFiles($id, Output $output, Options $options)
 	{
 		$api     = new Api($options, $output);
-
-		$id = $params['id'];
 
 		if ($id <= 0)
 		{
