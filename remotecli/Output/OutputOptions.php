@@ -69,6 +69,17 @@ class OutputOptions
 			$this->$k = $v;
 		}
 
+		// Map options
+		if (isset($options['nocolor']))
+		{
+			$this->noColor = (bool) $options['nocolor'];
+		}
+
+		if (isset($options['mergeerror']))
+		{
+			$this->mergeErrorOutput = (bool) $options['mergeerror'];
+		}
+
 		// The debug flag forcibly turns off quiet mode
 		if ($this->debug)
 		{
