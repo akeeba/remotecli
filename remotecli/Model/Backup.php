@@ -101,6 +101,11 @@ class Backup
 			$data = $api->doQuery('stepBackup', $params);
 		}
 
+		if ($data->body->status != 200)
+		{
+			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
+		}
+
 		$output->header('Backup finished successfully');
 		$output->debug('Backup record ID: ' . $backupRecordID);
 		$output->debug('Archive name: ' . $archive);
