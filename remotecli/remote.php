@@ -81,7 +81,7 @@ try
 }
 catch (Exception $e)
 {
-	$output->error($e->getMessage());
+	$output->error(sprintf('Error #%d - %s', $e->getCode(), $e->getMessage()));
 
 	$output->debug("Stack Trace (for debugging):");
 
@@ -89,4 +89,6 @@ catch (Exception $e)
 	{
 		$output->debug($line);
 	}
+
+	exit($e->getCode());
 }
