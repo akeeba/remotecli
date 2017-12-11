@@ -634,7 +634,7 @@
 
       <para>The file is named <filename>.akeebaremotecli</filename> (mind the
       leading dot!) and is located in your home directory. In standard Unix
-      notation that would be <filename>~/.akeebaremotecli</filename> </para>
+      notation that would be <filename>~/.akeebaremotecli</filename></para>
 
       <para>This is a plain text file which follows the INI format. Each
       configuration section can define a set of options which have the same
@@ -662,17 +662,17 @@ profile=3</programlisting>
 
       <para>Example using the default section (tests the connection):</para>
 
-      <para>remote.phar test</para>
+      <programlisting>remote.phar test</programlisting>
 
       <para>Example using a named section, without having to specify a command
       (takes a backup with profile #2):</para>
 
-      <para>remote.phar backup --host=mybackup</para>
+      <programlisting>remote.phar backup --host=mybackup</programlisting>
 
       <para>Example using a named section, specifying commands and overriding
       options (takes a backup with profile #1);</para>
 
-      <para>remote.phar backup --host=example --profile=1</para>
+      <programlisting>remote.phar backup --host=example --profile=1</programlisting>
     </section>
 
     <section xml:id="walkthrough">
@@ -752,16 +752,7 @@ Successful connection to site</screen>
       <para>The following command will take a backup (without downloading it
       to your local PC), using backup profile #1:</para>
 
-      <programlisting>php remote.phar --action=backup --host=http://www.example.com 
-    --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1</programlisting>
-
-      <warning>
-        <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only. When you copy
-        &amp; paste it and it doesn't work, come back here, read this
-        paragraph, go back to your command line and REMOVE the line break
-        after --profile=1 and before --dlurl.</para>
-      </warning>
+      <programlisting>php remote.phar --action=backup --host=http://www.example.com --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1</programlisting>
 
       <para>You should see a long list of output coming through, detailing the
       backup progress. In the end it should read:</para>
@@ -786,10 +777,7 @@ Successful connection to site</screen>
 
       <warning>
         <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only. When you copy
-        &amp; paste it and it doesn't work, come back here, read this
-        paragraph, go back to your command line and REMOVE the line break
-        after --profile=1.</para>
+        have added the line break for typesetting purposes only.</para>
       </warning>
 
       <para>This will take a backup and then download it to C:\Downloads (or
@@ -842,10 +830,7 @@ Successful connection to site</screen>
 
       <warning>
         <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only. When you copy
-        &amp; paste it and it doesn't work, come back here, read this
-        paragraph, go back to your command line and REMOVE the line break
-        after --profile=1 and before --dlurl.</para>
+        have added the line break for typesetting purposes only.</para>
       </warning>
 
       <para>One final note. After you download the backup archive, it's a good
@@ -857,35 +842,14 @@ Successful connection to site</screen>
   --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1
   --download --dlmode=curl --dlpath="c:\Downloads" --delete
   --dlurl="ftp://<emphasis role="bold">foo</emphasis>:<emphasis role="bold">bar</emphasis>@<emphasis
-          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeeba/backup</emphasis>"
-</programlisting>
+          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeeba/backup</emphasis>"</programlisting>
 
       <warning>
         <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only. When you copy
-        &amp; paste it and it doesn't work, come back here, read this
-        paragraph, go back to your command line and REMOVE the line break
-        after --profile=1 and before --dlurl.</para>
+        have added the line break for typesetting purposes only.</para>
       </warning>
 
       <para>That's it!</para>
-
-      <bridgehead>Updating Akeeba Backup automatically</bridgehead>
-
-      <para>If your server supports our Live Update method, you can
-      automatically update Akeeba Backup to its latest version, when one is
-      made available. The command line to do that is:</para>
-
-      <programlisting>php remote.phar --action=update --host=http://www.example.com
-  --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA</programlisting>
-
-      <warning>
-        <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only. When you copy
-        &amp; paste it and it doesn't work, come back here, read this
-        paragraph, go back to your command line and REMOVE the line break
-        after --profile=1 and before --dlurl.</para>
-      </warning>
 
       <bridgehead>Automating the whole lot</bridgehead>
 
