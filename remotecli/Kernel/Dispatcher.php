@@ -177,7 +177,7 @@ class Dispatcher
 	 *
 	 * @return  void
 	 */
-	private function showBanner()
+	protected function showBanner()
 	{
 		if ($this->input->getBool('quiet'))
 		{
