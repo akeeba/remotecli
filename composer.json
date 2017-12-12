@@ -24,5 +24,10 @@
   ],
   "config": {
     "vendor-dir": "remotecli/vendor"
+  },
+  "autoload": {
+    "psr-4": {
+      "Akeeba\\RemoteCLI\\": "remotecli/"
+    }
   }
 }

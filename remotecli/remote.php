@@ -47,7 +47,7 @@ if ($autoloader === false)
 	die('You must initialize Composer requirements before running this script.');
 }
 
-$autoloader->addPsr4("Akeeba\\RemoteCLI\\", __DIR__);
+$autoloader->addPsr4("Akeeba\\RemoteCLI\\", __DIR__, true);
 
 // Get the options from the CLI parameters and merge the configuration file data
 $input = new Cli();
