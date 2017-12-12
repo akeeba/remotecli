@@ -120,6 +120,7 @@ class Dispatcher
 			throw new InvalidCommand($this->command);
 		}
 
+		$commandObject->prepare($this->input);
 		$commandObject->execute($this->input, $this->output);
 	}
 
