@@ -49,7 +49,7 @@ class Deletefiles extends AbstractCommand
 
 		$id = $input->getInt('id', -1);
 
-		if (!$id <= 0)
+		if ($id <= 0)
 		{
 			throw new NoBackupID();
 		}
