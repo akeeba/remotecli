@@ -118,10 +118,11 @@ class Backup
 		$api = new Api($options, $output);
 
 		// From is >= 1
-		$from = max(1, $input->getInt('from', 0));
+		$from = max(0, $input->getInt('from', 0));
 
-		// Limit is between 10 and 200
-		$limit = $input->getInt('limit', 50);
+		// Limit is between 10 and 200. Also support the old --to parameter.
+		$limit = $input->getInt('to', 50);
+		$limit = $input->getInt('limit', $limit);
 		$limit = min(max(1, $limit), 200);
 
 		$data = $api->doQuery('listBackups', [

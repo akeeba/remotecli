@@ -1,6 +1,7 @@
 # Akeeba Remote CLI 2.0.1
 
 * delete and deletefiles did not work
+* listbackups does not list the latest backup
 
 # Akeeba Remote CLI 2.0.0
 

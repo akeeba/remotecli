@@ -31,7 +31,7 @@ class Delete extends AbstractCommand
 		$options = $testModel->getBestOptions($input, $output, $options);
 
 		// Now delete the files of that backup record
-		$downloadModel->deleteFiles($id, $output, $options);
+		$downloadModel->delete($id, $output, $options);
 	}
 
 	/**

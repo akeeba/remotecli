@@ -10,7 +10,7 @@ namespace Akeeba\RemoteCLI\Command;
 
 
 use Akeeba\RemoteCLI\Input\Cli;
-use Akeeba\RemoteCLI\Model\Backup;
+use Akeeba\RemoteCLI\Model\Backup as BackupModel;
 use Akeeba\RemoteCLI\Model\Test as TestModel;
 use Akeeba\RemoteCLI\Output\Output;
 
@@ -21,7 +21,7 @@ class Listbackups extends AbstractCommand
 		$this->assertConfigured($input);
 
 		$testModel = new TestModel();
-		$model     = new Backup();
+		$model     = new BackupModel();
 
 		// Find the best options to connect to the API
 		$options = $this->getApiOptions($input);
