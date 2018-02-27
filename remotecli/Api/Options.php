@@ -152,7 +152,7 @@ class Options
 		$originalPath = $uri->getPath();
 		list ($path, $endpoint) = $this->parsePath($originalPath);
 
-		$uri->setPath($path);
+		$uri->setPath('/' . ltrim($path));
 
 		if (!empty($endpoint) && (substr($endpoint, -4) == '.php'))
 		{
@@ -193,7 +193,7 @@ class Options
 		if ($lastSlashPost !== false)
 		{
 			$endpoint = substr($originalPath, $lastSlashPost + 1);
-			$path     = substr($originalPath, 0, $lastSlashPost - 1);
+			$path     = substr($originalPath, 0, $lastSlashPost);
 		}
 
 		// The path is "some/thing/or/another"

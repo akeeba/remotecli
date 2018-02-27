@@ -1,3 +1,7 @@
+# Akeeba Remote CLI 2.0.2
+
+* Connection problems with Akeeba Backup for WordPress and sites hosted in subdirectories 
+
 # Akeeba Remote CLI 2.0.1
 
 * delete and deletefiles did not work
