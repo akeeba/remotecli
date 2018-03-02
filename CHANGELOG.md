@@ -1,6 +1,7 @@
 # Akeeba Remote CLI 2.0.2
 
-* Connection problems with Akeeba Backup for WordPress and sites hosted in subdirectories 
+* Connection problems with Akeeba Backup for WordPress and sites hosted in subdirectories
+* Machine readable format only worked with the long --machine-readable switch but not the short switch (-m) 
 
 # Akeeba Remote CLI 2.0.1
 

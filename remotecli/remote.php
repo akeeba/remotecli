@@ -54,11 +54,12 @@ $input = new Cli();
 $input->mergeData((new LocalFile())->getConfiguration($input->getCmd('host', 'akeebaremotecli')));
 
 // Create the output object
-$output        = new Output(
+$machineReadable = $input->getBool('m', false) || $input->getBool('machine-readable', false);
+$output          = new Output(
 	new OutputOptions(
 		$input->getData()
 	),
-	$input->getBool('machine-readable', false) ? 'machine' : 'console'
+	$machineReadable ? 'machine' : 'console'
 );
 
 // Create the dispatcher with all the commands
