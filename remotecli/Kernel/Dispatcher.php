@@ -185,6 +185,11 @@ class Dispatcher
 			return;
 		}
 
+		if ($this->input->getBool('m') || $this->input->getBool('machine-readable'))
+		{
+			return;
+		}
+
 		$version = ARCCLI_VERSION;
 		$date    = ARCCLI_DATE;
 		$year    = gmdate('Y');
