@@ -22,6 +22,14 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		$this->supportsChunkDownload = true;
 		$this->name                  = 'curl';
 		$this->isSupported           = function_exists('curl_init') && function_exists('curl_exec') && function_exists('curl_close');
+
+		// PLEASE NOTE! In Phar packages, we MUST have a cacert on the filesystem, since the library can't load certificates
+		// using the phar:// stream wrapper. This constant should ALWAYS be defined by the caller, this is just a fallback to avoid
+		// things to break with non-https sites
+		if (!defined('AKEEBA_CACERT_PEM'))
+		{
+			define('AKEEBA_CACERT_PEM', __DIR__ . '/cacert.pem');
+		}
 	}
 
 	/**
@@ -74,7 +82,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_SSLVERSION, 0);
-        curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
+        curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 
         if (!is_null($fp) && is_resource($fp))
         {
@@ -153,7 +161,8 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
-		curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
+
+		curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 
 		if (!empty($params))
 		{

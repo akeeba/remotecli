@@ -109,7 +109,7 @@ class Options
 		// Make sure I have a valid CA cache path
 		if (empty($this->capath))
 		{
-			$this->capath = __DIR__ . '/../Download/Adapter/cacert.pem';
+			$this->capath = AKEEBA_CACERT_PEM;
 		}
 	}
 

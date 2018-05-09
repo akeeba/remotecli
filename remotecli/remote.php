@@ -47,6 +47,19 @@ if ($autoloader === false)
 	die('You must initialize Composer requirements before running this script.');
 }
 
+// cURL is not working nice with phar:// wrappers. This means that we have to manually create a temp file outside the
+// package and supply it to cURL
+$cacert_path    = __DIR__ . '/Download/Adapter/cacert.pem';
+$cacertContents = file_get_contents($cacert_path);
+
+// Let's use the tmpfile trick: in this way the file will removed once the $temp_cacert goes out of scope
+$temp_cacert = tmpfile();
+$temp_cacert_path = stream_get_meta_data($temp_cacert)['uri'];
+
+fwrite($temp_cacert, $cacertContents);
+
+define('AKEEBA_CACERT_PEM', $temp_cacert_path);
+
 $autoloader->addPsr4("Akeeba\\RemoteCLI\\", __DIR__, true);
 
 // Get the options from the CLI parameters and merge the configuration file data
