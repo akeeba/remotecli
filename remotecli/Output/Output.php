@@ -22,14 +22,14 @@ class Output
 	 *
 	 * @var  OutputAdapterInterface
 	 */
-	private $adapter = null;
+	protected $adapter = null;
 
 	/**
 	 * The output options
 	 *
 	 * @var  OutputOptions
 	 */
-	private $options;
+	protected $options;
 
 	public function __construct(OutputOptions $options, $adapter = 'console')
 	{
