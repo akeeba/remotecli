@@ -309,7 +309,17 @@ class Download
 		$path = $params['path'];
 		$chunk_size = $params['chunkSize'];
 
-		for ($part = 1; $part <= $parts; $part++)
+		$part_start = 1;
+		$part_end 	= $parts;
+
+		// Did I asked to download only one specific part?
+		if ($params['part'])
+		{
+			$part_start = $params['part'];
+			$part_end	= $params['part'];
+		}
+
+		for ($part = $part_start; $part <= $part_end; $part++)
 		{
 			// Open file pointer
 			$name     = $fileInformation[$part]->name;
@@ -419,7 +429,17 @@ class Download
 		$url = $params['url'];
 		$authentication = $params['authentication'];
 
-		for ($part = 1; $part <= $parts; $part++)
+		$part_start = 1;
+		$part_end 	= $parts;
+
+		// Did I asked to download only one specific part?
+		if ($params['part'])
+		{
+			$part_start = $params['part'];
+			$part_end	= $params['part'];
+		}
+
+		for ($part = $part_start; $part <= $part_end; $part++)
 		{
 			// Open file pointer
 			$name     = $fileInformation[$part]->name;
