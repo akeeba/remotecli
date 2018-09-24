@@ -42,12 +42,21 @@ class Download
 			'id'       => $input->getInt('id', 0),
 			'filename' => $input->getString('filename', ''),
 			'delete'   => $input->getBool('delete', false),
+			'part'     => $input->getInt('part', -1),
 		];
+
+		// Passed part number is 0-based index, while we're using 1-based index inside the application
+		if ($parameters['part'] > -1)
+		{
+			$parameters['part'] += 1;
+		}
 
 		if (!in_array($parameters['mode'], array('http', 'curl', 'chunk')))
 		{
 			throw new NoDownloadMode();
 		}
+
+		$parameters['path'] = rtrim($parameters['path'], '/');
 
 		if (empty($parameters['path']) || !is_dir($parameters['path']))
 		{
@@ -186,7 +195,17 @@ class Download
 		$api  = new Api($options, $output);
 		$path = $params['path'];
 
-		for ($part = 1; $part <= $parts; $part++)
+		$part_start = 1;
+		$part_end 	= $parts;
+
+		// Did I asked to download only one specific part?
+		if ($params['part'])
+		{
+			$part_start = $params['part'];
+			$part_end	= $params['part'];
+		}
+
+		for ($part = $part_start; $part <= $part_end; $part++)
 		{
 			// Open file pointer
 			$name     = $fileInformation[$part]->name;
