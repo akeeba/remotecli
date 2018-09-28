@@ -56,7 +56,7 @@ class Listbackups extends AbstractCommand
 								$record->profile_id,
 								$parts,
 								$meta,
-								$record->size
+								isset($record->size) ? $record->size : ''
 			);
 
 			$output->info($line, true);
