@@ -12,7 +12,8 @@ namespace Akeeba\RemoteCLI\Model;
 use Akeeba\RemoteCLI\Api\Api;
 use Akeeba\RemoteCLI\Api\Options;
 use Akeeba\RemoteCLI\Exception\CannotListProfiles;
-use Akeeba\RemoteCLI\Exception\RemoteError;
+use Akeeba\RemoteCLI\Exception\NoProfileData;
+use Akeeba\RemoteCLI\Exception\NoProfileID;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Output\Output;
 
@@ -39,5 +40,39 @@ class Profiles
 		}
 
 		return $data->body->data;
+	}
+
+	public function exportConfiguration(Cli $input, Output $output, Options $options)
+	{
+		$id = $input->getInt('id', -1);
+
+		if ($id <= 0)
+		{
+			throw new NoProfileID();
+		}
+
+		$api = new Api($options, $output);
+
+		$data = $api->doQuery('exportConfiguration', ['profile' => $input->getInt('id')]);
+
+		return $data->body->data;
+	}
+
+	public function importConfiguration(Cli $input, Output $output, Options $options)
+	{
+		$data = $input->get('data', '', 'raw');
+
+		if (!$data)
+		{
+			throw new NoProfileData();
+		}
+
+		$data = json_decode($data);
+
+		$api = new Api($options, $output);
+
+		$response = $api->doQuery('importConfiguration', ['profile' => 0, 'data' => $data]);
+
+		return $response->body->data;
 	}
 }

@@ -43,7 +43,21 @@ class Listbackups extends AbstractCommand
 		{
 			$status = ($record->status == 'complete') && !($record->filesexist) ? 'obsolete' : $record->status;
 			$status = str_pad($status, 8);
-			$line   = sprintf('%6u|%s|%s|%s', $record->id, $record->backupstart, $status, $record->description);
+			$meta	= str_pad($record->meta, 8);
+
+			// If multipart is 0 it means that's a single backup archive
+			$parts	= (!$record->multipart ? 1 : $record->multipart);
+
+			$line   = sprintf('%6u|%s|%s|%s|%s|%s|%s|%s',
+								$record->id,
+								$record->backupstart,
+								$status,
+								$record->description,
+								$record->profile_id,
+								$parts,
+								$meta,
+								isset($record->size) ? $record->size : ''
+			);
 
 			$output->info($line, true);
 		}
