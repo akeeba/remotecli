@@ -10,7 +10,6 @@ namespace Akeeba\RemoteCLI\Command;
 
 
 use Akeeba\RemoteCLI\Input\Cli;
-use Akeeba\RemoteCLI\Model\Test as TestModel;
 use Akeeba\RemoteCLI\Output\Output;
 
 class License extends AbstractCommand
