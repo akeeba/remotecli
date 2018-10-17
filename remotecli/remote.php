@@ -77,6 +77,7 @@ $output          = new Output(
 
 // Create the dispatcher with all the commands
 $dispatcher = new Dispatcher([
+	\Akeeba\RemoteCLI\Command\PHP::class,
 	\Akeeba\RemoteCLI\Command\License::class,
 	\Akeeba\RemoteCLI\Command\Test::class,
 	\Akeeba\RemoteCLI\Command\Backup::class,
