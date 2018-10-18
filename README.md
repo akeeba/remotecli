@@ -75,3 +75,17 @@ MUST NOT be typed!
 
 		$ phing documentation
 		> phing documentation
+
+## Building the Dockerized version
+
+After tagging a releasing a new version the old-fashioned way you can also release the Dockerized version:
+
+    cd /path/to/this/repository
+    export ARCCLI_LATEST_TAG=`git describe --abbrev=0`
+    docker rmi akeebaltd/remotecli:latest
+    docker build -t akeebaltd/remotecli:latest .
+    docker tag akeebaltd/remotecli:latest akeebaltd/remotecli:$ARCCLI_LATEST_TAG 
+    docker push akeebaltd/remotecli:$ARCCLI_LATEST_TAG
+    docker push akeebaltd/remotecli:latest
+
+Test before releasing! The Dockerfile is currently using PHP 7 latest. This might NOT be a version of PHP we have extensively tested in a different way.
