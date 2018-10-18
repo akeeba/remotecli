@@ -17,7 +17,7 @@
       </affiliation>
     </author>
 
-    <pubdate>December 2017</pubdate>
+    <pubdate>October 2018</pubdate>
   </info>
 
   <chapter>
@@ -47,8 +47,13 @@
     <section xml:id="usage">
       <title>Usage</title>
 
+      <bridgehead>Using the PHAR file</bridgehead>
+
+      <para>The traditional way to use Remote CLI is as a command line script
+      running on your machine.</para>
+
       <para>Remote CLI requires a command line version of PHP (a.k.a. PHP-CLI)
-      to be installed on your machine. In the command line above, please
+      to be installed on your machine. In the command line below, please
       substitute php with the full path to your PHP CLI executable file. On
       most Linux and Mac OS X systems, you don't need to specify a path, just
       <command>php</command> will do as the executable file is already in the
@@ -71,14 +76,38 @@
         cases.</para>
       </important>
 
-      <para>You can use Remote CLI from the command line of your operating
-      system with a command like this:</para>
+      <para>After downloading remote.phar (the Remote CLI executable PHP
+      archive) from our site you can use Remote CLI from the command line of
+      your operating system with a command like this:</para>
 
       <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para><replaceable>php</replaceable> is the path to your PHP CLI
       exectuable. If this is not in your path or you are not sure, please ask
       your host or your system administrator.</para>
+
+      <bridgehead>Using the Dockerized version</bridgehead>
+
+      <para>If you are using Docker you can make use of the Dockerized version
+      of Remote CLI:</para>
+
+      <programlisting>docker run --rm akeebaltd/remotecli <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
+
+      <para>The Dockerized version is self-contained, using the latest version
+      of PHP at the time we build the container image. It's much simpler to
+      use since it does not require installing or configuring anything on your
+      host machine. Moreover, it's <emphasis>self-updating</emphasis>. The
+      command line above always tries to use the latest version of Remote CLI
+      we have published in Docker Hub.</para>
+
+      <warning>
+        <para>There's a caveat. You can NOT use the Dockerized version with
+        local servers i.e. anything which resolves to an IP address only
+        routable by the host machine. If you want to try our Remote CLI
+        locally you have to use the PHAR file.</para>
+      </warning>
+
+      <bridgehead>What are all these options?</bridgehead>
 
       <para><replaceable>hostName</replaceable> is the URL to your site's
       root, without a trailing slash, e.g. <uri>http://www.example.com</uri>.
@@ -632,6 +661,11 @@
       Microsoft Windows which does not make available the necessary
       information to do so.</para>
 
+      <important>
+        <para>Configuration files only apply to remote.phar. The Dockerized
+        version does not read files from your user folder.</para>
+      </important>
+
       <para>The file is named <filename>.akeebaremotecli</filename> (mind the
       leading dot!) and is located in your home directory. In standard Unix
       notation that would be <filename>~/.akeebaremotecli</filename></para>
@@ -885,7 +919,7 @@ Successful connection to site</screen>
 
       <para>As for the batch/script file, all you have to do is to include the
       commands above in a .BAT (Windows) or .sh (Linux, Mac OS X) file. For
-      example, a Windows batch file (backup.php) looks like that:</para>
+      example, a Windows batch file (backup.bat) looks like that:</para>
 
       <programlisting>REM IMPORTANT! Before running Remote CLI, you have to change the current
 REM directory to wherever remote.phar is located in. In this example, we
