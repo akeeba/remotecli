@@ -45,7 +45,7 @@ class Backup
 		];
 		$data = $api->doQuery('startBackup', $config);
 
-		while ($data->body->data->HasRun)
+		while (isset($data->body->data->HasRun) && $data->body->data->HasRun)
 		{
 			if ($data->body->status != 200)
 			{
