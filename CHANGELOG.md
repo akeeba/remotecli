@@ -1,3 +1,7 @@
+# Akeeba Remote CLI 2.1.0
+
+* Automatically detect the correct encapsulation. The --encapsulation option is ignored.
+
 # Akeeba Remote CLI 2.0.2
 
 * Connection problems with Akeeba Backup for WordPress and sites hosted in subdirectories

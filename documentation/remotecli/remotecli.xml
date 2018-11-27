@@ -335,55 +335,6 @@
         </varlistentry>
       </variablelist>
 
-      <para>All commands also accept the following optional options:</para>
-
-      <variablelist>
-        <varlistentry>
-          <term>encapsulation</term>
-
-          <listitem>
-            <para>By default Remote CLI will use an insecure, plain text
-            method to authenticate itself with Akeeba Backup / Akeeba Solo. If
-            your site does not use HTTPS this may pose a security risk.
-            Fortunately, Akeeba Backup / Akeeba Solo implements its own
-            cryptography for cases like this. This option tells ARC CLI which
-            kind of cryptography to use. The available options are:</para>
-
-            <itemizedlist>
-              <listitem>
-                <para><emphasis role="bold">RAW</emphasis> The default. No
-                encryption takes place. Only use with HTTPS sites. This is the
-                recommended connection method: HTTPS site with RAW
-                encapsulation.</para>
-              </listitem>
-
-              <listitem>
-                <para><emphasis role="bold">CTR128</emphasis> Use AES in CTR
-                mode with a 128 bit key. Not recommended.</para>
-              </listitem>
-
-              <listitem>
-                <para><emphasis role="bold">AES128</emphasis> Use AES in CBC
-                mode with a 128 bit key. This method requires that BOTH the
-                remote site AND the machine you're executing ARC CLI from have
-                the mcrypt (NOT recommended) or OpenSSL PHP modules installed
-                and enabled and that these PHP modules support the
-                rijndael-128 algorithm. If either server does not meet these
-                requirements the encryption will be downgraded to CTR128 or,
-                in some cases, result in an error message.</para>
-              </listitem>
-            </itemizedlist>
-
-            <para>Please note that error messages and downloads with the
-            <option>http</option> download mode are always transferred
-            unencrypted no matter which encapsulation you are using. Error
-            messages do not pose a security risk, but downloads do. Never use
-            the <option>http</option> download mode unless your server is
-            using HTTPS or you are using JPS (encrypted) archives.</para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
       <para>Below you can find the options required by each command:</para>
 
       <bridgehead>test</bridgehead>

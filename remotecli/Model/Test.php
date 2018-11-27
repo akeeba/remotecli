@@ -70,74 +70,79 @@ class Test
 	 */
 	private function getBestApiAndInformation(Cli $input, Output $output, Options $originalOptions)
 	{
-		$verbs     = $this->getVerbs($input);
-		$formats   = $this->getFormats($input);
-		$endpoints = $this->getEndpoints($originalOptions);
-		$apiResult = null;
-		$api       = null;
+		$verbs          = $this->getVerbs($input);
+		$formats        = $this->getFormats($input);
+		$endpoints      = $this->getEndpoints($originalOptions);
+		$encapsulations = $this->getEncapsulations();
+		$apiResult      = null;
+		$api            = null;
 
 		foreach ($verbs as $verb)
 		{
 			foreach ($formats as $format)
 			{
-				foreach ($endpoints as $endpoint)
+				foreach ($encapsulations as $encapsulation)
 				{
-					$options = $originalOptions->getModifiedClone([
-						'verb'     => $verb,
-						'format'   => $format,
-						'endpoint' => $endpoint,
-					]);
-
-					try
+					foreach ($endpoints as $endpoint)
 					{
-						$apiResult = null;
-						$api       = new Api($options, $output);
-						$apiResult = $api->doQuery('getVersion');
+						$options = $originalOptions->getModifiedClone([
+							'verb'          => $verb,
+							'format'        => $format,
+							'endpoint'      => $endpoint,
+							'encapsulation' => $encapsulation,
+						]);
 
-						break 3;
-					}
-					catch (CommunicationError $communicationError)
-					{
-						/**
-						 * We might get this kind of exception if the endpoint is wrong or results in endless
-						 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
-						 * you do?
-						 */
-
-						if ($options->verbose)
+						try
 						{
-							$output->debug(sprintf(
-									'Communication error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
-									$verb,
-									$format,
-									$endpoint,
-									$communicationError->getMessage()
-								)
-							);
-						}
+							$apiResult = null;
+							$api       = new Api($options, $output);
+							$apiResult = $api->doQuery('getVersion');
 
-						continue;
-					}
-					catch (ApiException $apiException)
-					{
-						/**
-						 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
-						 * with a broken third party plugin results in the output being ovewritten. So let's retry with
-						 * another way to connect to the site.
-						 */
-						if ($options->verbose)
+							break 3;
+						}
+						catch (CommunicationError $communicationError)
 						{
-							$output->debug(sprintf(
-									'Remote API error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
-									$verb,
-									$format,
-									$endpoint,
-									$apiException->getMessage()
-								)
-							);
-						}
+							/**
+							 * We might get this kind of exception if the endpoint is wrong or results in endless
+							 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
+							 * you do?
+							 */
 
-						continue;
+							if ($options->verbose)
+							{
+								$output->debug(sprintf(
+										'Communication error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										$verb,
+										$format,
+										$endpoint,
+										$communicationError->getMessage()
+									)
+								);
+							}
+
+							continue;
+						}
+						catch (ApiException $apiException)
+						{
+							/**
+							 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
+							 * with a broken third party plugin results in the output being ovewritten. So let's retry with
+							 * another way to connect to the site.
+							 */
+							if ($options->verbose)
+							{
+								$output->debug(sprintf(
+										'Remote API error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										$verb,
+										$format,
+										$endpoint,
+										$apiException->getMessage()
+									)
+								);
+							}
+
+							continue;
+						}
 					}
 				}
 			}
@@ -205,6 +210,20 @@ class Test
 		}
 
 		return empty($format) ? $defaultList : [$format];
+	}
+
+	/**
+	 * Get a list of the encapsulations to try using
+	 *
+	 * @return  array
+	 */
+	private function getEncapsulations()
+	{
+		return [
+			Options::ENC_CBC128,
+			Options::ENC_CTR128,
+			Options::ENC_RAW,
+		];
 	}
 
 	/**
