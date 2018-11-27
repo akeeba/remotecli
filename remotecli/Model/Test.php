@@ -98,7 +98,15 @@ class Test
 							$api       = new Api($options, $output);
 							$apiResult = $api->doQuery('getVersion');
 
-							break 3;
+							// This happens if we use the wrong encapsulation
+							if ($apiResult->body->status != 200)
+							{
+								$apiResult = null;
+
+								continue;
+							}
+
+							break 4;
 						}
 						catch (CommunicationError $communicationError)
 						{
@@ -111,10 +119,11 @@ class Test
 							if ($options->verbose)
 							{
 								$output->debug(sprintf(
-										'Communication error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										'Communication error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
 										$verb,
 										$format,
 										$endpoint,
+										$encapsulation,
 										$communicationError->getMessage()
 									)
 								);
@@ -132,10 +141,11 @@ class Test
 							if ($options->verbose)
 							{
 								$output->debug(sprintf(
-										'Remote API error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										'Remote API error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
 										$verb,
 										$format,
 										$endpoint,
+										$encapsulation,
 										$apiException->getMessage()
 									)
 								);
