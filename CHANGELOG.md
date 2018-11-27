@@ -1,6 +1,7 @@
 # Akeeba Remote CLI 2.1.0
 
 * Automatically detect the correct encapsulation. The --encapsulation option is ignored.
+* Would not work without cURL
 
 # Akeeba Remote CLI 2.0.2
 

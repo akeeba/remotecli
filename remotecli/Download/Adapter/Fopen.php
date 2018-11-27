@@ -105,7 +105,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 			// If that failed, go through our standard failure detection code and raise the relevant exception
 			if ($remoteFP === false)
 			{
-				return $this->evaluateHTTPResponse(false);
+				return $this->evaluateHTTPResponse(false, null);
 			}
 
 			// If we are supposed to read a specific chunk we need to seek to the offset
@@ -145,7 +145,12 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 			$result  = @file_get_contents($url, false, $context, $from, $length);
 		}
 
-		return $this->evaluateHTTPResponse($result);
+		if (!isset($http_response_header))
+		{
+			$http_response_header = null;
+		}
+
+		return $this->evaluateHTTPResponse($result, $http_response_header);
 	}
 
 	/**
@@ -180,7 +185,12 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		$context = stream_context_create($options);
 		$result  = @file_get_contents($url, false, $context);
 
-		return $this->evaluateHTTPResponse($result);
+		if (!isset($http_response_header))
+		{
+			$http_response_header = null;
+		}
+
+		return $this->evaluateHTTPResponse($result, $http_response_header);
 	}
 
 	/**
@@ -193,11 +203,11 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 	 *
 	 * @throws  CommunicationError  In case a communications error has been detected
 	 */
-	private function evaluateHTTPResponse($result)
+	private function evaluateHTTPResponse($result, $http_response_header)
 	{
 		global $http_response_header_test;
 
-		if (!isset($http_response_header) && empty($http_response_header_test))
+		if (is_null($http_response_header) && empty($http_response_header_test))
 		{
 			$error = 'Could not open the download URL using URL fopen() wrappers.';
 
@@ -205,7 +215,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		}
 
 		// Used for testing
-		if (!isset($http_response_header) && !empty($http_response_header_test))
+		if (is_null($http_response_header) && !empty($http_response_header_test))
 		{
 			$http_response_header = $http_response_header_test;
 		}
