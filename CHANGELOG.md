@@ -2,6 +2,7 @@
 
 * Automatically detect the correct encapsulation. The --encapsulation option is ignored.
 * Would not work without cURL
+* Spoof the User Agent string to work around servers blocking cURL or PHP stream wrappers
 
 # Akeeba Remote CLI 2.0.2
 
