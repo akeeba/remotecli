@@ -1,9 +1,8 @@
 <?php
 /**
- * @package AkeebaRemote
- * @copyright Copyright (c)2008-2018 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license GNU General Public License version 3, or later
- * @version $Id$
+ * @package    AkeebaRemoteCLI
+ * @copyright  Copyright (c)2008-2019 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license    GNU General Public License version 3, or later
  */
 
 define('ARCCLI_VERSION', '##VERSION##');
