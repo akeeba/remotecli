@@ -171,7 +171,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 
 		curl_setopt($ch, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, 'reponseHeaderCallback'));
-		curl_setopt($ch, CURLOPT_USERAGENT, array($this, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'));
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36');
 
 		if (!empty($params))
 		{
