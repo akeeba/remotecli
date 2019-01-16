@@ -118,7 +118,7 @@ class Test
 
 							if ($options->verbose)
 							{
-								$output->debug(sprintf(
+								$output->warning(sprintf(
 										'Communication error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
 										$verb,
 										$format,
@@ -140,7 +140,7 @@ class Test
 							 */
 							if ($options->verbose)
 							{
-								$output->debug(sprintf(
+								$output->warning(sprintf(
 										'Remote API error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
 										$verb,
 										$format,

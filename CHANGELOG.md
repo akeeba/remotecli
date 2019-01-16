@@ -1,3 +1,7 @@
+# Akeeba Remote CLI 2.1.1
+
+* `--certificate` option allows you to specify self-signed SSL certificates
+
 # Akeeba Remote CLI 2.1.0
 
 * Automatically detect the correct encapsulation. The --encapsulation option is ignored.

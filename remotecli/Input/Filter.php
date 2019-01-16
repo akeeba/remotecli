@@ -198,7 +198,7 @@ class Filter
 				break;
 
 			case 'PATH':
-				$pattern = '/^[A-Za-z0-9_-]+[A-Za-z0-9_\.-]*([\\\\\/][A-Za-z0-9_-]+[A-Za-z0-9_\.-]*)*$/';
+				$pattern = '/^(\/|[\w]\:|\\|[A-Za-z0-9_-])[A-Za-z0-9_\.-]*([\\\\\/][A-Za-z0-9_-]+[A-Za-z0-9_\.-]*)*$/';
 				preg_match($pattern, (string)$source, $matches);
 				$result = @ (string)$matches[0];
 				break;

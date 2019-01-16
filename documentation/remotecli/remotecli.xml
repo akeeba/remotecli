@@ -267,6 +267,17 @@
       options will be silently ignored. This has the same effect as specifying
       the license command.</para>
 
+      <para>If you have a host with a self-signed certificate, or a
+      certificate signed by a non-public certificate authority, you can use
+      the
+      <option>--certificate=<replaceable>/path/to/certificate.pem</replaceable></option>
+      option, where <replaceable>/path/to/certificate.pem</replaceable> is the
+      full filesystem path to a PEM-formatted certificate. This certificate
+      will be considered a valid certification authority for the purposes of
+      Akeeba Remote CLI. The practical use case for that is intranets, local
+      servers and testing environments, typically using self-signed
+      certificates.</para>
+
       <para>Each action can be used with one or several options. Some of them
       are mandatory for the correct operation of Remote CLI. The following
       sections detail the parameters which can be used with each option. All
