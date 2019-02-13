@@ -96,6 +96,7 @@ $dispatcher = new Dispatcher([
 	\Akeeba\RemoteCLI\Command\Profiles::class,
 	\Akeeba\RemoteCLI\Command\Listbackups::class,
 	\Akeeba\RemoteCLI\Command\Update::class,
+	\Akeeba\RemoteCLI\Command\BackupInfo::class,
 ], $input, $output);
 
 // Dispatch the application

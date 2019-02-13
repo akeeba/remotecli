@@ -137,4 +137,20 @@ class Backup
 
 		return $data->body->data;
 	}
+
+	public function getBackup(Cli $input, Output $output, Options $options)
+	{
+		$api = new Api($options, $output);
+
+		$id = $input->getInt('id', 0);
+
+		$data = $api->doQuery('getBackupInfo', ['backup_id' => $id]);
+
+		if ($data->body->status != 200)
+		{
+			throw new CannotListBackupRecords("Could not list backup records");
+		}
+
+		return $data->body->data;
+	}
 }
