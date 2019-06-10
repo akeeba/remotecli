@@ -49,11 +49,18 @@ class Backup
 		$data = $api->doQuery('startBackup', $config);
 
 		// Keep the backup loop running until we're done OR run step by step if asked so
-		while (
-			(isset($data->body->data->HasRun) && $data->body->data->HasRun) ||
-			$single_step
-		)
+		$keep_running = true;
+
+		while ($keep_running)
 		{
+			$keep_running = (isset($data->body->data->HasRun) && $data->body->data->HasRun);
+
+			// If running step by step, immediately break
+			if ($single_step)
+			{
+				$keep_running = false;
+			}
+
 			if ($data->body->status != 200)
 			{
 				throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
