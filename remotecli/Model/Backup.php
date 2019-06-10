@@ -30,9 +30,11 @@ class Backup
 	public function backup(Cli $input, Output $output, Options $options)
 	{
 		$api            = new Api($options, $output);
+		$single_step    = $input->getInt('single_step', 1);
 		$profile        = $input->getInt('profile', 1);
 		$description    = $input->getString('description', "Remote backup");
 		$comment        = $input->getHtml('comment', '');
+
 		$backupRecordID = 0;
 		$archive        = '';
 		$progress       = 0;
@@ -43,9 +45,14 @@ class Backup
 			'description' => $description,
 			'comment'     => $comment,
 		];
+
 		$data = $api->doQuery('startBackup', $config);
 
-		while (isset($data->body->data->HasRun) && $data->body->data->HasRun)
+		// Keep the backup loop running until we're done OR run step by step if asked so
+		while (
+			(isset($data->body->data->HasRun) && $data->body->data->HasRun) ||
+			$single_step
+		)
 		{
 			if ($data->body->status != 200)
 			{
@@ -106,7 +113,14 @@ class Backup
 			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
 		}
 
-		$output->header('Backup finished successfully');
+		$header = 'Backup';
+
+		if ($single_step)
+		{
+			$header = 'Backup step';
+		}
+
+		$output->header($header.' finished successfully');
 		$output->debug('Backup record ID: ' . $backupRecordID);
 		$output->debug('Archive name: ' . $archive);
 
