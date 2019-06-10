@@ -34,10 +34,11 @@ class Backup extends AbstractCommand
 	{
 		$this->assertConfigured($input);
 
-		$testModel   = new TestModel();
-		$backupModel = new BackupModel();
-		$downloadModel      = new Download();
-		$mustDownload = $input->getBool('download', false);
+		$testModel      = new TestModel();
+		$backupModel    = new BackupModel();
+		$downloadModel  = new Download();
+
+		$mustDownload   = $input->getBool('download', false);
 
 		/**
 		 * DO NOT DELETE!

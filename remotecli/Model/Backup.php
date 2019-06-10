@@ -29,8 +29,8 @@ class Backup
 	 */
 	public function backup(Cli $input, Output $output, Options $options)
 	{
-		$api = new Api($options, $output);
-		$profile        = (int) ($input->getInt('profile', 1));
+		$api            = new Api($options, $output);
+		$profile        = $input->getInt('profile', 1);
 		$description    = $input->getString('description', "Remote backup");
 		$comment        = $input->getHtml('comment', '');
 		$backupRecordID = 0;
