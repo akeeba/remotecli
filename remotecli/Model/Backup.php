@@ -31,9 +31,14 @@ class Backup
 	{
 		$api            = new Api($options, $output);
 		$single_step    = $input->getInt('single_step', 0);
+		$step           = $input->getInt('step', 0);
+		$backupID       = $input->getCmd('backupid', '');
 		$profile        = $input->getInt('profile', 1);
 		$description    = $input->getString('description', "Remote backup");
 		$comment        = $input->getHtml('comment', '');
+
+		$backupRecordID = '';
+		$archive        = '';
 
 		$config = [
 			'profile'     => $profile,
@@ -41,13 +46,16 @@ class Backup
 			'comment'     => $comment,
 		];
 
-		$result = $this->handleQuery($api, 'startBackup', $config, $output);
+		if (!$step)
+		{
+			$result = $this->handleQuery($api, 'startBackup', $config, $output);
 
-		$backupRecordID = $result['backupRecordID'];
-		$backupID       = $result['backupID'];
-		$archive        = $result['archive'];
+			$backupRecordID = $result['backupRecordID'];
+			$backupID       = $result['backupID'];
+			$archive        = $result['archive'];
+		}
 
-		$params = array();
+		$params = [];
 
 		if (!empty($backupID))
 		{
