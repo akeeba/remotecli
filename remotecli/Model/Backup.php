@@ -30,7 +30,7 @@ class Backup
 	public function backup(Cli $input, Output $output, Options $options)
 	{
 		$api            = new Api($options, $output);
-		$single_step    = $input->getInt('single_step', 1);
+		$single_step    = $input->getInt('single_step', 0);
 		$profile        = $input->getInt('profile', 1);
 		$description    = $input->getString('description', "Remote backup");
 		$comment        = $input->getHtml('comment', '');
@@ -48,11 +48,53 @@ class Backup
 
 		$data = $api->doQuery('startBackup', $config);
 
-		// Keep the backup loop running until we're done OR run step by step if asked so
+		if ($data->body->status != 200)
+		{
+			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
+		}
+
+		if (isset($data->body->data->BackupID))
+		{
+			$backupRecordID = $data->body->data->BackupID;
+			$output->debug('Got backup record ID: ' . $backupRecordID);
+		}
+
+		if (isset($data->body->data->backupid))
+		{
+			$backupID = $data->body->data->backupid;
+			$output->debug('Got backupID: ' . $backupID);
+		}
+
+		if (isset($data->body->data->Archive))
+		{
+			$archive = $data->body->data->Archive;
+			$output->debug('Got archive name: ' . $archive);
+		}
+
+		if (isset($data->body->data->Progress))
+		{
+			$progress = $data->body->data->Progress;
+		}
+
+		$output->header('Got backup tick');
+		$output->info("Progress: {$progress}%");
+		$output->info("Domain  : {$data->body->data->Domain}");
+		$output->info("Step    : {$data->body->data->Step}");
+		$output->info("Substep : {$data->body->data->Substep}");
+
+		if (!empty($data->body->data->Warnings))
+		{
+			foreach ($data->body->data->Warnings as $warning)
+			{
+				$output->warning("Warning : $warning");
+			}
+		}
+
 		$keep_running = true;
 
 		while ($keep_running)
 		{
+			// Keep the backup loop running until we're done OR run step by step if asked so
 			$keep_running = (isset($data->body->data->HasRun) && $data->body->data->HasRun);
 
 			// If running step by step, immediately break
@@ -60,6 +102,15 @@ class Backup
 			{
 				$keep_running = false;
 			}
+
+			$params = array();
+
+			if (!empty($backupID))
+			{
+				$params['backupid'] = $backupID;
+			}
+
+			$data = $api->doQuery('stepBackup', $params);
 
 			if ($data->body->status != 200)
 			{
@@ -104,15 +155,6 @@ class Backup
 			}
 
 			$output->info('');
-
-			$params = array();
-
-			if (!empty($backupID))
-			{
-				$params['backupid'] = $backupID;
-			}
-
-			$data = $api->doQuery('stepBackup', $params);
 		}
 
 		if ($data->body->status != 200)
