@@ -35,131 +35,42 @@ class Backup
 		$description    = $input->getString('description', "Remote backup");
 		$comment        = $input->getHtml('comment', '');
 
-		$backupRecordID = 0;
-		$archive        = '';
-		$progress       = 0;
-		$backupID       = null;
-
 		$config = [
 			'profile'     => $profile,
 			'description' => $description,
 			'comment'     => $comment,
 		];
 
-		$data = $api->doQuery('startBackup', $config);
+		$result = $this->handleQuery($api, 'startBackup', $config, $output);
 
-		if ($data->body->status != 200)
+		$backupRecordID = $result['backupRecordID'];
+		$backupID       = $result['backupID'];
+		$archive        = $result['archive'];
+
+		$params = array();
+
+		if (!empty($backupID))
 		{
-			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
-		}
-
-		if (isset($data->body->data->BackupID))
-		{
-			$backupRecordID = $data->body->data->BackupID;
-			$output->debug('Got backup record ID: ' . $backupRecordID);
-		}
-
-		if (isset($data->body->data->backupid))
-		{
-			$backupID = $data->body->data->backupid;
-			$output->debug('Got backupID: ' . $backupID);
-		}
-
-		if (isset($data->body->data->Archive))
-		{
-			$archive = $data->body->data->Archive;
-			$output->debug('Got archive name: ' . $archive);
-		}
-
-		if (isset($data->body->data->Progress))
-		{
-			$progress = $data->body->data->Progress;
-		}
-
-		$output->header('Got backup tick');
-		$output->info("Progress: {$progress}%");
-		$output->info("Domain  : {$data->body->data->Domain}");
-		$output->info("Step    : {$data->body->data->Step}");
-		$output->info("Substep : {$data->body->data->Substep}");
-
-		if (!empty($data->body->data->Warnings))
-		{
-			foreach ($data->body->data->Warnings as $warning)
-			{
-				$output->warning("Warning : $warning");
-			}
+			$params['backupid'] = $backupID;
 		}
 
 		$keep_running = true;
 
 		while ($keep_running)
 		{
+			$result = $this->handleQuery($api, 'stepBackup', $params, $output);
+
+			$backupRecordID = $result['backupRecordID'];
+			$archive        = $result['archive'];
+
 			// Keep the backup loop running until we're done OR run step by step if asked so
-			$keep_running = (isset($data->body->data->HasRun) && $data->body->data->HasRun);
+			$keep_running = $result['hasRan'];
 
 			// If running step by step, immediately break
 			if ($single_step)
 			{
 				$keep_running = false;
 			}
-
-			$params = array();
-
-			if (!empty($backupID))
-			{
-				$params['backupid'] = $backupID;
-			}
-
-			$data = $api->doQuery('stepBackup', $params);
-
-			if ($data->body->status != 200)
-			{
-				throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
-			}
-
-			if (isset($data->body->data->BackupID))
-			{
-				$backupRecordID = $data->body->data->BackupID;
-				$output->debug('Got backup record ID: ' . $backupRecordID);
-			}
-
-			if (isset($data->body->data->backupid))
-			{
-				$backupID = $data->body->data->backupid;
-				$output->debug('Got backupID: ' . $backupID);
-			}
-
-			if (isset($data->body->data->Archive))
-			{
-				$archive = $data->body->data->Archive;
-				$output->debug('Got archive name: ' . $archive);
-			}
-
-			if (isset($data->body->data->Progress))
-			{
-				$progress = $data->body->data->Progress;
-			}
-
-			$output->header('Got backup tick');
-			$output->info("Progress: {$progress}%");
-			$output->info("Domain  : {$data->body->data->Domain}");
-			$output->info("Step    : {$data->body->data->Step}");
-			$output->info("Substep : {$data->body->data->Substep}");
-
-			if (!empty($data->body->data->Warnings))
-			{
-				foreach ($data->body->data->Warnings as $warning)
-				{
-					$output->warning("Warning : $warning");
-				}
-			}
-
-			$output->info('');
-		}
-
-		if ($data->body->status != 200)
-		{
-			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
 		}
 
 		$header = 'Backup';
@@ -215,5 +126,76 @@ class Backup
 		}
 
 		return $data->body->data;
+	}
+
+	/**
+	 * Performs a query to the API endpoint and fetches back the result, controlling it and setting the correct variables
+	 *
+	 * @param Api       $api
+	 * @param string    $method
+	 * @param array     $config
+	 * @param Output    $output
+	 *
+	 * @return array    Array containg all useful info for feedback
+	 */
+	protected function handleQuery(Api $api, $method, $config, Output &$output)
+	{
+		$data = $api->doQuery($method, $config);
+
+		$backupRecordID = 0;
+		$archive        = '';
+		$progress       = 0;
+		$backupID       = null;
+
+		if ($data->body->status != 200)
+		{
+			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
+		}
+
+		if (isset($data->body->data->BackupID))
+		{
+			$backupRecordID = $data->body->data->BackupID;
+			$output->debug('Got backup record ID: ' . $backupRecordID);
+		}
+
+		if (isset($data->body->data->backupid))
+		{
+			$backupID = $data->body->data->backupid;
+			$output->debug('Got backupID: ' . $backupID);
+		}
+
+		if (isset($data->body->data->Archive))
+		{
+			$archive = $data->body->data->Archive;
+			$output->debug('Got archive name: ' . $archive);
+		}
+
+		if (isset($data->body->data->Progress))
+		{
+			$progress = $data->body->data->Progress;
+		}
+
+		$output->header('Got backup tick');
+		$output->info("Progress: {$progress}%");
+		$output->info("Domain  : {$data->body->data->Domain}");
+		$output->info("Step    : {$data->body->data->Step}");
+		$output->info("Substep : {$data->body->data->Substep}");
+
+		if (!empty($data->body->data->Warnings))
+		{
+			foreach ($data->body->data->Warnings as $warning)
+			{
+				$output->warning("Warning : $warning");
+			}
+		}
+
+		$output->info('');
+
+		return $result = [
+			'backupRecordID' => $backupRecordID,
+			'backupID'       => $backupID,
+			'archive'        => $archive,
+			'hasRan'         => isset($data->body->data->HasRun) && $data->body->data->HasRun
+		];
 	}
 }
