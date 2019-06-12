@@ -72,7 +72,7 @@ class Backup
 			$archive        = $result['archive'];
 
 			// Keep the backup loop running until we're done OR run step by step if asked so
-			$keep_running = $result['hasRan'];
+			$keep_running = $result['hasRun'];
 
 			// If running step by step, immediately break
 			if ($single_step)
@@ -188,7 +188,7 @@ class Backup
 		$output->info("Domain  : {$data->body->data->Domain}");
 		$output->info("Step    : {$data->body->data->Step}");
 		$output->info("Substep : {$data->body->data->Substep}");
-		$output->debug("HasRan : {$data->body->data->HasRun}");
+		$output->debug("HasRun : {$data->body->data->HasRun}");
 
 		if (!empty($data->body->data->Warnings))
 		{
@@ -204,7 +204,7 @@ class Backup
 			'backupRecordID' => $backupRecordID,
 			'backupID'       => $backupID,
 			'archive'        => $archive,
-			'hasRan'         => isset($data->body->data->HasRun) && $data->body->data->HasRun
+			'hasRun'         => (isset($data->body->data->HasRun) && $data->body->data->HasRun)
 		];
 	}
 }
