@@ -9,6 +9,7 @@
 namespace Akeeba\RemoteCLI\Command;
 
 
+use Akeeba\RemoteCLI\Exception\NoBackupID;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Model\Backup as BackupModel;
 use Akeeba\RemoteCLI\Model\Download;
@@ -85,4 +86,41 @@ class Backup extends AbstractCommand
 		}
 	}
 
+
+	public function startBackup(Cli $input, Output $output)
+	{
+		$this->assertConfigured($input);
+
+		$testModel   = new TestModel();
+		$backupModel = new BackupModel();
+
+		// Find the best options to connect to the API
+		$options = $this->getApiOptions($input);
+		$options = $testModel->getBestOptions($input, $output, $options);
+
+		// Take a backup
+		$backupModel->startBackup($input, $output, $options);
+	}
+
+	public function stepBackup(Cli $input, Output $output)
+	{
+		$this->assertConfigured($input);
+
+		$backupID = $input->getString('backupid');
+
+		if (!$backupID)
+		{
+			throw new NoBackupID();
+		}
+
+		$testModel   = new TestModel();
+		$backupModel = new BackupModel();
+
+		// Find the best options to connect to the API
+		$options = $this->getApiOptions($input);
+		$options = $testModel->getBestOptions($input, $output, $options);
+
+		// Take a backup
+		$backupModel->stepBackup($output, $options, $backupID);
+	}
 }
