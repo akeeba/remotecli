@@ -182,11 +182,14 @@ class Backup
 			$progress = $data->body->data->Progress;
 		}
 
+		$hasRun = isset($data->body->data->HasRun) && $data->body->data->HasRun;
+
 		$output->header('Got backup tick');
 		$output->info("Progress: {$progress}%");
 		$output->info("Domain  : {$data->body->data->Domain}");
 		$output->info("Step    : {$data->body->data->Step}");
 		$output->info("Substep : {$data->body->data->Substep}");
+		$output->debug("HasRun  : {$hasRun}");
 
 		if (!empty($data->body->data->Warnings))
 		{
