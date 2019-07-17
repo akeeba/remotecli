@@ -74,7 +74,7 @@ $temp_cacert_path = stream_get_meta_data($temp_cacert)['uri'];
 fwrite($temp_cacert, $cacertContents);
 
 // If there's a certificate specified in the command line we'll append it to the temporary cacert.pem
-$certFile = $input->get('certificate', '', 'path');
+$certFile = $input->get('certificate', '', 'raw');
 
 if (!empty($certFile) && is_readable($certFile))
 {
