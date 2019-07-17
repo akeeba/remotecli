@@ -199,7 +199,7 @@ class Download
 		$part_end 	= $parts;
 
 		// Did I asked to download only one specific part?
-		if ($params['part'])
+		if ($params['part'] > 0)
 		{
 			$part_start = $params['part'];
 			$part_end	= $params['part'];
@@ -313,7 +313,7 @@ class Download
 		$part_end 	= $parts;
 
 		// Did I asked to download only one specific part?
-		if ($params['part'])
+		if ($params['part'] > 0)
 		{
 			$part_start = $params['part'];
 			$part_end	= $params['part'];
@@ -433,7 +433,7 @@ class Download
 		$part_end 	= $parts;
 
 		// Did I asked to download only one specific part?
-		if ($params['part'])
+		if ($params['part'] > 0)
 		{
 			$part_start = $params['part'];
 			$part_end	= $params['part'];

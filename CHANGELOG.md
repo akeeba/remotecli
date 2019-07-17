@@ -1,6 +1,7 @@
 # Akeeba Remote CLI 2.1.1
 
 * `--certificate` option allows you to specify self-signed SSL certificates
+* Downloading archives without specifying a part number was broken
 
 # Akeeba Remote CLI 2.1.0
 
