@@ -67,6 +67,7 @@ class Backup extends AbstractCommand
 
 		$input->set('id', $backupRecordID);
 		$input->set('archive', $archive);
+		$input->set('part', -1);
 
 		/**
 		 * DO NOT DELETE!
