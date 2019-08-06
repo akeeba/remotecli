@@ -2,6 +2,7 @@
 
 * `--certificate` option allows you to specify self-signed SSL certificates
 * Downloading archives without specifying a part number was broken
+* Using local configuration files wouldn't work under PHP 7.4
 
 # Akeeba Remote CLI 2.1.0
 

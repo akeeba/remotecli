@@ -67,7 +67,12 @@ abstract class IniParser
 		else
 		{
 			$file = str_replace("\r", "", $file);
-			$ini  = explode("\n", $file);
+			$ini = explode("\n", $file);
+		}
+
+		if (!is_array($ini))
+		{
+			return array();
 		}
 
 		if (count($ini) == 0)
@@ -76,11 +81,10 @@ abstract class IniParser
 		}
 
 		$sections = array();
-		$values   = array();
-		$result   = array();
-		$globals  = array();
-		$i        = 0;
-
+		$values = array();
+		$result = array();
+		$globals = array();
+		$i = 0;
 		foreach ($ini as $line)
 		{
 			$line = trim($line);
@@ -93,9 +97,9 @@ abstract class IniParser
 			}
 
 			// Sections
-			if ($line{0} == '[')
+			if ($line[0] == '[')
 			{
-				$tmp        = explode(']', $line);
+				$tmp = explode(']', $line);
 				$sections[] = trim(substr($tmp[0], 1));
 				$i++;
 				continue;
@@ -103,24 +107,20 @@ abstract class IniParser
 
 			// Key-value pair
 			$lineParts = explode('=', $line, 2);
-
 			if (count($lineParts) != 2)
 			{
 				continue;
 			}
-
-			$key   = trim($lineParts[0]);
+			$key = trim($lineParts[0]);
 			$value = trim($lineParts[1]);
-
 			unset($lineParts);
 
 			if (strstr($value, ";"))
 			{
 				$tmp = explode(';', $value);
-
 				if (count($tmp) == 2)
 				{
-					if ((($value{0} != '"') && ($value{0} != "'")) ||
+					if ((($value[0] != '"') && ($value[0] != "'")) ||
 						preg_match('/^".*"\s*;/', $value) || preg_match('/^".*;[^"]*$/', $value) ||
 						preg_match("/^'.*'\s*;/", $value) || preg_match("/^'.*;[^']*$/", $value)
 					)
@@ -130,11 +130,11 @@ abstract class IniParser
 				}
 				else
 				{
-					if ($value{0} == '"')
+					if ($value[0] == '"')
 					{
 						$value = preg_replace('/^"(.*)".*/', '$1', $value);
 					}
-					elseif ($value{0} == "'")
+					elseif ($value[0] == "'")
 					{
 						$value = preg_replace("/^'(.*)'.*/", '$1', $value);
 					}
@@ -144,7 +144,6 @@ abstract class IniParser
 					}
 				}
 			}
-
 			$value = trim($value);
 			$value = trim($value, "'\"");
 
