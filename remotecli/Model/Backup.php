@@ -40,7 +40,18 @@ class Backup
 		while (isset($data->body->data->HasRun) && $data->body->data->HasRun)
 		{
 			$backupID = $info['backupID'];
-			$info     = $this->stepBackup($output, $options,$backupID);
+
+			if (isset($info['backupRecordID']))
+			{
+				$backupRecordID = $info['backupRecordID'];
+			}
+
+			if (isset($info['archive']))
+			{
+				$archive = $info['archive'];
+			}
+
+			$info = $this->stepBackup($output, $options, $backupID);
 
 			$data = $info['data'];
 		}
@@ -48,16 +59,6 @@ class Backup
 		if ($data->body->status != 200)
 		{
 			throw new RemoteError('Error ' . $data->body->status . ": " . $data->body->data);
-		}
-
-		if (isset($info['backupRecordID']))
-		{
-			$backupRecordID = $info['backupRecordID'];
-		}
-
-		if (isset($info['archive']))
-		{
-			$archive = $info['archive'];
 		}
 
 		$output->header('Backup finished successfully');
