@@ -27,11 +27,8 @@ use Akeeba\RemoteCLI\Utility\Uri;
  */
 class Options
 {
+	const ENC_NONE = 0;
 	const ENC_RAW = 1;
-	const ENC_CTR128 = 2;
-	const ENC_CTR256 = 3;
-	const ENC_CBC128 = 4;
-	const ENC_CBC256 = 5;
 
 	private $host;
 	private $secret;
@@ -41,7 +38,7 @@ class Options
 	private $format = 'html';
 	private $ua = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
 	private $verbose = false;
-	private $encapsulation = self::ENC_CBC128;
+	private $encapsulation = self::ENC_RAW;
 	private $legacy = false;
 	private $capath = null;
 
@@ -84,24 +81,8 @@ class Options
 			switch (strtoupper($this->encapsulation))
 			{
 				case 'RAW':
-					$this->encapsulation = self::ENC_RAW;
-					break;
-
-				case 'CTR128':
-					$this->encapsulation = self::ENC_CTR128;
-					break;
-
-				case 'CTR256':
-					$this->encapsulation = self::ENC_CTR256;
-					break;
-
 				default:
-				case 'CBC128':
-					$this->encapsulation = self::ENC_CBC128;
-					break;
-
-				case 'CBC256':
-					$this->encapsulation = self::ENC_CBC256;
+					$this->encapsulation = self::ENC_RAW;
 					break;
 			}
 		}

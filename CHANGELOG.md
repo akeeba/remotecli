@@ -1,6 +1,7 @@
-# Akeeba Remote CLI 2.1.2
+# Akeeba Remote CLI 2.2.0
 
 * Download after backup was broken with newer Akeeba Backup / Akeeba Solo versions
+* Removed support for encapsulations other than RAW
 
 # Akeeba Remote CLI 2.1.1
 

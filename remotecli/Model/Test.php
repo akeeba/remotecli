@@ -230,8 +230,7 @@ class Test
 	private function getEncapsulations()
 	{
 		return [
-			Options::ENC_CBC128,
-			Options::ENC_CTR128,
+			// Options::ENC_NONE,
 			Options::ENC_RAW,
 		];
 	}

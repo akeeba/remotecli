@@ -13,103 +13,28 @@
       <personname><firstname>Nicholas</firstname><surname>Dionysopoulos</surname></personname>
 
       <affiliation>
-        <orgname>AkeebaBackup.com</orgname>
+        <orgname>Akeeba Ltd</orgname>
       </affiliation>
     </author>
 
-    <revhistory>
-      <revision>
-        <date>December 2011</date>
+    <copyright>
+      <year>2011-2020 </year>
 
-        <revremark>First version</revremark>
-      </revision>
-
-      <revision>
-        <date>April 2012</date>
-
-        <revremark>Updated for Akeeba Backup 3.5</revremark>
-      </revision>
-
-      <revision>
-        <date>July 2012</date>
-
-        <revremark>Updated for Akeeba Backup 3.5.3</revremark>
-      </revision>
-
-      <revision>
-        <date>January 2016</date>
-
-        <revremark>Updated for advanced Akeeba Solo JSON API</revremark>
-      </revision>
-
-      <revision>
-        <date>June 2016</date>
-
-        <revremark>backupid information</revremark>
-      </revision>
-
-      <revision>
-        <date>October 2016</date>
-
-        <revremark>Updated for Akeeba Backup 5.1.4 / Akeeba Solo
-        2.0.3</revremark>
-      </revision>
-    </revhistory>
+      <holder>Akeeba Ltd</holder>
+    </copyright>
   </info>
 
   <section>
     <title>Introduction to the API</title>
 
-    <para>Akeeba Backup's JSON API is provided as a means to automate various
-    functions of the Akeeba Backup component for Joomla!, Akeeba Backup for
-    WordPress plugin and Akeeba Solo standalone application without having to
-    visit their back-end, from remote client applications. The client
-    applications can be written in any programming language supporting HTTP
-    transfers and JSON encoding/decoding, such as PHP, JavaScript, Delphi,
-    .NET, Java and C/C++. The main design goals of the API are:</para>
+    <para>The Professional (for-a-fee) versions Akeeba Backup for Joomla!,
+    Akeeba Backup for WordPress and Akeeba Solo offer a unified web API which
+    allows you to take, download and manage backups. The API is based on
+    simple HTTP requests accepting and returning JSON-encoded messages. This
+    API is called the <firstterm>Akeeba Backup JSON API</firstterm>.</para>
 
-    <itemizedlist>
-      <listitem>
-        <para><emphasis role="bold">Uniformity</emphasis>. The interface is
-        uniform across all of our backup products (Akeeba Backup for Joomla!,
-        Akeeba Backup for WordPress, Akeeba Solo).</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis role="bold">Backwards compatibility</emphasis>. The
-        interface remains backward compatible for the longest time possible.
-        Backwards incompatible changes are noted in the documentation, by API
-        version.</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis role="bold">Ease of use</emphasis>. Basic
-        functionality should be as simple to implement as possible, with a
-        minimal list of requirements.</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis role="bold">Security</emphasis>. The web is a
-        treacherous place. Eavesdropping is fairly easy to accomplish, so are
-        man-in-the-middle and replay attacks. However, not all websites are
-        equipped with a valid, commercially signed SSL certificate which rules
-        out this kind of attacks. As a result, we implement two alternate
-        methods of authentication and two encryption standards, ranging from
-        fairly trivial to quite secure.</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis role="bold">Functionality</emphasis>. The API should
-        be agile enough to provide methods not only for running backups, but
-        also fetching statistics as well as remotely downloading files,
-        without the need to resort to another API or protocol. Everything
-        should be catered for by the JSON API over standard HTTP
-        transfers.</para>
-      </listitem>
-    </itemizedlist>
-
-    <para>This guide is meant to be the reference to programming against this
-    interface.</para>
+    <para>This documentation is the reference for communicating to our
+    software using this API.</para>
 
     <para>For a real world implementation in PHP please take a look at <link
     xlink:href="https://github.com/akeeba/remotecli">Akeeba Remote Control
@@ -121,6 +46,74 @@
 
   <section>
     <title>Client and server data formats</title>
+
+    <para>For historical reasons, version 1 requires that you
+    <emphasis>encapsulate</emphasis> the data you send to the server and
+    specifies that the returned data will also be returned encapsulated. The
+    encapsulation in this context means that the actual data is passed as a
+    string inside another, outer, JSON message. </para>
+
+    <para>For example, if you want to pass the message:</para>
+
+    <programlisting>{
+  foo: "bar"
+}</programlisting>
+
+    <para>You would need to encapsulate it like this:</para>
+
+    <programlisting>{
+  encapsulation: 1,
+  body: {
+    challenge: "foo:3858f62230ac3c915f300c664312c63f",
+    method: "example",
+    data: "{foo:\"bar\"}"
+  }
+}</programlisting>
+
+    <para>In the past this allowed the data string (body.data) to be encrypted
+    using AES. This was a misguided attempt to use encryption for
+    authentication (which is a bad idea due to attacks against the encryption
+    algorithm) and also as a way to work around the fact that the majority of
+    sites back in early 2011 didn't use HTTPS.</para>
+
+    <para>Fast forward to 2019, when we started working on Akeeba Backup 7. It
+    was pretty clear that using encryption for authentication was a liability,
+    not an asset. Moreover, most sites would now use HTTPS since the cost of
+    SSL/TLS certificates had dropped to zero thanks to the free of charge
+    certification authority <orgname>Let's Encrypt</orgname>.</para>
+
+    <para>Therefore the decision was made to drop all encapsulations except
+    for RAW from Akeeba Backup 7. This documentation has been updated to
+    reflect this change.</para>
+
+    <bridgehead>Further changes in the horizon</bridgehead>
+
+    <para>Within 2020 we are going to introduce the second version of our API.
+    The following changes will take place.</para>
+
+    <para><emphasis role="bold">There will be no encapsulation of the
+    message</emphasis>. The only reason for encapsulation was the support of
+    different encryption methods. This is no longer necessary, therefore
+    encapsulation can be dropped completely.</para>
+
+    <para><emphasis role="bold">Authentication will move to tokens</emphasis>.
+    In the current API implementation authentication takes place using an MD5
+    hash of a random salt and a static shared key. We had to do that to avoid
+    having the actual key appear in server logs since it's part of the GET
+    query. In the new API version we will be using a token that's sent to your
+    site as an HTTP header. You will be able to regenerate or revoke your
+    token anytime. This simplifies token management and does away with the
+    need to enforce a minimum password complexity for the secret key as we
+    were doing in the past.</para>
+
+    <para><emphasis role="bold">Some API methods will be dropped</emphasis>.
+    Some API methods have been marked deprecated and will be removed from the
+    next API version.</para>
+
+    <para><emphasis role="bold">Co-existence of the two API
+    versions</emphasis>. For a brief period of time both API versions will
+    co-exist. This will give a few months for third party implementations to
+    catch up with the new API.</para>
 
     <section>
       <title>Client-side</title>
@@ -135,7 +128,9 @@
 
       <note>
         <para>API endpoints for Akeeba Backup for WordPress and Akeeba Solo
-        are different than the one illustrated above.</para>
+        are different than the one illustrated above. Please consult the
+        Schedule Automatic Backups page of each software to learn about the
+        API endpoints.</para>
       </note>
 
       <para><emphasis role="bold">Exceptions to the GET rule</emphasis>: Some
@@ -185,34 +180,15 @@
             <term>challenge</term>
 
             <listitem>
-              <para>This field is required if and only if the encapsulation is
-              1 (ENCAPSULATION_RAW). It consists of a salt string and an MD5
-              hash, separated by a colon, like this: <code>salt:md5</code>.
-              The salt can be an arbitrary length alphanumeric string. The md5
-              part of the challenge is the result of the MD5 hash of the
-              concatenated string of the salt and the Akeeba Backup front-end
-              secret key, as configured in the component's Parameters. For
-              example, if the salt is foo and the secret key is bar, the md5
-              is md5(foobar) = 3858f62230ac3c915f300c664312c63f, therefore the
-              challenge is
+              <para>This field consists of a salt string and an MD5 hash,
+              separated by a colon, like this: <code>salt:md5</code>. The salt
+              can be an arbitrary length alphanumeric string. The md5 part of
+              the challenge is the result of the MD5 hash of the concatenated
+              string of the salt and the Akeeba Backup front-end secret key,
+              as configured in the component's Options. For example, if the
+              salt is foo and the secret key is bar, the md5 is md5(foobar) =
+              3858f62230ac3c915f300c664312c63f, therefore the challenge is
               <code>foo:3858f62230ac3c915f300c664312c63f</code>.</para>
-
-              <para>If the encapsulation is higher than 1, the challenge field
-              is completely ignored. The authentication is implicitly
-              performed as soon as the body is successfully deciphered, since
-              the knowledge of the server's key is a prerequisite for
-              successful encryption.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>key</term>
-
-            <listitem>
-              <para>This field must be present and is required if and only if
-              the encapsulation is higher than 1. The server's response will
-              be encrypted using this key, not the Secret Key defined in the
-              component's Parameters.</para>
             </listitem>
           </varlistentry>
 
@@ -241,43 +217,10 @@
       <title>Server-side</title>
 
       <para>When the server receives a request and processed it, it will reply
-      with a Response Object. The encapsulation used may be different than the
-      encapsulation you requested in your request. The encapsulation changes
-      behaviour is the following:</para>
+      with a Response Object. </para>
 
-      <itemizedlist>
-        <listitem>
-          <para>If your request was using ENCAPSULATION_RAW the result will
-          always be in the same encapsulation. This means that unencrypted
-          connections will always be replied with unencrypted
-          connections.</para>
-        </listitem>
-
-        <listitem>
-          <para>If your request was encrypted but the server can not handle
-          encryption (e.g. Core version of the component, or mcrypt not
-          activated in the server) the error message will be encapsulated in
-          ENCAPSULATION_RAW.</para>
-        </listitem>
-
-        <listitem>
-          <para>If your request was using ENCAPSULATION_AESCTR128 or
-          ENCAPSULATION_AESCTR256 the same encapsulation will be used for the
-          response, except if you request a file download. In that case, the
-          respective CBC encapsulation will be used if the server supports
-          mcrypt, otherwise the ENCAPSULATION_RAW will be used. This is done
-          for performance reasons, as encrypting more than 5Kb of data using
-          the CTR method may cause server timeouts.</para>
-        </listitem>
-
-        <listitem>
-          <para>If your request was using one of the CBC encapsulations, the
-          same encapsulation will always be used for the response.</para>
-        </listitem>
-      </itemizedlist>
-
-      <para>In any case, the client program MUST check the encapsulation field
-      of the response object before trying to parse its body.</para>
+      <para>As of version 7 of our software the encapsulation of the Response
+      Object will always be RAW.</para>
 
       <section>
         <title>The Response Object</title>
@@ -303,7 +246,8 @@
 
             <listitem>
               <para>The encapsulation the server decided to use for its
-              response</para>
+              response. This should always be 1 i.e. the RAW
+              encapsulation.</para>
             </listitem>
           </varlistentry>
 
@@ -335,12 +279,6 @@
           </varlistentry>
         </variablelist>
 
-        <important>
-          <para>Unlike the request, the entire body is not encapsulated. The
-          status is always transferred as plain text, the data is
-          encapsulated.</para>
-        </important>
-
         <para>When the status is anything other than 200, the data is an
         encapsulated and JSON-encoded string containing more information about
         the error condition which occurred. If the status is 200, please refer
@@ -370,10 +308,7 @@
             <term>2</term>
 
             <listitem>
-              <para>ENCAPSULATION_AESCTR128. The JSON-encoded body is
-              encrypted using AES-128 in CTR (counter) mode. The result is
-              base64-encoded before transport. An implementation for CTR
-              encryption and decryption exists for PHP and Javascript.</para>
+              <para>ENCAPSULATION_AESCTR128. OBSOLETE - NO LONGER USED.</para>
             </listitem>
           </varlistentry>
 
@@ -381,10 +316,7 @@
             <term>3</term>
 
             <listitem>
-              <para>ENCAPSULATION_AESCTR256. The JSON-encoded body is
-              encrypted using AES-256 in CTR (counter) mode. The result is
-              base64-encoded before transport. An implementation for CTR
-              encryption and decryption exists for PHP and Javascript.</para>
+              <para>ENCAPSULATION_AESCTR256. OBSOLETE - NO LONGER USED.</para>
             </listitem>
           </varlistentry>
 
@@ -392,11 +324,8 @@
             <term>4</term>
 
             <listitem>
-              <para>ENCAPSULATION_AESCBC128. The JSON-encoded body is
-              encrypted using AES-128 in CBC mode. Since the original message
-              is padded with 0x00 for its size to become a multiple of 16, the
-              length of the plaintext is appended to the ciphertext (4 bytes).
-              The result is base64-encoded before transport.</para>
+              <para>ENCAPSULATION_AESCBC128. OBSOLETE - NO LONGER
+              USED..</para>
             </listitem>
           </varlistentry>
 
@@ -404,27 +333,14 @@
             <term>5</term>
 
             <listitem>
-              <para>ENCAPSULATION_AESCBC256. The JSON-encoded body is
-              encrypted using AES-256 in CBC mode. Since the original message
-              is padded with 0x00 for its size to become a multiple of 16, the
-              length of the plaintext is appended to the ciphertext (4 bytes).
-              The result is base64-encoded before transport.</para>
+              <para>ENCAPSULATION_AESCBC256. OBSOLETE - NO LONGER
+              USED..</para>
             </listitem>
           </varlistentry>
         </variablelist>
 
-        <para>Do note that AES-128 and AES-256 both use Rijndael in 128-bits
-        encryption mode. The only difference is the key size, which is 128
-        bits for AES-128 and 256 bits for AES-256. Reference implementations
-        for PHP using the mcrypt library are available in the AEUtilEncrypt
-        class of the component (Professional version).</para>
-
-        <para>All encrypted encapsulations (those higher than 1) encrypt the
-        message with the Secret Key defined in Akeeba Backup's component
-        Parameters. If the key is correct, the ciphertext can be deciphered
-        server-side, therefore successful decipher of the request body
-        constitutes successful authentication of the client against the
-        server.</para>
+        <para>The only encapsulation you should use and expect to receive is
+        1.</para>
       </section>
 
       <section>
@@ -443,8 +359,8 @@
             <term>401</term>
 
             <listitem>
-              <para>Invalid credentials. The challenge you provided failed, or
-              you used an invalid key to encrypt your request.</para>
+              <para>Invalid credentials. The challenge you provided failed to
+              validate. Check your secret key.</para>
             </listitem>
           </varlistentry>
 
@@ -454,7 +370,7 @@
             <listitem>
               <para>Inadequate privileges. The system administrator doesn't
               allow the requested action to be performed over the JSON API
-              (reserved status code for future use)</para>
+              (reserved status code for future use).</para>
             </listitem>
           </varlistentry>
 
@@ -472,8 +388,9 @@
             <term>405</term>
 
             <listitem>
-              <para>Unknown JSON method. The JSON method requested is
-              unknown.</para>
+              <para>Unknown JSON method. The JSON method you requested is not
+              known to the API server. Check for typos or whether you're using
+              an obsolete method that has already been removed.</para>
             </listitem>
           </varlistentry>
 
@@ -491,8 +408,10 @@
             <term>501</term>
 
             <listitem>
-              <para>Not implemented. The method you requested is not
-              implemented by the server.</para>
+              <para>Not implemented. The method you requested is known but
+              currently not implemented by the server. You can expect to see
+              that code for deprecated methods before they are completely
+              removed.</para>
             </listitem>
           </varlistentry>
 
@@ -501,8 +420,7 @@
 
             <listitem>
               <para>Remote service not activated. The system administrator has
-              not activated the front-end or remote backup feature of Akeeba
-              Backup.</para>
+              not activated the Akeeba Backup JSON API feature.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -791,13 +709,7 @@
     <section>
       <title>startSRPBackup</title>
 
-      <para>NO LONGER AVAILABLE</para>
-
-      <para>This used to allow you to start a System Restore Point backup in
-      Joomla!. Beginning with Joomla! 1.6 the premise of such a backup became
-      increasingly unrealistic. By Joomla! 3.0 it was unlikely to offer any
-      real benefits in the case of a disaster, therefore it was completely
-      removed.</para>
+      <para>Obsolete. This method is no longer available.</para>
     </section>
 
     <section>
@@ -1311,12 +1223,6 @@
       <para>Sends back a chunk of a backup archive file, maximum length of
       1Mb</para>
 
-      <para>It should be well noted that if the requested encapsulation is CTR
-      it will be automatically upgraded to the respective CBC mode, i.e.
-      ENCAPSULATION_AESCTR128 will be upgraded to ENCAPSULATION_AESCBC128.
-      This happens because the CTR encapsulation is extremely slow and would
-      cause a server time-out.</para>
-
       <bridgehead renderas="sect3">Request Data expected</bridgehead>
 
       <variablelist>
@@ -1361,13 +1267,7 @@
 
       <bridgehead renderas="sect3">Response Data returned</bridgehead>
 
-      <para>Depends on the encapsulation. For ENCAPSULATION_RAW you get
-      base64-encoded raw binary data. For ENCAPSULATION_AESCBC128/256 you get
-      encrypted raw binary data.</para>
-
-      <para>As a rule of thumb, when you use ENCAPSULATION_RAW you must
-      base64-decode the data part of the response and append to the archive
-      file on disk.</para>
+      <para>You get base64-encoded raw binary data.</para>
     </section>
 
     <section>
@@ -1375,9 +1275,6 @@
 
       <para>Sends back a entire backup archive part as raw binary data stream,
       i.e. a regular file download</para>
-
-      <para>Do note that the data is always returned unencrypted, no mater
-      what the requested encapsulation was in your request.</para>
 
       <bridgehead renderas="sect3">Request Data expected</bridgehead>
 
@@ -1467,6 +1364,9 @@
     <section>
       <title>getLog</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Returns the contents of the log file associated with a given
       backup tag. A backup "tag" is an identifier which conventionally
       indicates the backup origin. The default tag for backups initiated by
@@ -1493,6 +1393,9 @@
     <section>
       <title>getGUIConfiguration</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Returns a JSON definition for the configuration page. Available
       since API version 340.</para>
 
@@ -1517,6 +1420,9 @@
 
     <section>
       <title>exportConfiguration</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Returns a hash table with the profile's description, engine
       configuration and filters configuration. You can use it to export
@@ -1570,6 +1476,9 @@
     <section>
       <title>importConfiguration</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Imports a hash table with the profile information either as a new
       profile or overwriting an existing profile. You can use it to import
       profiles you exported from the same or a different server. Available
@@ -1606,6 +1515,9 @@
     <section>
       <title>saveConfiguration</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Saves the configuration of a backup profile. Available since API
       version 340.</para>
 
@@ -1641,6 +1553,9 @@
 
     <section>
       <title>saveProfile</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Updates or creates a backup profile. Available since API version
       340.</para>
@@ -1707,6 +1622,9 @@
     <section>
       <title>deleteProfile</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Deletes a backup profile. Available since API version 340.</para>
 
       <bridgehead renderas="sect3">Request Data expected</bridgehead>
@@ -1729,6 +1647,9 @@
 
     <section>
       <title>browse</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Returns the list of subdirectories and directory information for a
       requested folder. Used to implement directory browsers, e.g. for the
@@ -1865,6 +1786,9 @@
     <section>
       <title>getDBRoots</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Returns the database roots for the backup profile. Available since
       API version 340.</para>
 
@@ -1912,6 +1836,9 @@
 
     <section>
       <title>getDBFilters</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Returns a list of all the database entities and any exclusion
       filters applied to each one of them. Typically used to render a GUI for
@@ -1972,6 +1899,9 @@
 
     <section>
       <title>getDBEntities</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Returns the database entities exclusion filters for the chosen
       backup profile. Available since API version 340.</para>
@@ -2132,6 +2062,9 @@
     <section>
       <title>setDBFilter</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Sets or resets a database exclusion filter. Available since API
       version 340.</para>
 
@@ -2212,6 +2145,9 @@
     <section>
       <title>getFSRoots</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Returns the filesystem roots for the backup profile. Available
       since API version 340.</para>
 
@@ -2256,6 +2192,9 @@
 
     <section>
       <title>getFSFilters</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Returns the filesystem exclusion filters for the chosen backup
       profile. Available since API version 340.</para>
@@ -2333,6 +2272,9 @@
 
     <section>
       <title>getFSEntities</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Returns the filesystem entities (files and folders) exclusion
       filters for the chosen backup profile. Available since API version
@@ -2474,6 +2416,9 @@
     <section>
       <title>setFSFilter</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Sets or resets a filesystem exclusion filter. Available since API
       version 340.</para>
 
@@ -2554,6 +2499,9 @@
     <section>
       <title>getIncludedDirectories</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Lists the additional included directories. Available since API
       version 340.</para>
 
@@ -2600,6 +2548,9 @@
 
     <section>
       <title>setIncludedDirectory</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Add an additional included directory definition. Available since
       API version 340.</para>
@@ -2671,6 +2622,9 @@
     <section>
       <title>removeIncludedDirectory</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Removes an additional included directory definition. Available
       since API version 340.</para>
 
@@ -2720,6 +2674,9 @@
 
     <section>
       <title>getIncludedDBs</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Lists the additional included database definitions. Available
       since API version 340.</para>
@@ -2802,6 +2759,9 @@
 
     <section>
       <title>setIncludedDB</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Adds an additional included database definition. Available since
       API version 340.</para>
@@ -2907,6 +2867,9 @@
     <section>
       <title>removeIncludedDB</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Removes an additional included database definition. Available
       since API version 340.</para>
 
@@ -2937,6 +2900,9 @@
 
     <section>
       <title>testDBConnection</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Test the connection to a database, used to test connection
       information before submitting it to setIncludedDB. Available since API
@@ -3035,6 +3001,9 @@
     <section>
       <title>getRegexDBFilters</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Returns the regular expression database exclusion filters for the
       backup profile. Available since API version 340.</para>
 
@@ -3090,6 +3059,9 @@
 
     <section>
       <title>setRegexDBFilter</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Sets a regular expression database exclusion filter for the backup
       profile. Available since API version 340.</para>
@@ -3150,6 +3122,9 @@
     <section>
       <title>getRegexFSFilters</title>
 
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
+
       <para>Returns the regular expression filesystem exclusion filters for
       the backup profile. Available since API version 340.</para>
 
@@ -3206,6 +3181,9 @@
 
     <section>
       <title>setRegexFSFilter</title>
+
+      <para>DEPRECATED - This method will be removed in Akeeba Backup
+      7.1</para>
 
       <para>Sets a regular expression filesystem exclusion filter for the
       backup profile. Available since API version 340.</para>

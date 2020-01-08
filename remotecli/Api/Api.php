@@ -10,12 +10,10 @@ namespace Akeeba\RemoteCLI\Api;
 
 use Akeeba\RemoteCLI\Download\Download;
 use Akeeba\RemoteCLI\Exception\CommunicationError;
-use Akeeba\RemoteCLI\Exception\EncapsulationNotSupported;
 use Akeeba\RemoteCLI\Exception\InvalidEncapsulatedJSON;
 use Akeeba\RemoteCLI\Exception\InvalidJSONBody;
 use Akeeba\RemoteCLI\Output\Output;
 use Akeeba\RemoteCLI\Encrypt\RandomValue;
-use Akeeba\RemoteCLI\Encrypt\Encrypt;
 use Akeeba\RemoteCLI\Utility\Uri;
 
 class Api
@@ -245,18 +243,10 @@ class Api
 			'data'   => $data,
 		);
 
-		if ($this->options->encapsulation == Options::ENC_RAW)
-		{
-			$randVal           = new RandomValue();
-			$salt              = $randVal->generateString(32);
-			$challenge         = $salt . ':' . md5($salt . $this->options->secret);
-			$body['challenge'] = $challenge;
-		}
-
-		if (($this->options->encapsulation != Options::ENC_RAW) && !empty($this->responseKey))
-		{
-			$body['key'] = $this->responseKey;
-		}
+		$randVal           = new RandomValue();
+		$salt              = $randVal->generateString(32);
+		$challenge         = $salt . ':' . md5($salt . $this->options->secret);
+		$body['challenge'] = $challenge;
 
 		$bodyData = json_encode($body);
 
@@ -264,29 +254,6 @@ class Api
 			'encapsulation' => $this->options->encapsulation,
 			'body' => $bodyData
 		);
-
-		$encrypt = new Encrypt();
-
-		switch ($this->options->encapsulation)
-		{
-			case Options::ENC_CTR128:
-				$jsonSource['body'] = $encrypt->AESEncryptCtr($jsonSource['body'], $this->options->secret, 128);
-				break;
-
-			case Options::ENC_CTR256:
-				$jsonSource['body'] = $encrypt->AESEncryptCtr($jsonSource['body'], $this->options->secret, 256);
-				break;
-
-			case Options::ENC_CBC128:
-				$jsonSource['body'] = $encrypt->AESEncryptCBC($jsonSource['body'], $this->options->secret, $this->options->legacy);
-				$jsonSource['body'] = base64_encode($jsonSource['body']);
-				break;
-
-			case Options::ENC_CBC256:
-				throw new EncapsulationNotSupported('AES256 (Rijndael 256-bit)');
-
-				break;
-		}
 
 		return json_encode($jsonSource);
 	}
@@ -303,34 +270,9 @@ class Api
 	{
 		$result = json_decode($encapsulated, false);
 
-		if (is_null($result))
+		if (is_null($result) || !property_exists($result, 'body') || !property_exists($result->body, 'data'))
 		{
 			throw new InvalidEncapsulatedJSON($encapsulated);
-		}
-
-		$encrypt = new Encrypt();
-
-		$key = empty($this->responseKey) ? $this->options->secret : $this->responseKey;
-
-		switch ($result->encapsulation)
-		{
-			case Options::ENC_CTR128:
-				$result->body->data = $encrypt->AESDecryptCtr($result->body->data, $key, 128);
-				break;
-
-			case Options::ENC_CTR256:
-				$result->body->data = $encrypt->AESDecryptCtr($result->body->data, $key, 256);
-				break;
-
-			case Options::ENC_CBC128:
-				$result->body->data = base64_decode($result->body->data);
-				$result->body->data = $encrypt->AESDecryptCBC($result->body->data, $key);
-				$result->body->data = rtrim($result->body->data, chr(0));
-				break;
-
-			case Options::ENC_CBC256:
-				throw new EncapsulationNotSupported('AES256 (Rijndael 256-bit)');
-				break;
 		}
 
 		return $result;

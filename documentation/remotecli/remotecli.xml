@@ -434,7 +434,7 @@
                   download links in the "Manage Backups" (formerly "Administer
                   Backup Files") page of Akeeba Backup. Even though it is the
                   simplest method, it may cause corrupted downloads of backup
-                  archives over 10-20Mb on most shared hosts.</para>
+                  archives over 10-20MB on some shared hosts.</para>
 
                   <para>Files are transferred unencrypted with this method.
                   You are advised to only use this if your server is using
@@ -452,13 +452,6 @@
                   download. However, on a few shared hosts this will cause the
                   download to fail with a timeout error, memory outage error
                   or an Internal Server Error (HTTP 500 error).</para>
-
-                  <para>If you have used an <option>--encapsulation</option>
-                  parameter other than RAW all data is transferred encrypted
-                  with this method. This is the recommended method for servers
-                  which offer neither HTTPS nor FTPS/SFTP <emphasis>as long as
-                  you use an <option>--encapsulation</option> parameter other
-                  than RAW</emphasis>.</para>
                 </listitem>
               </varlistentry>
 
@@ -888,12 +881,6 @@ REM directory to wherever remote.phar is located in. In this example, we
 REM will assume that you followed our advice and put it in c:\PHP
 C:
 CD c:\PHP
-
-REM The following line updates Akeeba Backup - REMOVE THE LINE BREAKS
-REM WHEN COPYING THIS SCRIPT TO YOUR SYSTEM, OTHERWISE IT WILL NOT WORK!!!
-
-php-cli.exe remote.phar --action=update --host=http://www.example.com
- --secret=iloveakeeba
 
 REM The following line takes and downloads a backup - REMOVE THE LINE
 REM BREAKS WHEN COPYING THIS SCRIPT TO YOUR SYSTEM, OTHERWISE IT WILL
