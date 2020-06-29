@@ -4,7 +4,7 @@ FROM php:7-alpine
 # Labels describing what this is all about
 LABEL org.label-schema.name = "AkeebaRemoteCLI" \
       org.label-schema.description= "Akeeba Remote Control CLI (Dockerized) takes and download remote backups using Akeeba Backup and Akeeba Solo" \
-      org.label-schema.usage = "https://www.akeebabackup.com/documentation/arccli.html" \
+      org.label-schema.usage = "https://www.akeeba.com/documentation/arccli.html" \
       org.label-schema.vcs-url = "https://github.com/akeeba/remotecli" \
       org.label-schema.vendor = "Akeeba Ltd" \
       org.label-schema.schema-version = "1.0" \
