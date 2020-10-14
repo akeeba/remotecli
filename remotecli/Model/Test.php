@@ -34,7 +34,7 @@ class Test
 	 */
 	public function getBestOptions(Cli $input, Output $output, Options $originalOptions)
 	{
-		list($options, ) = $this->getBestApiAndInformation($input, $output, $originalOptions);
+		[$options,] = $this->getBestApiAndInformation($input, $output, $originalOptions);
 
 		return $options;
 	}
@@ -52,15 +52,22 @@ class Test
 	 */
 	public function getApiInformation(Cli $input, Output $output, Options $originalOptions)
 	{
-		list(, $apiresult) = $this->getBestApiAndInformation($input, $output, $originalOptions);
+		[, $apiresult] = $this->getBestApiAndInformation($input, $output, $originalOptions);
 
 		return $apiresult;
 	}
 
 	/**
-	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
-	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
-	 * returns both the API options and the API test information.
+	 * Find the best API connection method to the site.
+	 *
+	 * First we try with the v2 API (view=Api) using format=json|raw, HTTP POST|GET and endpoint index.php|remote.php.
+	 *
+	 * Then we try the v1 API (view=json) using format=raw|html|(none), HTTP POST|GET and endpoint index.php|remote.php.
+	 *
+	 * Assuming we manage to find a way to connect we then verify that the remote site is on the correct API level for
+	 * this script.
+	 *
+	 * This method returns both the API options and the API test information.
 	 *
 	 * @param   Cli      $input            The input object.
 	 * @param   Output   $output           The output object.
@@ -70,23 +77,33 @@ class Test
 	 */
 	private function getBestApiAndInformation(Cli $input, Output $output, Options $originalOptions)
 	{
-		$verbs          = $this->getVerbs($input);
-		$formats        = $this->getFormats($input);
-		$endpoints      = $this->getEndpoints($originalOptions);
-		$encapsulations = $this->getEncapsulations();
-		$apiResult      = null;
-		$api            = null;
+		$apiResult = null;
+		$api       = null;
 
-		foreach ($verbs as $verb)
+		//foreach (['api', 'json'] as $view)
+		foreach (['api'] as $view)
 		{
-			foreach ($formats as $format)
+			$verbs   = $this->getVerbs($input);
+			$format  = $this->getFormat($input);
+			$formats = [$format];
+
+			if (empty($format))
 			{
-				foreach ($encapsulations as $encapsulation)
+				$formats = ($view == 'json') ? ['raw', 'html', ''] : ['json', 'raw'];
+			}
+
+			$endpoints      = $this->getEndpoints($originalOptions);
+			$encapsulation = ($view == 'json') ? Options::ENC_RAW : Options::ENC_NONE;
+
+			foreach ($verbs as $verb)
+			{
+				foreach ($formats as $format)
 				{
 					foreach ($endpoints as $endpoint)
 					{
 						$options = $originalOptions->getModifiedClone([
 							'verb'          => $verb,
+							'view'          => $view,
 							'format'        => $format,
 							'endpoint'      => $endpoint,
 							'encapsulation' => $encapsulation,
@@ -119,8 +136,9 @@ class Test
 							if ($options->verbose)
 							{
 								$output->warning(sprintf(
-										'Communication error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
+										'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
 										$verb,
+										$view,
 										$format,
 										$endpoint,
 										$encapsulation,
@@ -156,6 +174,7 @@ class Test
 					}
 				}
 			}
+
 		}
 
 		if (is_null($apiResult))
@@ -206,11 +225,11 @@ class Test
 	 *
 	 * @param   Cli  $input  The application input object
 	 *
-	 * @return  array
+	 * @return  string
 	 */
-	private function getFormats(Cli $input)
+	private function getFormat(Cli $input)
 	{
-		$defaultList = ['html', 'raw', ''];
+		$defaultList = ['json', 'html', 'raw', ''];
 		$format      = $input->getCmd('format', null);
 		$format      = strtolower($format);
 
@@ -219,7 +238,7 @@ class Test
 			$format = '';
 		}
 
-		return empty($format) ? $defaultList : [$format];
+		return $format;
 	}
 
 	/**

@@ -24,6 +24,7 @@ use Akeeba\RemoteCLI\Utility\Uri;
  * @property-read   bool    $verbose        Should I be verbose about what I'm doing?
  * @property-read   int     $encapsulation  The API encapsulation, defaults to AES-128 CBC
  * @property-read   bool    $legacy         Use legacy, unsafe AES CBC encryption (for old versions of Akeeba Backup / Solo)
+ * @property-read   string  $view           View name. 'json' is the v1 JSON API. 'api' is the v2 JSON API.
  */
 class Options
 {
@@ -41,6 +42,7 @@ class Options
 	private $encapsulation = self::ENC_RAW;
 	private $legacy = false;
 	private $capath = null;
+	private $view = 'json';
 
 	/**
 	 * OutputOptions constructor. The options you pass initialize the immutable object.

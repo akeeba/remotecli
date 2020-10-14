@@ -90,11 +90,14 @@ class Api
 	 */
 	public function doQuery($apiMethod, array $data = [])
 	{
-		// Generate a random key the server will use to encrypt its response back to us
-		$this->genRandomKey();
-
 		$this->output->debug('Data: ' . print_r($data, true));
-		$this->output->debug('Response Key: ' . $this->responseKey);
+
+		// Generate a random key the server will use to encrypt its response back to us
+		if ($this->options->view == 'json')
+		{
+			$this->genRandomKey();
+			$this->output->debug('Response Key: ' . $this->responseKey);
+		}
 
 		$url = $this->getURL($apiMethod, $data);
 
@@ -119,22 +122,43 @@ class Api
 		}
 
 		// Expose the encapsulated data
-		$result = $this->exposeData($encapsulatedResponse);
+		if ($this->options->view == 'json')
+		{
+			// Legacy v1 API: unwrap the data
+			$result = $this->exposeData($encapsulatedResponse);
+
+			if ($this->options->verbose)
+			{
+				$this->output->debug('Parsed Response: ' . print_r($result, true));
+			}
+
+			// Decode the JSON encoded body
+			$result->body->data = json_decode($result->body->data, false);
+
+			if (is_null($result->body->data))
+			{
+				throw new InvalidJSONBody();
+			}
+
+			return $result;
+		}
+
+		// JSON API v2: Get the JSON data and construct a result similar to what was returned by v1
+		$result = json_decode($encapsulatedResponse, false);
+
+		if (is_null($result) || !property_exists($result, 'status') || !property_exists($result, 'data'))
+		{
+			throw new InvalidEncapsulatedJSON($encapsulatedResponse);
+		}
 
 		if ($this->options->verbose)
 		{
 			$this->output->debug('Parsed Response: ' . print_r($result, true));
 		}
 
-		// Decode the JSON encoded body
-		$result->body->data = json_decode($result->body->data, false);
-
-		if (is_null($result->body->data))
-		{
-			throw new InvalidJSONBody();
-		}
-
-		return $result;
+		return (object) [
+			'body' => $result
+		];
 	}
 
 	/**
@@ -170,15 +194,21 @@ class Api
 			$url .= '/' . $endpoint;
 		}
 
+		// For v2 URLs we need to add the authentication as a GET parameter
+		$uri = new Uri($url);
+
+		if ($this->options->view == 'api')
+		{
+			$uri->setVar('_akeebaAuth', $this->options->secret);
+		}
+
 		// If we're doing POST requests there's nothing more to do
 		if (!$forceGET && ($verb == 'POST'))
 		{
-			return $url;
+			return $uri->toString();
 		}
 
 		// For GET requests we have to add the entire payload as query string parameters
-		$uri = new Uri($url);
-
 		foreach ($this->getQueryStringParameters($apiMethod, $data) as $k => $v)
 		{
 			$uri->setVar($k, $v);
@@ -197,10 +227,20 @@ class Api
 	 */
 	private function getQueryStringParameters($apiMethod, array $data = [])
 	{
-		$params = [
-			'view' => 'json',
-			'json' => $this->encapsulateData($apiMethod, $data),
-		];
+		switch ($this->options->view ?? 'json')
+		{
+			case 'json':
+			default:
+				$params = [
+					'view' => 'json',
+					'json' => $this->encapsulateData($apiMethod, $data),
+				];
+				break;
+
+			case 'api':
+				$params = array_merge($data, ['view' => 'Api', 'method' => $apiMethod]);
+				break;
+		}
 
 		// DO NOT REMOVE. empty() does NOT work on magic properties!
 		$component = $this->options->component;

@@ -1,3 +1,7 @@
+# Akeeba Remote CLI 2.3.0
+
+* Support for remote backup JSON API version 2
+
 # Akeeba Remote CLI 2.2.0
 
 * Download after backup was broken with newer Akeeba Backup / Akeeba Solo versions
