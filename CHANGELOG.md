@@ -1,6 +1,7 @@
 # Akeeba Remote CLI 2.3.0
 
 * Support for remote backup JSON API version 2
+* Changed User Agent string to AkeebaRemoteCLI/2.3.0
 
 # Akeeba Remote CLI 2.2.0
 

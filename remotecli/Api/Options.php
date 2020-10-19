@@ -37,7 +37,7 @@ class Options
 	private $component = 'com_akeeba';
 	private $verb = 'GET';
 	private $format = 'html';
-	private $ua = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36';
+	private $ua = '';
 	private $verbose = false;
 	private $encapsulation = self::ENC_RAW;
 	private $legacy = false;
@@ -52,6 +52,8 @@ class Options
 	 */
 	public function __construct(array $options, $strict = false)
 	{
+		$this->ua = 'AkeebaRemoteCLI/' . ARCCLI_VERSION;
+
 		foreach ($options as $k => $v)
 		{
 			if (!property_exists($this, $k))
