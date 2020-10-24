@@ -9,6 +9,7 @@ namespace Akeeba\RemoteCLI\Download\Adapter;
 
 use Akeeba\RemoteCLI\Download\DownloadInterface;
 use Akeeba\RemoteCLI\Exception\CommunicationError;
+use Akeeba\RemoteCLI\Utility\Uri;
 
 /**
  * A download adapter using the cURL PHP integration
@@ -152,8 +153,23 @@ class Curl extends AbstractAdapter implements DownloadInterface
 	 */
 	public function postAndReturn($url, $data, $contentType = 'application/x-www-form-urlencoded', array $params = array())
 	{
-		$ch = curl_init();
+		$headers = [
+			sprintf('Content-Type: %s', $contentType)
+		];
 
+		// Move the URI parameter _akeebaAuth to a header for POST requests
+		$uri = new Uri($url);
+		$akeebaAuth = $uri->getVar('_akeebaAuth');
+
+		if (!is_null($akeebaAuth))
+		{
+			$headers[] = 'X-Akeeba-Auth: ' . $akeebaAuth;
+
+			$uri->delVar('_akeebaAuth');
+			$url = $uri->toString();
+		}
+
+		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
@@ -161,9 +177,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			sprintf('Content-Type: %s', $contentType)
-		]);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
@@ -305,7 +319,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 			return $strlen;
 		}
 
-		list($header, $value) = explode(': ', trim($data), 2);
+		[$header, $value] = explode(': ', trim($data), 2);
 
 		$this->headers[strtolower($header)] = $value;
 
