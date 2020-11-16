@@ -1,8 +1,23 @@
-<h3>PHP 5.5.0 or later</h3>
+<h3>What's new?</h3>
 <p>
-    Remote CLI is compatible with PHP versions 5.5, 5.6, 7.0, 7.1, 7.2, 7.3 and 7.4.
-    We'd like to remind you that this requirement refers only to our software. The sites which can be backed
-    up or restored by our  software may not support all of the aforementioned PHP versions. Please check the
-    requirements of your site's  software before restoring it on a different host / server to avoid issues
-    due to PHP version incompatibilities.
+    <strong>Support for remote backup JSON API version 2</strong>.
+    Akeeba Remote CLI supports the new version of Akeeba Backup;s remote backup JSON API instroduced in Akeeba Backup 7.4.0. The new version of the API will be used automatically if the endpoint URL contains <code>view=Api</code>. Furthermore, the connection to the server will be upgraded to API v2 when the remote server tells us that the remote API version is version 400 or later when we contact it with API v1. The v2 API is faster and more efficient.
+</p>
+<p>
+    <strong>Changed User Agent string to AkeebaRemoteCLI/2.3.0</strong>.
+    We noted that some servers had blacklisted the spoofed user agent string we were using since Akeeba Remote CLI 2.1.0. We are now using our own, custom user agent to make it easier for hosting companies to whitelist it for the specific URL patterns accessed by Remote CLI. We also let you change it in the command line to something else.
+</p>
+
+<h3>PHP versions supported</h3>
+<p>
+    Akeeba Remote CLI will run with any version equal to or later than PHP 5.5 including PHP 5.5, 5.6, 7.0, 7.1, 7.2,
+    7.3 and 7.4.
+    Please note that PHP versions 5.5 to 7.1 inclusive are end of life and should not be used.
+    We strongly advise you to run the latest available version of PHP on a branch currently maintained by the PHP project for security reasons. Also note that we may choose to terminate support for End of Life PHP versions any time, without prior warning.
+</p>
+<p>
+    At the time of this writing PHP 8 is still in a pre-release state. We offer tentative support for it.
+</p>
+<p>
+    Please note that earlier PHP versions including but not limited to PHP 5.3 and 5.4 are no longer supported and our software no longer works on them.
 </p>
