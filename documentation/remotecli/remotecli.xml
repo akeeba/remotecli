@@ -83,7 +83,7 @@
       <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para><replaceable>php</replaceable> is the path to your PHP CLI
-      exectuable. If this is not in your path or you are not sure, please ask
+      executable. If this is not in your path or you are not sure, please ask
       your host or your system administrator.</para>
 
       <bridgehead>Using the Dockerized version</bridgehead>
@@ -500,7 +500,7 @@
             Hostname is the FTP server's host name. Port is the numeric TCP/IP
             port (normally it's 21, ask your host). The
             <filename>/path/to/output/directory</filename> is the FTP path to
-            yoru output directory. In order to figure out the latter, please
+            your output directory. In order to figure out the latter, please
             use FileZilla to connect to your site and navigate to the backup
             output directory (by default that is
             <filename>administrator/components/com_akeeba/backup</filename>).
