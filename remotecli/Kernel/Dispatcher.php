@@ -77,7 +77,7 @@ class Dispatcher
 	 *
 	 * @throws  \Exception
 	 */
-	public function dispatch()
+	public function dispatch(): void
 	{
 		$this->showBanner();
 
@@ -129,7 +129,7 @@ class Dispatcher
 	 *
 	 * @return  string
 	 */
-	public function getDefaultCommand()
+	public function getDefaultCommand(): string
 	{
 		return $this->defaultCommand;
 	}
@@ -141,7 +141,7 @@ class Dispatcher
 	 *
 	 * @return  void
 	 */
-	public function setDefaultCommand($defaultCommand)
+	public function setDefaultCommand(string $defaultCommand): void
 	{
 		$this->defaultCommand = $defaultCommand;
 	}
@@ -152,7 +152,7 @@ class Dispatcher
 	 * For backwards compatibility reasons we first check the --action option. If it's empty we will use the first
 	 * argument. Note that if you specify --action then the argument is ignored.
 	 */
-	protected function determineCommand()
+	protected function determineCommand(): void
 	{
 		$this->command = $this->input->getCmd('action', null);
 
@@ -178,7 +178,7 @@ class Dispatcher
 	 *
 	 * @return  void
 	 */
-	protected function showBanner()
+	protected function showBanner(): void
 	{
 		if ($this->input->getBool('quiet'))
 		{

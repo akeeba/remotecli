@@ -24,7 +24,7 @@ interface CommandInterface
 	 *
 	 * @throws  \Exception
 	 */
-	public function prepare(Cli $input);
+	public function prepare(Cli $input): void;
 
 	/**
 	 * Executes the command.
@@ -33,5 +33,5 @@ interface CommandInterface
 	 *
 	 * @throws  \Exception
 	 */
-	public function execute(Cli $input, Output $output);
+	public function execute(Cli $input, Output $output): void;
 }

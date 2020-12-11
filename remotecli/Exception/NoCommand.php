@@ -14,7 +14,7 @@ use RuntimeException;
 
 class NoCommand extends RuntimeException
 {
-	public function __construct($code = 38, Exception $previous = null)
+	public function __construct(int $code = 38, Exception $previous = null)
 	{
 		$message = 'You have not specified a valid command to run.';
 

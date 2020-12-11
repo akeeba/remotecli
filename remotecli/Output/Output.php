@@ -11,11 +11,11 @@ namespace Akeeba\RemoteCLI\Output;
 class Output
 {
 	// Output types
-	const DEBUG = 5;
-	const INFO = 10;
-	const HEADER = 25;
-	const WARNING = 50;
-	const ERROR = 100;
+	public const DEBUG = 5;
+	public const INFO = 10;
+	public const HEADER = 25;
+	public const WARNING = 50;
+	public const ERROR = 100;
 
 	/**
 	 * The interface used internally

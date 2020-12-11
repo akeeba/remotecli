@@ -40,16 +40,16 @@ class Uri
 	protected $fragment = null;
 
 	/** @var   array  Query variable hash */
-	protected $vars = array();
+	protected $vars = [];
 
 	/** @var   array  An array of \Awf\Uri\Uri instances. */
-	protected static $instances = array();
+	protected static $instances = [];
 
 	/** @var   array  The current calculated base url segments. */
-	protected static $base = array();
+	protected static $base = [];
 
 	/** @var   array  The current calculated root url segments. */
-	protected static $root = array();
+	protected static $root = [];
 
 	/** @var   string  The current URI */
 	protected static $current;
@@ -57,9 +57,9 @@ class Uri
 	/**
 	 * Constructor. Pass a URI string to the constructor to initialise a specific URI.
 	 *
-	 * @param   string $uri The optional URI string
+	 * @param   string|null  $uri  The optional URI string
 	 */
-	public function __construct($uri = null)
+	public function __construct(?string $uri = null)
 	{
 		if (!is_null($uri))
 		{
@@ -80,11 +80,11 @@ class Uri
 	/**
 	 * Parse a given URI and populate the class fields.
 	 *
-	 * @param   string $uri The URI string to parse.
+	 * @param   string  $uri  The URI string to parse.
 	 *
 	 * @return  boolean  True on success.
 	 */
-	public function parse($uri)
+	public function parse(string $uri): bool
 	{
 		// Set the original URI to fall back on
 		$this->uri = $uri;
@@ -102,14 +102,14 @@ class Uri
 			$parts['query'] = str_replace('&amp;', '&', $parts['query']);
 		}
 
-		$this->scheme = isset($parts['scheme']) ? $parts['scheme'] : null;
-		$this->user = isset($parts['user']) ? $parts['user'] : null;
-		$this->pass = isset($parts['pass']) ? $parts['pass'] : null;
-		$this->host = isset($parts['host']) ? $parts['host'] : null;
-		$this->port = isset($parts['port']) ? $parts['port'] : null;
-		$this->path = isset($parts['path']) ? $parts['path'] : null;
-		$this->query = isset($parts['query']) ? $parts['query'] : null;
-		$this->fragment = isset($parts['fragment']) ? $parts['fragment'] : null;
+		$this->scheme   = $parts['scheme'] ?? null;
+		$this->user     = $parts['user'] ?? null;
+		$this->pass     = $parts['pass'] ?? null;
+		$this->host     = $parts['host'] ?? null;
+		$this->port     = $parts['port'] ?? null;
+		$this->path     = $parts['path'] ?? null;
+		$this->query    = $parts['query'] ?? null;
+		$this->fragment = $parts['fragment'] ?? null;
 
 		// Parse the query
 
@@ -124,11 +124,11 @@ class Uri
 	/**
 	 * Returns full uri string.
 	 *
-	 * @param   array $parts An array specifying the parts to render.
+	 * @param   array  $parts  An array specifying the parts to render.
 	 *
 	 * @return  string  The rendered URI string.
 	 */
-	public function toString(array $parts = array('scheme', 'user', 'pass', 'host', 'port', 'path', 'query', 'fragment'))
+	public function toString(array $parts = ['scheme', 'user', 'pass', 'host', 'port', 'path', 'query', 'fragment']): string
 	{
 		// Make sure the query is created
 		$query = $this->getQuery();
@@ -150,14 +150,14 @@ class Uri
 	 * Adds a query variable and value, replacing the value if it
 	 * already exists and returning the old value.
 	 *
-	 * @param   string $name  Name of the query variable to set.
-	 * @param   string $value Value of the query variable.
+	 * @param   string  $name   Name of the query variable to set.
+	 * @param   string  $value  Value of the query variable.
 	 *
 	 * @return  string  Previous value for the query variable.
 	 */
-	public function setVar($name, $value)
+	public function setVar(string $name, string $value): ?string
 	{
-		$tmp = isset($this->vars[$name]) ? $this->vars[$name] : null;
+		$tmp = $this->vars[$name] ?? null;
 
 		if (is_null($value))
 		{
@@ -180,11 +180,11 @@ class Uri
 	/**
 	 * Checks if variable exists.
 	 *
-	 * @param   string $name Name of the query variable to check.
+	 * @param   string  $name  Name of the query variable to check.
 	 *
 	 * @return  boolean  True if the variable exists.
 	 */
-	public function hasVar($name)
+	public function hasVar(string $name): bool
 	{
 		return array_key_exists($name, $this->vars);
 	}
@@ -192,12 +192,12 @@ class Uri
 	/**
 	 * Returns a query variable by name.
 	 *
-	 * @param   string $name    Name of the query variable to get.
-	 * @param   string $default Default value to return if the variable is not set.
+	 * @param   string  $name     Name of the query variable to get.
+	 * @param   null    $default  Default value to return if the variable is not set.
 	 *
 	 * @return  string   Query variables.
 	 */
-	public function getVar($name, $default = null)
+	public function getVar(string $name, $default = null): ?string
 	{
 		if (array_key_exists($name, $this->vars))
 		{
@@ -210,11 +210,11 @@ class Uri
 	/**
 	 * Removes an item from the query string variables if it exists.
 	 *
-	 * @param   string $name Name of variable to remove.
+	 * @param   string  $name  Name of variable to remove.
 	 *
 	 * @return  void
 	 */
-	public function delVar($name)
+	public function delVar(string $name): void
 	{
 		if (array_key_exists($name, $this->vars))
 		{
@@ -229,11 +229,11 @@ class Uri
 	 * Sets the query to a supplied string in format:
 	 * foo=bar&x=y
 	 *
-	 * @param   mixed $query The query string or array.
+	 * @param   string|array  $query  The query string or array.
 	 *
 	 * @return  void
 	 */
-	public function setQuery($query)
+	public function setQuery($query): void
 	{
 		if (is_array($query))
 		{
@@ -260,7 +260,7 @@ class Uri
 	 *
 	 * @return  string|array   Query string.
 	 */
-	public function getQuery($toArray = false)
+	public function getQuery(bool $toArray = false)
 	{
 		if ($toArray)
 		{
@@ -279,13 +279,13 @@ class Uri
 	/**
 	 * Build a query from a array (reverse of the PHP parse_str()).
 	 *
-	 * @param   array $params The array of key => value pairs to return as a query string.
+	 * @param   array  $params  The array of key => value pairs to return as a query string.
 	 *
 	 * @return  string  The resulting query string.
 	 *
 	 * @see     parse_str()
 	 */
-	public static function buildQuery(array $params)
+	public static function buildQuery(array $params): string
 	{
 		if (count($params) == 0)
 		{
@@ -301,7 +301,7 @@ class Uri
 	 *
 	 * @return  string  The URI scheme.
 	 */
-	public function getScheme()
+	public function getScheme(): ?string
 	{
 		return $this->scheme;
 	}
@@ -310,11 +310,11 @@ class Uri
 	 * Set URI scheme (protocol)
 	 * ie. http, https, ftp, etc...
 	 *
-	 * @param   string $scheme The URI scheme.
+	 * @param   string  $scheme  The URI scheme.
 	 *
 	 * @return  void
 	 */
-	public function setScheme($scheme)
+	public function setScheme(string $scheme): void
 	{
 		$this->scheme = $scheme;
 	}
@@ -325,7 +325,7 @@ class Uri
 	 *
 	 * @return  string  The URI username.
 	 */
-	public function getUser()
+	public function getUser(): ?string
 	{
 		return $this->user;
 	}
@@ -333,11 +333,11 @@ class Uri
 	/**
 	 * Set URI username.
 	 *
-	 * @param   string $user The URI username.
+	 * @param   string|null  $user  The URI username.
 	 *
 	 * @return  void
 	 */
-	public function setUser($user)
+	public function setUser(?string $user): void
 	{
 		$this->user = $user;
 	}
@@ -348,7 +348,7 @@ class Uri
 	 *
 	 * @return  string  The URI password.
 	 */
-	public function getPass()
+	public function getPass(): ?string
 	{
 		return $this->pass;
 	}
@@ -356,11 +356,11 @@ class Uri
 	/**
 	 * Set URI password.
 	 *
-	 * @param   string $pass The URI password.
+	 * @param   string|null  $pass  The URI password.
 	 *
 	 * @return  void
 	 */
-	public function setPass($pass)
+	public function setPass(?string $pass)
 	{
 		$this->pass = $pass;
 	}
@@ -371,7 +371,7 @@ class Uri
 	 *
 	 * @return  string  The URI host.
 	 */
-	public function getHost()
+	public function getHost(): ?string
 	{
 		return $this->host;
 	}
@@ -379,11 +379,11 @@ class Uri
 	/**
 	 * Set URI host.
 	 *
-	 * @param   string $host The URI host.
+	 * @param   string|null  $host  The URI host.
 	 *
 	 * @return  void
 	 */
-	public function setHost($host)
+	public function setHost(?string $host)
 	{
 		$this->host = $host;
 	}
@@ -392,21 +392,21 @@ class Uri
 	 * Get URI port
 	 * Returns the port number, or null if no port was specified.
 	 *
-	 * @return  integer  The URI port number.
+	 * @return  int  The URI port number.
 	 */
-	public function getPort()
+	public function getPort(): ?int
 	{
-		return (isset($this->port)) ? $this->port : null;
+		return $this->port ?? null;
 	}
 
 	/**
 	 * Set URI port.
 	 *
-	 * @param   integer $port The URI port number.
+	 * @param   int|null  $port  The URI port number.
 	 *
 	 * @return  void
 	 */
-	public function setPort($port)
+	public function setPort(?int $port): void
 	{
 		$this->port = $port;
 	}
@@ -416,7 +416,7 @@ class Uri
 	 *
 	 * @return  string  The URI path string.
 	 */
-	public function getPath()
+	public function getPath(): ?string
 	{
 		return $this->path;
 	}
@@ -424,11 +424,11 @@ class Uri
 	/**
 	 * Set the URI path string.
 	 *
-	 * @param   string $path The URI path string.
+	 * @param   string|null  $path  The URI path string.
 	 *
 	 * @return  void
 	 */
-	public function setPath($path)
+	public function setPath(?string $path): void
 	{
 		$this->path = $this->_cleanPath($path);
 	}
@@ -439,7 +439,7 @@ class Uri
 	 *
 	 * @return  string  The URI anchor string.
 	 */
-	public function getFragment()
+	public function getFragment(): ?string
 	{
 		return $this->fragment;
 	}
@@ -448,11 +448,11 @@ class Uri
 	 * Set the URI anchor string
 	 * everything after the "#".
 	 *
-	 * @param   string $anchor The URI anchor string.
+	 * @param   string|null  $anchor  The URI anchor string.
 	 *
 	 * @return  void
 	 */
-	public function setFragment($anchor)
+	public function setFragment(?string $anchor)
 	{
 		$this->fragment = $anchor;
 	}
@@ -462,7 +462,7 @@ class Uri
 	 *
 	 * @return  boolean  True if using SSL via HTTPS.
 	 */
-	public function isSSL()
+	public function isSSL(): bool
 	{
 		return $this->getScheme() == 'https' ? true : false;
 	}
@@ -475,11 +475,11 @@ class Uri
 	 * /foo/bar/../../boo.php => /boo.php
 	 * /foo/bar/.././/boo.php => /foo/boo.php
 	 *
-	 * @param   string $path The URI path to clean.
+	 * @param   string  $path  The URI path to clean.
 	 *
 	 * @return  string  Cleaned and resolved URI path.
 	 */
-	protected function _cleanPath($path)
+	protected function _cleanPath(string $path): string
 	{
 		$path = explode('/', preg_replace('#(/+)#', '/', $path));
 
@@ -499,8 +499,8 @@ class Uri
 					unset($path[$i]);
 					unset($path[$i - 1]);
 					$path = array_values($path);
-					$i -= 2;
-					$n -= 2;
+					$i    -= 2;
+					$n    -= 2;
 				}
 			}
 		}
@@ -511,19 +511,20 @@ class Uri
 	/**
 	 * Sanitises and parses a URL using urldecode
 	 *
-	 * @param   string $url The URL to parse
+	 * @param   string  $url  The URL to parse
 	 *
 	 * @return  array  The URL parts from urldecode
 	 */
-	public static function parse_url($url)
+	public static function parse_url(string $url): array
 	{
-		$result = array();
+		$result = [];
 		// Build arrays of values we need to decode before parsing
-		$entities = array(
-			'%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B',
-			'%5D'
-		);
-		$replacements = array('!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "$", ",", "/", "?", "%", "#", "[", "]");
+		$entities     = [
+			'%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%24', '%2C', '%2F', '%3F', '%25',
+			'%23', '%5B',
+			'%5D',
+		];
+		$replacements = ['!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "$", ",", "/", "?", "%", "#", "[", "]"];
 		// Create encoded URL with special URL characters decoded so it can be parsed
 		// All other characters will be encoded
 		$encodedURL = str_replace($entities, $replacements, urlencode($url));

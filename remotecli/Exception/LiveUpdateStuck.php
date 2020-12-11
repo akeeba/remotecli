@@ -14,7 +14,7 @@ use Throwable;
 
 class LiveUpdateStuck extends RuntimeException
 {
-	public function __construct($extra = '', $code = 113, Throwable $previous = null)
+	public function __construct(string $extra = '', int $code = 113, Throwable $previous = null)
 	{
 		$message = 'Akeeba Live Update reports that it\'s stuck trying to load update information.';
 

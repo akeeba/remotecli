@@ -21,9 +21,9 @@ abstract class IniParser
 	 *
 	 * @return  array   An associative array of sections, keys and values
 	 */
-	public static function parse_ini_file($file, $process_sections, $rawData = false)
+	public static function parse_ini_file(string $file, bool $process_sections, bool $rawData = false): array
 	{
-		$isBadHostFile = !function_exists('parse_ini_file');
+		$isBadHostFile   = !function_exists('parse_ini_file');
 		$isBadHostString = !function_exists('parse_ini_string');
 
 		if ($rawData)
@@ -50,13 +50,13 @@ abstract class IniParser
 	 * Thanks to asohn ~at~ aircanopy ~dot~ net for posting this handy function on
 	 * the parse_ini_file page on http://gr.php.net/parse_ini_file
 	 *
-	 * @param    string $file             Filename to process
-	 * @param    bool   $process_sections True to also process INI sections
-	 * @param    bool   $rawdata          If true, the $file contains raw INI data, not a filename
+	 * @param   string  $file              Filename to process
+	 * @param   bool    $process_sections  True to also process INI sections
+	 * @param   bool    $rawdata           If true, the $file contains raw INI data, not a filename
 	 *
 	 * @return    array    An associative array of sections, keys and values
 	 */
-	static function parse_ini_file_php($file, $process_sections = false, $rawdata = false)
+	static function parse_ini_file_php(string $file, bool $process_sections = false, bool $rawdata = false): array
 	{
 		$process_sections = ($process_sections !== true) ? false : true;
 
@@ -67,24 +67,24 @@ abstract class IniParser
 		else
 		{
 			$file = str_replace("\r", "", $file);
-			$ini = explode("\n", $file);
+			$ini  = explode("\n", $file);
 		}
 
 		if (!is_array($ini))
 		{
-			return array();
+			return [];
 		}
 
 		if (count($ini) == 0)
 		{
-			return array();
+			return [];
 		}
 
-		$sections = array();
-		$values = array();
-		$result = array();
-		$globals = array();
-		$i = 0;
+		$sections = [];
+		$values   = [];
+		$result   = [];
+		$globals  = [];
+		$i        = 0;
 		foreach ($ini as $line)
 		{
 			$line = trim($line);
@@ -99,7 +99,7 @@ abstract class IniParser
 			// Sections
 			if ($line[0] == '[')
 			{
-				$tmp = explode(']', $line);
+				$tmp        = explode(']', $line);
 				$sections[] = trim(substr($tmp[0], 1));
 				$i++;
 				continue;
@@ -111,7 +111,7 @@ abstract class IniParser
 			{
 				continue;
 			}
-			$key = trim($lineParts[0]);
+			$key   = trim($lineParts[0]);
 			$value = trim($lineParts[1]);
 			unset($lineParts);
 

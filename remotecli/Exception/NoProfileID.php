@@ -14,7 +14,7 @@ use RuntimeException;
 
 class NoProfileID extends RuntimeException
 {
-	public function __construct($code = 39, Exception $previous = null)
+	public function __construct(int $code = 39, Exception $previous = null)
 	{
 		$message = 'You must specify a numeric profile ID';
 

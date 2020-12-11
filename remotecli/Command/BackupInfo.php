@@ -17,7 +17,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class BackupInfo extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 
@@ -53,7 +53,7 @@ class BackupInfo extends AbstractCommand
 							$backup->description,
 							$backup->profile_id,
 							$parts,
-							isset($backup->size) ? $backup->size : ''
+							$backup->size ?? ''
 		);
 
 		$output->info($line, true);
@@ -68,7 +68,7 @@ class BackupInfo extends AbstractCommand
 	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input)
+	protected function assertConfigured(Cli $input): void
 	{
 		parent::assertConfigured($input);
 

@@ -17,7 +17,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class Deletefiles extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 
@@ -43,7 +43,7 @@ class Deletefiles extends AbstractCommand
 	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input)
+	protected function assertConfigured(Cli $input): void
 	{
 		parent::assertConfigured($input);
 

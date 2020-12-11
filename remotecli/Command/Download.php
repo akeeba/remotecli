@@ -16,7 +16,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class Download extends AbstractCommand
 {
-	public function prepare(Cli $input)
+	public function prepare(Cli $input): void
 	{
 		if ($input->getBool('D', false))
 		{
@@ -24,7 +24,7 @@ class Download extends AbstractCommand
 		}
 	}
 
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 

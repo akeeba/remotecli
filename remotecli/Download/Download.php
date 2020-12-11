@@ -62,7 +62,7 @@ class Download
 	 *
 	 * @param   string  $className  The name of the class or the name of the adapter
 	 */
-	public function setAdapter($className)
+	public function setAdapter(string $className): void
 	{
 		$adapter = null;
 
@@ -87,7 +87,7 @@ class Download
      *
      * @return  string
      */
-    public function getAdapterName()
+    public function getAdapterName(): string
     {
 	    if (!is_object($this->adapter))
 	    {
@@ -106,7 +106,7 @@ class Download
      *
      * @codeCoverageIgnore
      */
-    public function setAdapterOptions(array $options)
+    public function setAdapterOptions(array $options): void
     {
         $this->adapterOptions = $options;
     }
@@ -118,7 +118,7 @@ class Download
      *
      * @codeCoverageIgnore
      */
-    public function getAdapterOptions()
+    public function getAdapterOptions(): array
     {
         return $this->adapterOptions;
     }
@@ -131,7 +131,7 @@ class Download
 	 *
 	 * @return  mixed  The value for this parameter key
 	 */
-	private function getParam($key, $default = null)
+	private function getParam(string $key, $default = null)
 	{
 		if (array_key_exists($key, $this->params))
 		{
@@ -144,15 +144,15 @@ class Download
 	/**
 	 * Download data from a URL and return it
 	 *
-	 * @param   string    $url            The URL to download from.
-	 * @param   bool      $useExceptions  Set to false to return false on failure instead of throwing an exception.
-	 * @param   resource  $fp             A file pointer to download to. If provided, the method returns null.
+	 * @param   string  $url            The URL to download from.
+	 * @param   bool    $useExceptions  Set to false to return false on failure instead of throwing an exception.
+	 * @param   null    $fp             A file pointer to download to. If provided, the method returns null.
 	 *
 	 * @return  bool|string  The downloaded data. If $useExceptions is true it returns false on failure.
 	 *
-	 * @throws  CommunicationError  When there is an error communicating with the server
+	 * @throws CommunicationError When there is an error communicating with the server
 	 */
-	public function getFromURL($url, $useExceptions = true, $fp = null)
+	public function getFromURL(string $url, bool $useExceptions = true, $fp = null)
 	{
 		try
 		{
@@ -180,9 +180,9 @@ class Download
 	 *
 	 * @return  bool|string  The downloaded data. If $useExceptions is true it returns false on failure.
 	 *
-	 * @throws  CommunicationError  When there is an error communicating with the server
+	 * @throws CommunicationError When there is an error communicating with the server
 	 */
-	public function postToURL($url, $data = '', $contentType = 'application/x-www-form-urlencoded', $useExceptions = true)
+	public function postToURL(string $url, string $data = '', string $contentType = 'application/x-www-form-urlencoded', bool $useExceptions = true)
 	{
 		try
 		{
@@ -206,7 +206,7 @@ class Download
 	 *
 	 * @return  array  A return status array
 	 */
-	public function importFromURL($params)
+	public function importFromURL(array $params): array
 	{
 		$this->params = $params;
 
@@ -427,7 +427,7 @@ class Download
 	 * @return  array   Associative array, where the `fullpath` key contains the path to the file,
 	 *                  and the `classname` key contains the name of the class
 	 */
-	protected static function getFiles($path, array $ignoreFolders = array(), array $ignoreFiles = array())
+	protected static function getFiles(string $path, array $ignoreFolders = array(), array $ignoreFiles = array()): array
 	{
 		$return = array();
 
@@ -460,7 +460,7 @@ class Download
 	 *
 	 * @return  array   List of all the files
 	 */
-	protected static function scanDirectory($path, array $ignoreFolders = array(), array $ignoreFiles = array())
+	protected static function scanDirectory(string $path, array $ignoreFolders = array(), array $ignoreFiles = array()): array
 	{
 		$return = array();
 

@@ -28,8 +28,8 @@ use Akeeba\RemoteCLI\Utility\Uri;
  */
 class Options
 {
-	const ENC_NONE = 0;
-	const ENC_RAW = 1;
+	public const ENC_NONE = 0;
+	public const ENC_RAW = 1;
 
 	private $host;
 	private $secret;
@@ -105,7 +105,7 @@ class Options
 	 *
 	 * @return  mixed
 	 */
-	public function __get($name)
+	public function __get(string $name)
 	{
 		if (property_exists($this, $name))
 		{
@@ -120,7 +120,7 @@ class Options
 	 *
 	 * @return  void  Operates directly to the host and endpoint properties of this object.
 	 */
-	private function parseHost()
+	private function parseHost(): void
 	{
 		if (empty($this->host))
 		{
@@ -135,7 +135,7 @@ class Options
 		}
 
 		$originalPath = $uri->getPath();
-		list ($path, $endpoint) = $this->parsePath($originalPath);
+		[$path, $endpoint] = $this->parsePath($originalPath);
 
 		$uri->setPath('/' . ltrim($path));
 
@@ -154,7 +154,7 @@ class Options
 	 *
 	 * @return  array  [$path, $endpoint]. The endpoint may be empty.
 	 */
-	private function parsePath($originalPath)
+	private function parsePath(string $originalPath): array
 	{
 		$originalPath = trim($originalPath, "/");
 
@@ -203,7 +203,7 @@ class Options
 	 *
 	 * @return  self
 	 */
-	public function getModifiedClone($options)
+	public function getModifiedClone(array $options): Options
 	{
 		$currentOptions = [];
 

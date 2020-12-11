@@ -86,7 +86,7 @@ class Download
 					throw new NoDownloadURL();
 				}
 
-				list($parameters['url'], $parameters['authentication']) = $this->processAuthenticatedUrl($parameters['url']);
+				[$parameters['url'], $parameters['authentication']] = $this->processAuthenticatedUrl($parameters['url']);
 				break;
 		}
 
@@ -190,7 +190,7 @@ class Download
 	private function downloadHTTP(array $params, Output $output, Options $options)
 	{
 		// Get the backup info
-		list(, $parts, $fileInformation) = $this->getBackupArchiveInformation($params, $output, $options);
+		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params, $output, $options);
 
 		$api  = new Api($options, $output);
 		$path = $params['path'];
@@ -303,7 +303,7 @@ class Download
 	private function downloadChunk(array $params, Output $output, Options $options)
 	{
 		// Get the backup info
-		list(, $parts, $fileInformation) = $this->getBackupArchiveInformation($params, $output, $options);
+		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params, $output, $options);
 
 		$api  = new Api($options, $output);
 		$path = $params['path'];
@@ -423,7 +423,7 @@ class Download
 	private function downloadCURL(array $params, Output $output, Options $options)
 	{
 		// Get the backup info
-		list(, $parts, $fileInformation) = $this->getBackupArchiveInformation($params, $output, $options);
+		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params, $output, $options);
 
 		$path = $params['path'];
 		$url = $params['url'];
@@ -613,7 +613,7 @@ class Download
 			$parts = 1;
 		}
 
-		if (!count($fileDefinitions))
+		if (!(is_array($fileDefinitions) || $fileDefinitions instanceof \Countable ? count($fileDefinitions) : 0))
 		{
 			throw new NoFilesInBackupRecord($params['id']);
 		}

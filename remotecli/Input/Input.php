@@ -35,13 +35,13 @@ class Input implements \Serializable, \Countable
 	protected $filter = null;
 
 	/** @var   array  Input data */
-	protected $data = array();
+	protected $data = [];
 
 	/** @var   array  Input objects */
-	protected $inputs = array();
+	protected $inputs = [];
 
 	/** @var   array  Input options */
-	protected $options = array();
+	protected $options = [];
 
 	/** @var bool Flag to detect if I already imported all the inputs */
 	private static $inputsLoaded = false;
@@ -49,10 +49,10 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Constructor
 	 *
-	 * @param   array $source  Source data (Optional, default is $_REQUEST)
-	 * @param   array $options Options for the Input object
+	 * @param   array|null  $source   Source data (Optional, default is $_REQUEST)
+	 * @param   array       $options  Options for the Input object
 	 */
-	public function __construct($source = null, $options = array())
+	public function __construct(?array $source = null, array $options = [])
 	{
 		$this->options = $options;
 
@@ -103,9 +103,9 @@ class Input implements \Serializable, \Countable
 		}
 	}
 
-	public static function cleanMagicQuotes(array $source)
+	public static function cleanMagicQuotes(array $source): array
 	{
-		$temp = array();
+		$temp = [];
 
 		foreach ($source as $k => $v)
 		{
@@ -127,7 +127,7 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Magic method to get an input object
 	 *
-	 * @param   mixed $name Name of the input object to retrieve.
+	 * @param   mixed  $name  Name of the input object to retrieve.
 	 *
 	 * @return  Input  The request input object
 	 */
@@ -166,7 +166,7 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @see     \Countable::count()
 	 */
-	public function count()
+	public function count(): int
 	{
 		return count($this->data);
 	}
@@ -174,13 +174,13 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Gets a value from the input data.
 	 *
-	 * @param   string $name    Name of the value to get.
-	 * @param   mixed  $default Default value to return if variable does not exist.
-	 * @param   string $filter  Filter to apply to the value.
+	 * @param   string  $name     Name of the value to get.
+	 * @param   mixed   $default  Default value to return if variable does not exist.
+	 * @param   string  $filter   Filter to apply to the value.
 	 *
 	 * @return  mixed  The filtered input value.
 	 */
-	public function get($name, $default = null, $filter = 'cmd')
+	public function get(string $name, $default = null, string $filter = 'cmd')
 	{
 		if (isset($this->data[$name]))
 		{
@@ -193,14 +193,14 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Gets an array of values from the request.
 	 *
-	 * @param   array $vars       Associative array of keys and filter types to apply.
-	 * @param   mixed $datasource Array to retrieve data from, or null
+	 * @param   array       $vars        Associative array of keys and filter types to apply.
+	 * @param   array|null  $datasource  Array to retrieve data from, or null
 	 *
 	 * @return  mixed  The filtered input data.
 	 */
-	public function getArray(array $vars, $datasource = null)
+	public function getArray(array $vars, ?array $datasource = null)
 	{
-		$results = array();
+		$results = [];
 
 		foreach ($vars as $k => $v)
 		{
@@ -238,12 +238,12 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Sets a value
 	 *
-	 * @param   string $name  Name of the value to set.
-	 * @param   mixed  $value Value to assign to the input.
+	 * @param   string  $name   Name of the value to set.
+	 * @param   mixed   $value  Value to assign to the input.
 	 *
 	 * @return  void
 	 */
-	public function set($name, $value)
+	public function set(string $name, $value): void
 	{
 		$this->data[$name] = $value;
 	}
@@ -251,12 +251,12 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Define a value. The value will only be set if there's no value for the name or if it is null.
 	 *
-	 * @param   string $name  Name of the value to define.
-	 * @param   mixed  $value Value to assign to the input.
+	 * @param   string  $name   Name of the value to define.
+	 * @param   mixed   $value  Value to assign to the input.
 	 *
 	 * @return  void
 	 */
-	public function def($name, $value)
+	public function def(string $name, $value): void
 	{
 		if (isset($this->data[$name]))
 		{
@@ -269,12 +269,12 @@ class Input implements \Serializable, \Countable
 	/**
 	 * Magic method to get filtered input data.
 	 *
-	 * @param   string $name      Name of the filter type prefixed with 'get'.
-	 * @param   array  $arguments [0] The name of the variable [1] The default value.
+	 * @param   string  $name       Name of the filter type prefixed with 'get'.
+	 * @param   array   $arguments  [0] The name of the variable [1] The default value.
 	 *
 	 * @return  mixed   The filtered input value.
 	 */
-	public function __call($name, $arguments)
+	public function __call(string $name, array $arguments)
 	{
 		if (substr($name, 0, 3) == 'get')
 		{
@@ -299,7 +299,7 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @return  string   The request method.
 	 */
-	public function getMethod()
+	public function getMethod(): string
 	{
 		$method = strtoupper($_SERVER['REQUEST_METHOD']);
 
@@ -311,7 +311,7 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @return  string  The serialized input.
 	 */
-	public function serialize()
+	public function serialize(): string
 	{
 		// Load all of the inputs.
 		$this->loadAllInputs();
@@ -322,20 +322,20 @@ class Input implements \Serializable, \Countable
 		unset($inputs['server']);
 
 		// Serialize the data and inputs.
-		return serialize(array($this->options, $this->data, $inputs));
+		return serialize([$this->options, $this->data, $inputs]);
 	}
 
 	/**
 	 * Method to unserialize the input.
 	 *
-	 * @param   string $input The serialized input.
+	 * @param   string  $input  The serialized input.
 	 *
 	 * @return  self  The input object.
 	 */
 	public function unserialize($input)
 	{
 		// Unserialize the data, and inputs.
-		list($this->options, $this->data, $this->inputs) = unserialize($input);
+		[$this->options, $this->data, $this->inputs] = unserialize($input);
 
 		// Load the filter.
 		$this->filter = Filter::getInstance();
@@ -348,7 +348,7 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @return  void
 	 */
-	protected function loadAllInputs()
+	protected function loadAllInputs(): void
 	{
 		if (!self::$inputsLoaded)
 		{
@@ -376,7 +376,7 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @return  array
 	 */
-	public function getData()
+	public function getData(): array
 	{
 		return (array) $this->data;
 	}
@@ -388,7 +388,7 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @return  void
 	 */
-	public function setData($data)
+	public function setData($data): void
 	{
 		$this->data = (array) $data;
 	}
@@ -398,9 +398,9 @@ class Input implements \Serializable, \Countable
 	 *
 	 * @param   array|object  $data  The raw input data to merge
 	 */
-	public function mergeData($data)
+	public function mergeData($data): void
 	{
-		$data = (array) $data;
+		$data       = (array) $data;
 		$this->data = array_replace_recursive($this->data, $data);
 	}
 }

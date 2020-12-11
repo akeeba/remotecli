@@ -15,7 +15,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class Test extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 

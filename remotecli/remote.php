@@ -5,6 +5,17 @@
  * @license    GNU General Public License version 3, or later
  */
 
+use Akeeba\RemoteCLI\Command\Backup;
+use Akeeba\RemoteCLI\Command\BackupInfo;
+use Akeeba\RemoteCLI\Command\Delete;
+use Akeeba\RemoteCLI\Command\Deletefiles;
+use Akeeba\RemoteCLI\Command\Download;
+use Akeeba\RemoteCLI\Command\License;
+use Akeeba\RemoteCLI\Command\Listbackups;
+use Akeeba\RemoteCLI\Command\PHP;
+use Akeeba\RemoteCLI\Command\Profiles;
+use Akeeba\RemoteCLI\Command\Test;
+use Akeeba\RemoteCLI\Command\Update;
 use Akeeba\RemoteCLI\Input\Cli;
 use Akeeba\RemoteCLI\Kernel\Dispatcher;
 use Akeeba\RemoteCLI\Output\Output;
@@ -12,14 +23,14 @@ use Akeeba\RemoteCLI\Output\OutputOptions;
 use Akeeba\RemoteCLI\Utility\LocalFile;
 
 // PHP Version check
-if (version_compare(PHP_VERSION, '5.5.0', 'lt'))
+if (version_compare(PHP_VERSION, '7.2.0', 'lt'))
 {
 	$yourPHP = PHP_VERSION;
 	echo <<< END
 
 ! ! !    S T O P    ! ! !
 
-Akeeba Remote CLI requires PHP version 5.5.0 or later.
+Akeeba Remote CLI requires PHP version 7.2.0 or later.
 
 You are currently using PHP $yourPHP as reported by PHP itself.
 
@@ -86,17 +97,17 @@ define('AKEEBA_CACERT_PEM', $temp_cacert_path);
 
 // Create the dispatcher with all the commands
 $dispatcher = new Dispatcher([
-	\Akeeba\RemoteCLI\Command\PHP::class,
-	\Akeeba\RemoteCLI\Command\License::class,
-	\Akeeba\RemoteCLI\Command\Test::class,
-	\Akeeba\RemoteCLI\Command\Backup::class,
-	\Akeeba\RemoteCLI\Command\Download::class,
-	\Akeeba\RemoteCLI\Command\Deletefiles::class,
-	\Akeeba\RemoteCLI\Command\Delete::class,
-	\Akeeba\RemoteCLI\Command\Profiles::class,
-	\Akeeba\RemoteCLI\Command\Listbackups::class,
-	\Akeeba\RemoteCLI\Command\Update::class,
-	\Akeeba\RemoteCLI\Command\BackupInfo::class,
+	PHP::class,
+	License::class,
+	Test::class,
+	Backup::class,
+	Download::class,
+	Deletefiles::class,
+	Delete::class,
+	Profiles::class,
+	Listbackups::class,
+	Update::class,
+	BackupInfo::class,
 ], $input, $output);
 
 // Dispatch the application

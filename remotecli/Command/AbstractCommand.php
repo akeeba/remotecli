@@ -18,7 +18,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 abstract class AbstractCommand implements CommandInterface
 {
-	public function prepare(Cli $input)
+	public function prepare(Cli $input): void
 	{
 		if ($input->getBool('m', false))
 		{
@@ -45,7 +45,7 @@ abstract class AbstractCommand implements CommandInterface
 	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input)
+	protected function assertConfigured(Cli $input): void
 	{
 		if (empty($input->getCmd('host', null)))
 		{
@@ -66,7 +66,7 @@ abstract class AbstractCommand implements CommandInterface
 	 *
 	 * @return  Options
 	 */
-	protected function getApiOptions(Cli $input, array $additional = [])
+	protected function getApiOptions(Cli $input, array $additional = []): Options
 	{
 		$options = array_replace_recursive($input->getData(), $additional);
 

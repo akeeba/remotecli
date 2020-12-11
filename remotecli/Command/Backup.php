@@ -18,7 +18,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class Backup extends AbstractCommand
 {
-	public function prepare(Cli $input)
+	public function prepare(Cli $input): void
 	{
 		if ($input->getBool('d', false))
 		{
@@ -31,7 +31,7 @@ class Backup extends AbstractCommand
 		}
 	}
 
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 
@@ -57,7 +57,7 @@ class Backup extends AbstractCommand
 		$options = $testModel->getBestOptions($input, $output, $options);
 
 		// Take a backup
-		list($backupRecordID, $archive) = $backupModel->backup($input, $output, $options);
+		[$backupRecordID, $archive] = $backupModel->backup($input, $output, $options);
 
 		// Do I also need to download the backup archive?
 		if (!$mustDownload)
@@ -88,7 +88,7 @@ class Backup extends AbstractCommand
 	}
 
 
-	public function startBackup(Cli $input, Output $output)
+	public function startBackup(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 
@@ -103,7 +103,7 @@ class Backup extends AbstractCommand
 		$backupModel->startBackup($input, $output, $options);
 	}
 
-	public function stepBackup(Cli $input, Output $output)
+	public function stepBackup(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 

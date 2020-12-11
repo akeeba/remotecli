@@ -9,11 +9,11 @@
 namespace Akeeba\RemoteCLI\Api;
 
 use Akeeba\RemoteCLI\Download\Download;
+use Akeeba\RemoteCLI\Encrypt\RandomValue;
 use Akeeba\RemoteCLI\Exception\CommunicationError;
 use Akeeba\RemoteCLI\Exception\InvalidEncapsulatedJSON;
 use Akeeba\RemoteCLI\Exception\InvalidJSONBody;
 use Akeeba\RemoteCLI\Output\Output;
-use Akeeba\RemoteCLI\Encrypt\RandomValue;
 use Akeeba\RemoteCLI\Utility\Uri;
 
 class Api
@@ -69,7 +69,7 @@ class Api
 			case 'fopen':
 				$this->fetcher->setAdapterOptions([
 					'ssl' => [
-						'cafile'       => $options->capath,
+						'cafile' => $options->capath,
 					],
 				]);
 				break;
@@ -84,11 +84,11 @@ class Api
 	 *
 	 * @return  object  The response object per the JSON API documentation.
 	 *
-	 * @throws  InvalidJSONBody          When the body->data contains invalid JSON.
-	 * @throws  InvalidEncapsulatedJSON  When the encapsulated result we read from the server is not valid JSON.
-	 * @throws  CommunicationError       When there is a network or other error trying to communicate with the server.
+	 * @throws InvalidJSONBody When the body->data contains invalid JSON.
+	 * @throws InvalidEncapsulatedJSON When the encapsulated result we read from the server is not valid JSON.
+	 * @throws CommunicationError When there is a network or other error trying to communicate with the server.
 	 */
-	public function doQuery($apiMethod, array $data = [])
+	public function doQuery(string $apiMethod, array $data = []): object
 	{
 		$this->output->debug('Data: ' . print_r($data, true));
 
@@ -157,7 +157,7 @@ class Api
 		}
 
 		return (object) [
-			'body' => $result
+			'body' => $result,
 		];
 	}
 
@@ -168,7 +168,7 @@ class Api
 	 *
 	 * @return  Options
 	 */
-	public function getOptions(array $overrides = [])
+	public function getOptions(array $overrides = []): Options
 	{
 		return $this->options->getModifiedClone($overrides);
 	}
@@ -182,7 +182,7 @@ class Api
 	 *
 	 * @return  string  The URL we are supposed to access
 	 */
-	public function getURL($apiMethod, array $data = [], $forceGET = false)
+	public function getURL(string $apiMethod, array $data = [], bool $forceGET = false): string
 	{
 		// Extract options. DO NOT REMOVE. empty() does NOT work on magic properties!
 		$url      = rtrim($this->options->host, '/');
@@ -225,7 +225,7 @@ class Api
 	 *
 	 * @return  array
 	 */
-	private function getQueryStringParameters($apiMethod, array $data = [])
+	private function getQueryStringParameters(string $apiMethod, array $data = []): array
 	{
 		switch ($this->options->view ?? 'json')
 		{
@@ -271,17 +271,17 @@ class Api
 	/**
 	 * Encapsulate the data used for an API call into a (possibly encrypted) JSON string.
 	 *
-	 * @param   string $apiMethod  The API method you are calling
-	 * @param   array  $data       The data sent to the API method
+	 * @param   string  $apiMethod  The API method you are calling
+	 * @param   array   $data       The data sent to the API method
 	 *
 	 * @return  string  The encoded JSON string
 	 */
-	private function encapsulateData($apiMethod, array $data)
+	private function encapsulateData(string $apiMethod, array $data): string
 	{
-		$body = array(
+		$body = [
 			'method' => $apiMethod,
 			'data'   => $data,
-		);
+		];
 
 		$randVal           = new RandomValue();
 		$salt              = $randVal->generateString(32);
@@ -290,10 +290,10 @@ class Api
 
 		$bodyData = json_encode($body);
 
-		$jsonSource = array(
+		$jsonSource = [
 			'encapsulation' => $this->options->encapsulation,
-			'body' => $bodyData
-		);
+			'body'          => $bodyData,
+		];
 
 		return json_encode($jsonSource);
 	}
@@ -306,7 +306,7 @@ class Api
 	 *
 	 * @return  object  The ->body->data property contains the returned data from the server
 	 */
-	private function exposeData($encapsulated)
+	private function exposeData(string $encapsulated): object
 	{
 		$result = json_decode($encapsulated, false);
 
@@ -323,13 +323,18 @@ class Api
 	 *
 	 * @return  void
 	 */
-	private function genRandomKey()
+	private function genRandomKey(): void
 	{
-		$randval = new RandomValue();
+		$randval           = new RandomValue();
 		$this->responseKey = $randval->generateString(64);
 	}
 
-	private function extractEncapsulatedResponse($raw)
+	/**
+	 * @param   string  $raw
+	 *
+	 * @return  string
+	 */
+	private function extractEncapsulatedResponse(string $raw): string
 	{
 		$startPos = strpos($raw, '###') + 3;
 		$endPos   = strrpos($raw, '###');

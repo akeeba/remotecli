@@ -13,7 +13,7 @@ use Exception;
 
 class InvalidJSONBody extends ApiException
 {
-	public function __construct($code = 21, Exception $previous = null)
+	public function __construct(int $code = 21, Exception $previous = null)
 	{
 		$message = 'Invalid response body. Please make sure that a PHP cryptography module (OpenSSL or mcrypt) is installed and enabled on your machine and the remote machine.';
 

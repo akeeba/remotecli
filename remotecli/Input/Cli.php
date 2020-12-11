@@ -79,7 +79,7 @@ class Cli extends Input
 	public function unserialize($input)
 	{
 		// Unserialize the executable, args, options, data, and inputs.
-		list($this->executable, $this->args, $this->options, $this->data, $this->inputs) = unserialize($input);
+		[$this->executable, $this->args, $this->options, $this->data, $this->inputs] = unserialize($input);
 
 		// Load the filter.
 		if (isset($this->options['filter']))
@@ -127,7 +127,7 @@ class Cli extends Input
 
 		$out = array();
 
-		for ($i = 0, $j = count($argv); $i < $j; $i++)
+		for ($i = 0, $j = is_array($argv) || $argv instanceof \Countable ? count($argv) : 0; $i < $j; $i++)
 		{
 			$arg = $argv[$i];
 
@@ -149,7 +149,7 @@ class Cli extends Input
 					}
 					else
 					{
-						$value = isset($out[$key]) ? $out[$key] : true;
+						$value = $out[$key] ?? true;
 					}
 
 					$out[$key] = $value;
@@ -181,7 +181,7 @@ class Cli extends Input
 					foreach ($chars as $char)
 					{
 						$key = $char;
-						$value = isset($out[$key]) ? $out[$key] : true;
+						$value = $out[$key] ?? true;
 						$out[$key] = $value;
 					}
 
@@ -243,4 +243,4 @@ class Cli extends Input
 
 		return explode(' ', $query);
 	}
-} 
+}

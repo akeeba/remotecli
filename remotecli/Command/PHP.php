@@ -15,7 +15,7 @@ class PHP extends AbstractCommand
 {
 	protected $requiredExtensions = ['curl'];
 
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$phpVersion     = PHP_VERSION;
 		$rawExtensions  = get_loaded_extensions(false);

@@ -13,7 +13,7 @@ use Exception;
 
 class InvalidEncapsulatedJSON extends ApiException
 {
-	public function __construct($type, $code = 23, Exception $previous = null)
+	public function __construct(string $type, int $code = 23, Exception $previous = null)
 	{
 		$message = sprintf('Invalid JSON data returned from the server: ‘%s’.', $type);
 

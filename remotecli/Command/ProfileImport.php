@@ -17,7 +17,7 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class ProfileImport extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output)
+	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 
@@ -34,7 +34,7 @@ class ProfileImport extends AbstractCommand
 		$output->info(sprintf("Profile imported"));
 	}
 
-	protected function assertConfigured(Cli $input)
+	protected function assertConfigured(Cli $input): void
 	{
 		parent::assertConfigured($input);
 

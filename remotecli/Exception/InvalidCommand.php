@@ -14,7 +14,7 @@ use RuntimeException;
 
 class InvalidCommand extends RuntimeException
 {
-	public function __construct($type, $code = 10, Exception $previous = null)
+	public function __construct(string $type, int $code = 10, Exception $previous = null)
 	{
 		$message = sprintf('Invalid command ‘%s’.', $type);
 

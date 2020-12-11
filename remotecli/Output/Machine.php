@@ -68,6 +68,6 @@ class Machine implements OutputAdapterInterface
 		}
 
 		// Finally, print out the message itself.
-		fputs(STDOUT, $message . PHP_EOL);
+		fwrite(STDOUT, $message . PHP_EOL);
 	}
 }

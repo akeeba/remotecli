@@ -14,7 +14,7 @@ use Throwable;
 
 class LiveUpdateSupport extends RuntimeException
 {
-	public function __construct($code = 112, Throwable $previous = null)
+	public function __construct(int $code = 112, Throwable $previous = null)
 	{
 		$message = 'Your server does not support Akeeba Live Update.';
 

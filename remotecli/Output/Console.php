@@ -14,58 +14,58 @@ namespace Akeeba\RemoteCLI\Output;
 class Console implements OutputAdapterInterface
 {
 	// Console escape
-	const ESC = "\033[";
+	public const ESC = "\033[";
 
 	// Console color escape sequence
-	const ESC_SEQ_PATTERN = "\033[%sm";
+	public const ESC_SEQ_PATTERN = "\033[%sm";
 
 	// Special color patterns
-	const COLOR_RESET = 0;
-	const COLOR_BOLD = 1;
-	const COLOR_DARK = 2;
-	const COLOR_ITALIC = 3;
-	const COLOR_UNDERLINE = 4;
-	const COLOR_BLINK = 5;
-	const COLOR_REVERSE = 7;
-	const COLOR_CONCEALED = 8;
+	public const COLOR_RESET = 0;
+	public const COLOR_BOLD = 1;
+	public const COLOR_DARK = 2;
+	public const COLOR_ITALIC = 3;
+	public const COLOR_UNDERLINE = 4;
+	public const COLOR_BLINK = 5;
+	public const COLOR_REVERSE = 7;
+	public const COLOR_CONCEALED = 8;
 
 	// Foreground color
-	const COLOR_FG_DEFAULT = 39;
-	const COLOR_FG_BLACK = 30;
-	const COLOR_FG_RED = 31;
-	const COLOR_FG_GREEN = 32;
-	const COLOR_FG_YELLOW = 33;
-	const COLOR_FG_BLUE = 34;
-	const COLOR_FG_MAGENTA = 35;
-	const COLOR_FG_CYAN = 36;
-	const COLOR_FG_LIGHT_GRAY = 37;
-	const COLOR_FG_DARK_GRAY = 90;
-	const COLOR_FG_LIGHT_RED = 91;
-	const COLOR_FG_LIGHT_GREEN = 92;
-	const COLOR_FG_LIGHT_YELLOW = 93;
-	const COLOR_FG_LIGHT_BLUE = 94;
-	const COLOR_FG_LIGHT_MAGENTA = 95;
-	const COLOR_FG_LIGHT_CYAN = 96;
-	const COLOR_FG_WHITE = 97;
+	public const COLOR_FG_DEFAULT = 39;
+	public const COLOR_FG_BLACK = 30;
+	public const COLOR_FG_RED = 31;
+	public const COLOR_FG_GREEN = 32;
+	public const COLOR_FG_YELLOW = 33;
+	public const COLOR_FG_BLUE = 34;
+	public const COLOR_FG_MAGENTA = 35;
+	public const COLOR_FG_CYAN = 36;
+	public const COLOR_FG_LIGHT_GRAY = 37;
+	public const COLOR_FG_DARK_GRAY = 90;
+	public const COLOR_FG_LIGHT_RED = 91;
+	public const COLOR_FG_LIGHT_GREEN = 92;
+	public const COLOR_FG_LIGHT_YELLOW = 93;
+	public const COLOR_FG_LIGHT_BLUE = 94;
+	public const COLOR_FG_LIGHT_MAGENTA = 95;
+	public const COLOR_FG_LIGHT_CYAN = 96;
+	public const COLOR_FG_WHITE = 97;
 
 	// Background color
-	const COLOR_BG_DEFAULT = 49;
-	const COLOR_BG_BLACK = 40;
-	const COLOR_BG_RED = 41;
-	const COLOR_BG_GREEN = 42;
-	const COLOR_BG_YELLOW = 43;
-	const COLOR_BG_BLUE = 44;
-	const COLOR_BG_MAGENTA = 45;
-	const COLOR_BG_CYAN = 46;
-	const COLOR_BG_LIGHT_GRAY = 47;
-	const COLOR_BG_DARK_GRAY = 100;
-	const COLOR_BG_LIGHT_RED = 101;
-	const COLOR_BG_LIGHT_GREEN = 102;
-	const COLOR_BG_LIGHT_YELLOW = 103;
-	const COLOR_BG_LIGHT_BLUE = 104;
-	const COLOR_BG_LIGHT_MAGENTA = 105;
-	const COLOR_BG_LIGHT_CYAN = 106;
-	const COLOR_BG_WHITE = 107;
+	public const COLOR_BG_DEFAULT = 49;
+	public const COLOR_BG_BLACK = 40;
+	public const COLOR_BG_RED = 41;
+	public const COLOR_BG_GREEN = 42;
+	public const COLOR_BG_YELLOW = 43;
+	public const COLOR_BG_BLUE = 44;
+	public const COLOR_BG_MAGENTA = 45;
+	public const COLOR_BG_CYAN = 46;
+	public const COLOR_BG_LIGHT_GRAY = 47;
+	public const COLOR_BG_DARK_GRAY = 100;
+	public const COLOR_BG_LIGHT_RED = 101;
+	public const COLOR_BG_LIGHT_GREEN = 102;
+	public const COLOR_BG_LIGHT_YELLOW = 103;
+	public const COLOR_BG_LIGHT_BLUE = 104;
+	public const COLOR_BG_LIGHT_MAGENTA = 105;
+	public const COLOR_BG_LIGHT_CYAN = 106;
+	public const COLOR_BG_WHITE = 107;
 
 	/**
 	 * Does the console have color support?
@@ -166,11 +166,11 @@ class Console implements OutputAdapterInterface
 		// If we have an error header and we are asked to output errors in standard output let's display the header.
 		if ($header && $this->options->mergeErrorOutput)
 		{
-			fputs($output, $header);
+			fwrite($output, $header);
 		}
 
 		// Finally, print out the message itself.
-		fputs($output, $message . PHP_EOL);
+		fwrite($output, $message . PHP_EOL);
 	}
 
 

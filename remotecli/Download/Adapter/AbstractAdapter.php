@@ -51,7 +51,7 @@ abstract class AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  boolean  True if chunk download is supported
 	 */
-	public function supportsChunkDownload()
+	public function supportsChunkDownload(): bool
 	{
 		return $this->supportsChunkDownload;
 	}
@@ -61,7 +61,7 @@ abstract class AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  boolean  True if remote file size determination is supported
 	 */
-	public function supportsFileSize()
+	public function supportsFileSize(): bool
 	{
 		return $this->supportsFileSize;
 	}
@@ -71,7 +71,7 @@ abstract class AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  boolean  True if this server environment supports this download class
 	 */
-	public function isSupported()
+	public function isSupported(): bool
 	{
 		return $this->isSupported;
 	}
@@ -81,9 +81,9 @@ abstract class AbstractAdapter implements DownloadInterface
 	 * supported on a site, the one with the highest priority will be
 	 * used.
 	 *
-	 * @return  boolean
+	 * @return  int
 	 */
-	public function getPriority()
+	public function getPriority(): int
 	{
 		return $this->priority;
 	}
@@ -93,44 +93,19 @@ abstract class AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  string
 	 */
-	public function getName()
+	public function getName(): string
 	{
 		return $this->name;
 	}
 
-	/**
-	 * Download a part (or the whole) of a remote URL and return the downloaded
-	 * data. You are supposed to check the size of the returned data. If it's
-	 * smaller than what you expected you've reached end of file. If it's empty
-	 * you have tried reading past EOF. If it's larger than what you expected
-	 * the server doesn't support chunk downloads.
-	 *
-	 * If this class' supportsChunkDownload returns false you should assume
-	 * that the $from and $to parameters will be ignored.
-	 *
-	 * @param   string   $url     The remote file's URL
-	 * @param   integer  $from    Byte range to start downloading from. Use null for start of file.
-	 * @param   integer  $to      Byte range to stop downloading. Use null to download the entire file ($from is ignored)
-     * @param   array    $params  Additional params that will be added before performing the download
-	 * @param   resource $fp      A file pointer to download to. If provided, the method returns null.
-	 *
-	 * @return  string  The raw file data retrieved from the remote URL.
-	 *
-	 * @throws  \Exception  A generic exception is thrown on error
-	 */
-	public function downloadAndReturn($url, $from = null, $to = null, array $params = array(), $fp = null)
+	/** @inheritDoc */
+	public function downloadAndReturn(string $url, ?string $from = null, ?string $to = null, array $params = [], $fp = null): string
 	{
 		return '';
 	}
 
-	/**
-	 * Get the size of a remote file in bytes
-	 *
-	 * @param   string  $url  The remote file's URL
-	 *
-	 * @return  integer  The file size, or -1 if the remote server doesn't support this feature
-	 */
-	public function getFileSize($url)
+	/** @inheritDoc */
+	public function getFileSize(string $url): int
 	{
 		return -1;
 	}

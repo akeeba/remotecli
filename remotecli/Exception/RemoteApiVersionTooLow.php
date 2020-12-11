@@ -13,7 +13,7 @@ use Exception;
 
 class RemoteApiVersionTooLow extends ApiException
 {
-	public function __construct($code = 102, Exception $previous = null)
+	public function __construct(int $code = 102, Exception $previous = null)
 	{
 		$message = 'You need to install a newer version of Akeeba Backup / Akeeba Solo on your site';
 

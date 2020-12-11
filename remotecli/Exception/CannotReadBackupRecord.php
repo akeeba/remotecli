@@ -14,7 +14,7 @@ use RuntimeException;
 
 class CannotReadBackupRecord extends RuntimeException
 {
-	public function __construct($id, $code = 110, Exception $previous = null)
+	public function __construct(int $id, int $code = 110, Exception $previous = null)
 	{
 		$message = sprintf('Cannot read the information of backup record %d.', $id);
 

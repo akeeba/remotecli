@@ -1,0 +1,138 @@
+# Configuration file for Rector
+# ==============================================================================
+#
+# See https://github.com/rectorphp/rector
+#
+# Using installed version through Composer:
+#
+# rector process --dry-run
+#
+# DO NOT TRY TO USE THROUGH DOCKER.
+#
+# Rector relies on being able to autoload and include the .php files it analyzes AND their dependencies. This means
+# that it needs to autoload not just our own classes but also their dependencies including Joomla itself, FOF,
+# Usage States etc.
+#
+parameters:
+  autoload_paths:
+    - 'remotecli/vendor/autoload.php'
+  # Use PHP 7.2 features only
+  php_version_features: '7.2'
+  # Paths to include
+  paths:
+    - 'remotecli'
+  # Paths to exclude from automatic refactoring
+  #
+  # WARNING! Rector includes .php files. Any terminal endpoint file will KILL Rector.
+  #
+  # This means that all CLI scripts and error pages MUST be excluded.
+  #
+  exclude_paths:
+    # Component version file
+    - 'remotecli/vendor'
+    # Don't escape this repository, dammit!
+    - '../*'
+
+services:
+  ## "Celebrity" PHP language changes
+  # <> → !=
+  Rector\Celebrity\Rector\NotEqual\CommonNotEqualRector: null
+
+  # Old to new function names
+  Rector\Renaming\Rector\Function_\RenameFunctionRector:
+    $oldFunctionToNewFunction:
+      split: 'explode'
+      join: 'implode'
+      sizeof: 'count'
+
+      # https://www.php.net/manual/en/aliases.php
+      chop: 'rtrim'
+      doubleval: 'floatval'
+      gzputs: 'gzwrites'
+      fputs: 'fwrite'
+      ini_alter: 'ini_set'
+      is_double: 'is_float'
+      is_integer: 'is_int'
+      is_long: 'is_int'
+      is_real: 'is_float'
+      is_writeable: 'is_writable'
+      key_exists: 'array_key_exists'
+      pos: 'current'
+      strchr: 'strstr'
+      # mb
+      mbstrcut: 'mb_strcut'
+      mbstrlen: 'mb_strlen'
+      mbstrpos: 'mb_strpos'
+      mbstrrpos: 'mb_strrpos'
+      mbsubstr: 'mb_substr'
+
+      ## PHP 7.2 compatibility renames
+      jpeg2wbmp: 'imagecreatefromjpeg' # and imagewbmp
+      png2wbmp: 'imagecreatefrompng' # or imagewbmp
+      # http://php.net/manual/en/migration72.deprecated.php#migration72.deprecated.gmp_random-function
+      gmp_random: 'gmp_random_bits' # or gmp_random_range
+      read_exif_data: 'exif_read_data'
+
+  # settype($value, 'int') → (int) $value
+  Rector\Celebrity\Rector\FuncCall\SetTypeToCastRector: null
+
+  #  false or true → false || true
+  #  false and true → false && true
+  Rector\Celebrity\Rector\BooleanOp\LogicalToBooleanRector: null
+
+  ## PHP 5.2 compatibility rectors
+  Rector\Php52\Rector\Property\VarToPublicPropertyRector: ~
+  Rector\Php52\Rector\Switch_\ContinueToBreakInSwitchRector: ~
+
+  ## PHP 5.3 compatibility rectors
+  Rector\Php53\Rector\Ternary\TernaryToElvisRector: ~
+
+  ## PHP 5.4 compatibility rectors
+  Rector\Php54\Rector\FuncCall\RemoveReferenceFromCallRector: ~
+
+  ## PHP 5.5 compatibility rectors
+## ## WATCH OUT! This does crazy things, like convert $ret['ErrorException'] to $ret[\ErrorException::class] which is 100% WRONG AND FUCKS EVERYTHING UP!
+#  Rector\Php55\Rector\String_\StringClassNameToClassConstantRector: ~
+
+  ## PHP 5.6 compatibility rectors
+  Rector\Php56\Rector\FuncCall\PowToExpRector: ~
+  # inspired by level in psalm - https://github.com/vimeo/psalm/blob/82e0bcafac723fdf5007a31a7ae74af1736c9f6f/tests/FileManipulationTest.php#L1063
+  # Rector\Php56\Rector\FunctionLike\AddDefaultValueForUndefinedVariableRector: ~
+
+  ## PHP 7.0 compatibility rectors
+  Rector\Php70\Rector\Break_\BreakNotInLoopOrSwitchToReturnRector: ~
+  Rector\Php70\Rector\FuncCall\CallUserMethodRector: ~
+  Rector\Php70\Rector\FuncCall\EregToPregMatchRector: ~
+  Rector\Php70\Rector\FuncCall\MultiDirnameRector: ~
+  Rector\Php70\Rector\FuncCall\NonVariableToVariableOnFunctionCallRector: ~
+  Rector\Php70\Rector\FuncCall\RandomFunctionRector: ~
+  Rector\Php70\Rector\FuncCall\RenameMktimeWithoutArgsToTimeRector: ~
+  Rector\Php70\Rector\FunctionLike\ExceptionHandlerTypehintRector: ~
+  Rector\Php70\Rector\FunctionLike\Php4ConstructorRector: ~
+  Rector\Php70\Rector\If_\IfToSpaceshipRector: ~
+  Rector\Php70\Rector\List_\EmptyListRector: ~
+  Rector\Php70\Rector\List_\ListSplitStringRector: ~
+  Rector\Php70\Rector\List_\ListSwapArrayOrderRector: ~
+  Rector\Php70\Rector\MethodCall\ThisCallOnStaticMethodToStaticCallRector: ~
+  Rector\Php70\Rector\StaticCall\StaticCallOnNonStaticToInstanceCallRector: ~
+  Rector\Php70\Rector\Switch_\ReduceMultipleDefaultSwitchRector: ~
+  Rector\Php70\Rector\Ternary\TernaryToNullCoalescingRector: ~
+  Rector\Php70\Rector\Ternary\TernaryToSpaceshipRector: ~
+
+  ## PHP 7.1 compatibility rectors
+  Rector\Php71\Rector\Assign\AssignArrayToStringRector: ~
+  Rector\Php71\Rector\BinaryOp\BinaryOpBetweenNumberAndStringRector: ~
+  Rector\Php71\Rector\ClassConst\PublicConstantVisibilityRector: ~
+  Rector\Php71\Rector\FuncCall\CountOnNullRector: ~
+  Rector\Php71\Rector\FuncCall\RemoveExtraParametersRector: ~
+  Rector\Php71\Rector\List_\ListToArrayDestructRector: ~
+  Rector\Php71\Rector\Name\ReservedObjectRector: ~
+  Rector\Php71\Rector\TryCatch\MultiExceptionCatchRector: ~
+
+  ## PHP 7.2 compatibility rectors
+  Rector\Php72\Rector\FuncCall\GetClassOnNullRector: null
+  Rector\Php72\Rector\FuncCall\IsObjectOnIncompleteClassRector: null
+  Rector\Php72\Rector\FuncCall\ParseStrWithResultArgumentRector: null
+  Rector\Php72\Rector\FuncCall\StringsAssertNakedRector: null
+  Rector\Php72\Rector\FuncCall\CreateFunctionToAnonymousFunctionRector: null
+  Rector\Php72\Rector\FuncCall\StringifyDefineRector: null

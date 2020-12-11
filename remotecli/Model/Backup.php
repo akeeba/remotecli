@@ -27,7 +27,7 @@ class Backup
 	 *
 	 * @return  array  [backupRecordID, archive]
 	 */
-	public function backup(Cli $input, Output $output, Options $options)
+	public function backup(Cli $input, Output $output, Options $options): array
 	{
 		$backupRecordID = 0;
 		$archive        = '';
@@ -148,7 +148,7 @@ class Backup
 		return $info;
 	}
 
-	protected function handleAPIResponse($data, Output $output)
+	protected function handleAPIResponse(object $data, Output $output): array
 	{
 		$backupID       = null;
 		$backupRecordID = 0;

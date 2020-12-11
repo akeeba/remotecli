@@ -17,12 +17,12 @@ class LocalFile
 	/**
 	 * The default configuration filename
 	 */
-	const defaultFileName = '.akeebaremotecli';
+	public const defaultFileName = '.akeebaremotecli';
 
 	/**
 	 * The default section name where we place options outside any other section
 	 */
-	const defaultSection = 'akeebaremotecli';
+	public const defaultSection = 'akeebaremotecli';
 
 	/**
 	 * The path to the local file storing the configuration parameters.
@@ -44,7 +44,7 @@ class LocalFile
 	 *
 	 * @param   string|null  $filePath  The path to the local filename containing the configuration parameters
 	 */
-	public function __construct($filePath = null)
+	public function __construct(?string $filePath = null)
 	{
 		if (empty($filePath))
 		{
@@ -60,7 +60,7 @@ class LocalFile
 	 *
 	 * @return  null|string  The path to the file
 	 */
-	public function getFilePath()
+	public function getFilePath(): ?string
 	{
 		return $this->filePath;
 	}
@@ -72,7 +72,7 @@ class LocalFile
 	 *
 	 * @return  array
 	 */
-	public function getConfiguration($name = null)
+	public function getConfiguration(?string $name = null): array
 	{
 		if (empty($name))
 		{
@@ -92,7 +92,7 @@ class LocalFile
 	 *
 	 * @return  string
 	 */
-	public function getDefaultFilepath()
+	public function getDefaultFilepath(): string
 	{
 		$home = getenv('HOME');
 
@@ -115,7 +115,7 @@ class LocalFile
 	 *
 	 * @return  array
 	 */
-	private function parse($filePath)
+	private function parse(string $filePath): array
 	{
 		$return = [];
 

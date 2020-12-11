@@ -34,27 +34,8 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		}
 	}
 
-	/**
-	 * Download a part (or the whole) of a remote URL and return the downloaded
-	 * data. You are supposed to check the size of the returned data. If it's
-	 * smaller than what you expected you've reached end of file. If it's empty
-	 * you have tried reading past EOF. If it's larger than what you expected
-	 * the server doesn't support chunk downloads.
-	 *
-	 * If this class' supportsChunkDownload returns false you should assume
-	 * that the $from and $to parameters will be ignored.
-	 *
-	 * @param   string    $url     The remote file's URL
-	 * @param   integer   $from    Byte range to start downloading from. Use null for start of file.
-	 * @param   integer   $to      Byte range to stop downloading. Use null to download the entire file ($from is ignored)
-	 * @param   array     $params  Additional params that will be added before performing the download
-	 * @param   resource  $fp      A file pointer to download to. If provided, the method returns null.
-	 *
-	 * @return  string  The raw file data retrieved from the remote URL.
-	 *
-	 * @throws  CommunicationError  When there is an error communicating with the server
-	 */
-	public function downloadAndReturn($url, $from = null, $to = null, array $params = array(), $fp = null)
+	/** @inheritDoc */
+	public function downloadAndReturn(string $url, ?string $from = null, ?string $to = null, array $params = [], $fp = null): string
 	{
 		if (empty($from))
 		{
@@ -153,18 +134,8 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		return $this->evaluateHTTPResponse($result, $http_response_header);
 	}
 
-	/**
-	 * Send data to the server using a POST request and return the server response.
-	 *
-	 * @param   string  $url          The URL to send the data to.
-	 * @param   string  $data         The data to send to the server. If they need to be URL-encoded you have to do it
-	 *                                yourself.
-	 * @param   string  $contentType  The type of the form data. The default is application/x-www-form-urlencoded.
-	 * @param   array   $params       Additional params that will be added before performing the download
-	 *
-	 * @return  string  The raw response
-	 */
-	public function postAndReturn($url, $data, $contentType = 'application/x-www-form-urlencoded', array $params = array())
+	/** @inheritDoc */
+	public function postAndReturn(string $url, string $data, string $contentType = 'application/x-www-form-urlencoded', array $params = []): string
 	{
 		$options = array(
 			'http' => array(
@@ -199,12 +170,12 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 	 * throw a CommunicationError exception, otherwise we return the raw response content.
 	 *
 	 * @param   string  $result  The raw response content
+	 * @param   string  $http_response_header
 	 *
 	 * @return  string  The raw response content
 	 *
-	 * @throws  CommunicationError  In case a communications error has been detected
 	 */
-	private function evaluateHTTPResponse($result, $http_response_header)
+	private function evaluateHTTPResponse(string $result, string $http_response_header): string
 	{
 		global $http_response_header_test;
 
@@ -222,7 +193,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		}
 
 		$http_code = 200;
-		$nLines    = count($http_response_header);
+		$nLines    = is_array($http_response_header) || $http_response_header instanceof \Countable ? count($http_response_header) : 0;
 
 		for ($i = $nLines - 1; $i >= 0; $i--)
 		{

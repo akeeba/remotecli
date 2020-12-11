@@ -350,14 +350,14 @@ class Filter
 			{
 				// Close Tag
 				$isCloseTag = true;
-				list ($tagName) = explode(' ', $currentTag);
+				[$tagName] = explode(' ', $currentTag);
 				$tagName = substr($tagName, 1);
 			}
 			else
 			{
 				// Open Tag
 				$isCloseTag = false;
-				list ($tagName) = explode(' ', $currentTag);
+				[$tagName] = explode(' ', $currentTag);
 			}
 
 			/*
