@@ -150,13 +150,13 @@ class Options
 	/**
 	 * Parse the path of a URL and either extract a .php endpoint or strip a misplaced index.html or other useless bit.
 	 *
-	 * @param   string  $originalPath  The original UTL path
+	 * @param   string|null  $originalPath  The original UTL path
 	 *
 	 * @return  array  [$path, $endpoint]. The endpoint may be empty.
 	 */
-	private function parsePath(string $originalPath): array
+	private function parsePath(?string $originalPath): array
 	{
-		$originalPath = trim($originalPath, "/");
+		$originalPath = trim($originalPath ?? '', "/");
 
 		// The path is "/"
 		if (empty($originalPath))

@@ -55,7 +55,7 @@ class Cli extends Input
 	 *
 	 * @return  string  The serialized input.
 	 */
-	public function serialize()
+	public function serialize(): string
 	{
 		// Load all of the inputs.
 		$this->loadAllInputs();

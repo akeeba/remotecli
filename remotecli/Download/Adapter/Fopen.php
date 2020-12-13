@@ -169,13 +169,12 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 	 * Evaluate the server response, including the HTTP status, and the response itself. If an error has occurred we
 	 * throw a CommunicationError exception, otherwise we return the raw response content.
 	 *
-	 * @param   string  $result  The raw response content
-	 * @param   string  $http_response_header
+	 * @param   string|bool  $result  The raw response content
+	 * @param   string|null  $http_response_header
 	 *
 	 * @return  string  The raw response content
-	 *
 	 */
-	private function evaluateHTTPResponse(string $result, string $http_response_header): string
+	private function evaluateHTTPResponse($result, ?string $http_response_header): string
 	{
 		global $http_response_header_test;
 
