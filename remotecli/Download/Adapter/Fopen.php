@@ -17,10 +17,10 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 {
 	public function __construct()
 	{
-		$this->priority = 100;
-		$this->supportsFileSize = false;
+		$this->priority              = 100;
+		$this->supportsFileSize      = false;
 		$this->supportsChunkDownload = true;
-		$this->name = 'fopen';
+		$this->name                  = 'fopen';
 
 		// If we are not allowed to use ini_get, we assume that URL fopen is
 		// disabled.
@@ -56,17 +56,17 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		}
 
 		$length  = null;
-		$options = array(
-			'http' => array(
+		$options = [
+			'http' => [
 				'method'          => 'GET',
 				'follow-location' => 1,
-			),
-			'ssl'  => array(
+			],
+			'ssl'  => [
 				'verify_peer'  => true,
 				'cafile'       => __DIR__ . '/cacert.pem',
 				'verify_depth' => 5,
-			),
-		);
+			],
+		];
 
 		if (!(empty($from) && empty($to)))
 		{
@@ -112,7 +112,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 				}
 
 				$chunk = fread($remoteFP, $chunkSize);
-				$read += strlen($chunk);
+				$read  += strlen($chunk);
 
 				fwrite($fp, $chunk);
 			}
@@ -123,7 +123,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		}
 		else
 		{
-			$result  = @file_get_contents($url, false, $context, $from, $length);
+			$result = @file_get_contents($url, false, $context, $from, $length);
 		}
 
 		if (!isset($http_response_header))
@@ -137,22 +137,41 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 	/** @inheritDoc */
 	public function postAndReturn(string $url, string $data, string $contentType = 'application/x-www-form-urlencoded', array $params = []): string
 	{
-		$options = array(
-			'http' => array(
+		$options = [
+			'http' => [
 				'user_agent'      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
 				'method'          => 'POST',
 				'header'          => sprintf("Content-type: %s\r\n", $contentType),
 				'content'         => $data,
 				'follow-location' => 1,
-			),
-			'ssl'  => array(
+			],
+			'ssl'  => [
 				'verify_peer'  => true,
 				'cafile'       => __DIR__ . '/cacert.pem',
 				'verify_depth' => 5,
-			),
-		);
+			],
+		];
 
 		$options = array_merge_recursive($options, $params);
+
+		foreach (['http', 'ssl'] as $outerKey)
+		{
+			$temp = [];
+
+			foreach ($options[$outerKey] as $k => $v)
+			{
+				if (($k === 'content') || !is_array($v))
+				{
+					$temp[$k] = $v;
+
+					continue;
+				}
+
+				$temp[$k] = array_pop($v);
+			}
+
+			$options[$outerKey] = $temp;
+		}
 
 		$context = stream_context_create($options);
 		$result  = @file_get_contents($url, false, $context);
@@ -170,11 +189,11 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 	 * throw a CommunicationError exception, otherwise we return the raw response content.
 	 *
 	 * @param   string|bool  $result  The raw response content
-	 * @param   string|null  $http_response_header
+	 * @param   array|null   $http_response_header
 	 *
 	 * @return  string  The raw response content
 	 */
-	private function evaluateHTTPResponse($result, ?string $http_response_header): string
+	private function evaluateHTTPResponse($result, ?array $http_response_header): string
 	{
 		global $http_response_header_test;
 

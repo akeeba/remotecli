@@ -2,6 +2,7 @@ Akeeba Remote CLI 2.3.1
 ================================================================================
 ~ Minimum PHP version is now 7.2.0
 ~ Support for PHP 8.0
+# [MEDIUM] fopen network connection adapter was broken
 
 Akeeba Remote CLI 2.3.0
 ================================================================================
