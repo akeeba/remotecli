@@ -1,0 +1,53 @@
+# Basic release information
+release:
+  version: '%%VERSION%%'
+  date: '%%DATE%%'
+  category: 20
+  access: 1
+  release_notes: '%%DEFAULT_RELEASE_NOTES%%'
+  changelog: '%%DEFAULT_CHANGELOG%%'
+
+# Akeeba Release System API connection
+api:
+  endpoint: '%%API.ENDPOINT%%'
+  connector: '%%API.CONNECTOR%%'
+  username: '%%API.USERNAME%%'
+  password: '%%API.PASSWORD%%'
+  token: '%%API.TOKEN%%'
+  cacert: '%%CUSTOMCACERT%%'
+
+steps: [%%RELEASESTEPS%%]
+
+# File upload connections
+connections:
+  s3:
+    type: 's3'
+    access: '%%S3.ACCESS%%'
+    secret: '%%S3.SECRET%%'
+    bucket: '%%S3.BUCKET%%'
+    tls: true
+    signature: '%%S3.SIGNATURE%%'
+    region: '%%S3.REGION%%'
+    directory: 'downloads/arccli'
+    cdnhostname: '%%S3.CDNHOSTNAME%%'
+    acl: 'public-read'
+    storage_class: 'STANDARD'
+    maximum_age: 600
+
+# Release source files configuration.
+files:
+  -
+    title: 'Remote CLI (PHAR)'
+    connection: s3
+    source: '%%RELEASEDIR%%/remote*.phar'
+    access: 1
+  -
+    title: 'Remote CLI (ZIP)'
+    connection: s3
+    source: '%%RELEASEDIR%%/remote*.zip'
+    access: 1
+  -
+    title: 'Documentation (PDF)'
+    connection: s3
+    source: '%%RELEASEDIR%%/remotecli.pdf'
+    access: 1
