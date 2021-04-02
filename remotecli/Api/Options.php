@@ -134,6 +134,13 @@ class Options
 			$uri->setScheme('http');
 		}
 
+		$component = $uri->getVar('option', '');
+
+		if (!empty($component))
+		{
+			$this->component = $component;
+		}
+
 		$originalPath = $uri->getPath();
 		[$path, $endpoint] = $this->parsePath($originalPath);
 

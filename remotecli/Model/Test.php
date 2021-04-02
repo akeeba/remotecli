@@ -95,86 +95,96 @@ class Test
 			$endpoints      = $this->getEndpoints($originalOptions);
 			$encapsulation = ($view == 'json') ? Options::ENC_RAW : Options::ENC_NONE;
 
-			foreach ($verbs as $verb)
+			$components = ['com_akeeba', 'com_akeebabackup'];
+
+			if ((count($endpoints) === 1) && in_array('remote.php', $endpoints))
 			{
-				foreach ($formats as $format)
+				$components = [];
+			}
+
+			foreach ($components as $component)
+			{
+				foreach ($verbs as $verb)
 				{
-					foreach ($endpoints as $endpoint)
+					foreach ($formats as $format)
 					{
-						$options = $originalOptions->getModifiedClone([
-							'verb'          => $verb,
-							'view'          => $view,
-							'format'        => $format,
-							'endpoint'      => $endpoint,
-							'encapsulation' => $encapsulation,
-						]);
-
-						try
+						foreach ($endpoints as $endpoint)
 						{
-							$apiResult = null;
-							$api       = new Api($options, $output);
-							$apiResult = $api->doQuery('getVersion');
+							$options = $originalOptions->getModifiedClone([
+								'component'     => $component,
+								'verb'          => $verb,
+								'view'          => $view,
+								'format'        => $format,
+								'endpoint'      => $endpoint,
+								'encapsulation' => $encapsulation,
+							]);
 
-							// This happens if we use the wrong encapsulation
-							if ($apiResult->body->status != 200)
+							try
 							{
 								$apiResult = null;
+								$api       = new Api($options, $output);
+								$apiResult = $api->doQuery('getVersion');
+
+								// This happens if we use the wrong encapsulation
+								if ($apiResult->body->status != 200)
+								{
+									$apiResult = null;
+
+									continue;
+								}
+
+								break 4;
+							}
+							catch (CommunicationError $communicationError)
+							{
+								/**
+								 * We might get this kind of exception if the endpoint is wrong or results in endless
+								 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
+								 * you do?
+								 */
+
+								if ($options->verbose)
+								{
+									$output->warning(sprintf(
+											'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
+											$verb,
+											$view,
+											$format,
+											$endpoint,
+											$encapsulation,
+											$communicationError->getMessage()
+										)
+									);
+								}
 
 								continue;
 							}
-
-							break 4;
-						}
-						catch (CommunicationError $communicationError)
-						{
-							/**
-							 * We might get this kind of exception if the endpoint is wrong or results in endless
-							 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
-							 * you do?
-							 */
-
-							if ($options->verbose)
+							catch (ApiException $apiException)
 							{
-								$output->warning(sprintf(
-										'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
-										$verb,
-										$view,
-										$format,
-										$endpoint,
-										$encapsulation,
-										$communicationError->getMessage()
-									)
-								);
-							}
+								/**
+								 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
+								 * with a broken third party plugin results in the output being ovewritten. So let's retry with
+								 * another way to connect to the site.
+								 */
+								if ($options->verbose)
+								{
+									$output->warning(sprintf(
+											'Remote API error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
+											$verb,
+											$format,
+											$endpoint,
+											$encapsulation,
+											$apiException->getMessage()
+										)
+									);
+								}
 
-							continue;
-						}
-						catch (ApiException $apiException)
-						{
-							/**
-							 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
-							 * with a broken third party plugin results in the output being ovewritten. So let's retry with
-							 * another way to connect to the site.
-							 */
-							if ($options->verbose)
-							{
-								$output->warning(sprintf(
-										'Remote API error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
-										$verb,
-										$format,
-										$endpoint,
-										$encapsulation,
-										$apiException->getMessage()
-									)
-								);
+								continue;
 							}
-
-							continue;
 						}
 					}
 				}
 			}
-
 		}
 
 		if (is_null($apiResult))
