@@ -1,12 +1,13 @@
 <h3>What's new?</h3>
 <p>
-    <strong>Support for remote backup JSON API version 2</strong>.
-    Akeeba Remote CLI supports the new version of Akeeba Backup;s remote backup JSON API instroduced in Akeeba Backup 7.4.0. The new version of the API will be used automatically if the endpoint URL contains <code>view=Api</code>. Furthermore, the connection to the server will be upgraded to API v2 when the remote server tells us that the remote API version is version 400 or later when we contact it with API v1. The v2 API is faster and more efficient.
+    <strong>Updated cacert.pem. The file will be kept up-to-date using Composer</strong>.
+    The root Certification Authorities cache file (cacert.pem) is used to verify HTTPS connection to remote servers.
+    This file is regularly updated based on the trusted root CAs included in Mozilla Firefox. In the past we had to
+    manually update it every few months. We are now using Composer's <code>composer/ca-bundle</code> dependency to
+    automate this update every time we are making a new release. This file was a lready getting a bit old (last
+    updated in 2020), hence this release.
 </p>
-<p>
-    <strong>Changed User Agent string to AkeebaRemoteCLI/2.3.0</strong>.
-    We noted that some servers had blacklisted the spoofed user agent string we were using since Akeeba Remote CLI 2.1.0. We are now using our own, custom user agent to make it easier for hosting companies to whitelist it for the specific URL patterns accessed by Remote CLI. We also let you change it in the command line to something else.
-</p>
+
 
 <h3>PHP versions supported</h3>
 <p>
