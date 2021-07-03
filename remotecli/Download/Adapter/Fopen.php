@@ -9,6 +9,7 @@ namespace Akeeba\RemoteCLI\Download\Adapter;
 
 use Akeeba\RemoteCLI\Download\DownloadInterface;
 use Akeeba\RemoteCLI\Exception\CommunicationError;
+use Composer\CaBundle\CaBundle;
 
 /**
  * A download adapter using URL fopen() wrappers
@@ -31,6 +32,14 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		else
 		{
 			$this->isSupported = ini_get('allow_url_fopen');
+		}
+
+		// PLEASE NOTE! In Phar packages, we MUST have a cacert on the filesystem, since the library can't load certificates
+		// using the phar:// stream wrapper. This constant should ALWAYS be defined by the caller, this is just a fallback to avoid
+		// things to break with non-https sites
+		if (!defined('AKEEBA_CACERT_PEM'))
+		{
+			define('AKEEBA_CACERT_PEM', CaBundle::getBundledCaBundlePath());
 		}
 	}
 
@@ -63,7 +72,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 			],
 			'ssl'  => [
 				'verify_peer'  => true,
-				'cafile'       => __DIR__ . '/cacert.pem',
+				'cafile'       => AKEEBA_CACERT_PEM,
 				'verify_depth' => 5,
 			],
 		];
@@ -147,7 +156,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 			],
 			'ssl'  => [
 				'verify_peer'  => true,
-				'cafile'       => __DIR__ . '/cacert.pem',
+				'cafile'       => AKEEBA_CACERT_PEM,
 				'verify_depth' => 5,
 			],
 		];

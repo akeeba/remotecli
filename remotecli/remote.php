@@ -75,7 +75,7 @@ $output          = new Output(
 
 // cURL is not working nice with phar:// wrappers. This means that we have to manually create a temp file outside the
 // package and supply it to cURL
-$cacert_path    = __DIR__ . '/Download/Adapter/cacert.pem';
+$cacert_path    = \Composer\CaBundle\CaBundle::getBundledCaBundlePath();
 $cacertContents = file_get_contents($cacert_path);
 
 // Let's use the tmpfile trick: in this way the file will removed once the $temp_cacert goes out of scope

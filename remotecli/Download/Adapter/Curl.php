@@ -10,6 +10,7 @@ namespace Akeeba\RemoteCLI\Download\Adapter;
 use Akeeba\RemoteCLI\Download\DownloadInterface;
 use Akeeba\RemoteCLI\Exception\CommunicationError;
 use Akeeba\RemoteCLI\Utility\Uri;
+use Composer\CaBundle\CaBundle;
 
 /**
  * A download adapter using the cURL PHP integration
@@ -31,7 +32,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		// things to break with non-https sites
 		if (!defined('AKEEBA_CACERT_PEM'))
 		{
-			define('AKEEBA_CACERT_PEM', __DIR__ . '/cacert.pem');
+			define('AKEEBA_CACERT_PEM', CaBundle::getBundledCaBundlePath());
 		}
 	}
 

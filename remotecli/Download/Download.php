@@ -36,7 +36,7 @@ class Download
 	public function __construct()
 	{
 		// Find the best fitting adapter
-		$allAdapters = self::getFiles(__DIR__ . '/Adapter', array(), array('AbstractAdapter.php', 'cacert.pem'));
+		$allAdapters = self::getFiles(__DIR__ . '/Adapter', array(), array('AbstractAdapter.php'));
 		$priority    = 0;
 
 		foreach ($allAdapters as $adapterInfo)
