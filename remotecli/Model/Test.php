@@ -99,7 +99,7 @@ class Test
 
 			if ((count($endpoints) === 1) && in_array('remote.php', $endpoints))
 			{
-				$components = [];
+				$components = [null];
 			}
 
 			foreach ($components as $component)

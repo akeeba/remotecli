@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Remote WordPress" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="--action=backup --host=&quot;https://wordpress.local.web/wp-content/plugins/akeebabackupwp/app/remote.php?view=json&quot; --secret=&quot;deBEjOa0hBFRq97XHVIiQHaypE_WsQgU&quot; --certificate=/usr/local/etc/httpd/ssl/ca-chain.crt --debug --verbose">
+    <method v="2" />
+  </configuration>
+</component>
