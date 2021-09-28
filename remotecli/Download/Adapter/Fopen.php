@@ -90,7 +90,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		if (!is_null($fp) && is_resource($fp))
 		{
 			// Open the remote URL with URL fopen() wrappers.
-			$remoteFP = fopen($url, 'rb', null, $context);
+			$remoteFP = fopen($url, 'r', null, $context);
 
 			// If that failed, go through our standard failure detection code and raise the relevant exception
 			if ($remoteFP === false)

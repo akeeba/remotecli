@@ -211,7 +211,7 @@ class Download
 			$name     = $fileInformation[$part]->name;
 			$size     = $fileInformation[$part]->size;
 			$filePath = $path . DIRECTORY_SEPARATOR . $name;
-			$fp       = @fopen($filePath, 'wb');
+			$fp       = @fopen($filePath, 'w');
 
 			if ($fp == false)
 			{
@@ -325,7 +325,7 @@ class Download
 			$name     = $fileInformation[$part]->name;
 			$size     = $fileInformation[$part]->size;
 			$filePath = $path . DIRECTORY_SEPARATOR . $name;
-			$fp       = @fopen($filePath, 'wb');
+			$fp       = @fopen($filePath, 'w');
 
 			if ($fp == false)
 			{
@@ -445,7 +445,7 @@ class Download
 			$name     = $fileInformation[$part]->name;
 			$size     = $fileInformation[$part]->size;
 			$filePath = $path . DIRECTORY_SEPARATOR . $name;
-			$fp       = @fopen($filePath, 'wb');
+			$fp       = @fopen($filePath, 'w');
 
 			if ($fp == false)
 			{
