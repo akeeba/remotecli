@@ -7,48 +7,60 @@
 
 
 namespace Akeeba\RemoteCLI\Api;
+
 use Akeeba\RemoteCLI\Utility\Uri;
 
 
 /**
  * Immutable options for the API
  *
- * @property-read   string  $host           Protocol, hostname and path to the endpoint
- * @property-read   string  $secret         Secret key to use in communications (used for authentication)
- * @property-read   string  $endpoint       Endpoint file, defaults to index.php. Using remote.php clears format and component.
- * @property-read   string  $component      Component used in Joomla! sites, defaults to com_akeeba
- * @property-read   string  $verb           HTTP verb to use in the API< defaults to GET
- * @property-read   string  $format         Format used for Joomla! sites, defaults to html
- * @property-read   string  $ua             User Agent string to use
- * @property-read   string  $capath         Certificate Authority cache path
- * @property-read   bool    $verbose        Should I be verbose about what I'm doing?
- * @property-read   int     $encapsulation  The API encapsulation, defaults to AES-128 CBC
- * @property-read   bool    $legacy         Use legacy, unsafe AES CBC encryption (for old versions of Akeeba Backup / Solo)
- * @property-read   string  $view           View name. 'json' is the v1 JSON API. 'api' is the v2 JSON API.
+ * @property-read   string $host           Protocol, hostname and path to the endpoint
+ * @property-read   string $secret         Secret key to use in communications (used for authentication)
+ * @property-read   string $endpoint       Endpoint file, defaults to index.php. Using remote.php clears format and
+ *                  component.
+ * @property-read   string $component      Component used in Joomla! sites, defaults to com_akeeba
+ * @property-read   string $verb           HTTP verb to use in the API< defaults to GET
+ * @property-read   string $format         Format used for Joomla! sites, defaults to html
+ * @property-read   string $ua             User Agent string to use
+ * @property-read   string $capath         Certificate Authority cache path
+ * @property-read   bool   $verbose        Should I be verbose about what I'm doing?
+ * @property-read   int    $encapsulation  The API encapsulation, defaults to AES-128 CBC
+ * @property-read   bool   $legacy         Use legacy, unsafe AES CBC encryption (for old versions of Akeeba Backup /
+ *                  Solo)
+ * @property-read   string $view           View name. 'json' is the v1 JSON API. 'api' is the v2 JSON API.
  */
 class Options
 {
 	public const ENC_NONE = 0;
-	public const ENC_RAW = 1;
+
+	private $capath = null;
+
+	private $component = null;
+
+	private $endpoint = 'index.php';
+
+	private $format = '';
 
 	private $host;
-	private $secret;
-	private $endpoint = 'index.php';
-	private $component = 'com_akeeba';
-	private $verb = 'GET';
-	private $format = 'html';
-	private $ua = '';
-	private $verbose = false;
-	private $encapsulation = self::ENC_RAW;
+
 	private $legacy = false;
-	private $capath = null;
-	private $view = 'json';
+
+	private $secret;
+
+	private $ua = '';
+
+	private $verb = 'GET';
+
+	private $verbose = false;
+
+	private $view = 'api';
 
 	/**
 	 * OutputOptions constructor. The options you pass initialize the immutable object.
 	 *
-	 * @param   array   $options  The options to initialize the object with
-	 * @param   bool    $strict   When enabled, unknown $options keys will throw an exception instead of silently skipped.
+	 * @param   array  $options  The options to initialize the object with
+	 * @param   bool   $strict   When enabled, unknown $options keys will throw an exception instead of silently
+	 *                           skipped.
 	 */
 	public function __construct(array $options, $strict = false)
 	{
@@ -75,20 +87,8 @@ class Options
 		// Akeeba Solo or Akeeba Backup for WordPress endpoint; do not use format and component parameters in the URL
 		if ($this->endpoint == 'remote.php')
 		{
-			$this->format = '';
+			$this->format    = '';
 			$this->component = '';
-		}
-
-		// Make sure I have a valid encapsulation
-		if (is_string($this->encapsulation))
-		{
-			switch (strtoupper($this->encapsulation))
-			{
-				case 'RAW':
-				default:
-					$this->encapsulation = self::ENC_RAW;
-					break;
-			}
 		}
 
 		// Make sure I have a valid CA cache path
@@ -116,6 +116,27 @@ class Options
 	}
 
 	/**
+	 * Gets an exact copy of the object with the new options overriding the current ones
+	 *
+	 * @param   array  $options  The options you are overriding
+	 *
+	 * @return  self
+	 */
+	public function getModifiedClone(array $options): Options
+	{
+		$currentOptions = [];
+
+		foreach ($this as $k => $v)
+		{
+			$currentOptions[$k] = $v;
+		}
+
+		$options = array_replace_recursive($currentOptions, $options);
+
+		return new self($options);
+	}
+
+	/**
 	 * Normalize the host. Make sure there is an HTTP or HTTPS scheme. Also extract the endpoint if it's specified.
 	 *
 	 * @return  void  Operates directly to the host and endpoint properties of this object.
@@ -139,6 +160,20 @@ class Options
 		if (!empty($component))
 		{
 			$this->component = $component;
+		}
+
+		$format = $uri->getVar('format', '');
+
+		if (!empty($format))
+		{
+			$this->format = $format;
+		}
+
+		$view = $uri->getVar('view', '');
+
+		if (!empty($view))
+		{
+			$this->view = $view;
 		}
 
 		$originalPath = $uri->getPath();
@@ -201,26 +236,5 @@ class Options
 		}
 
 		return [$path, ''];
-	}
-
-	/**
-	 * Gets an exact copy of the object with the new options overriding the current ones
-	 *
-	 * @param   array  $options  The options you are overriding
-	 *
-	 * @return  self
-	 */
-	public function getModifiedClone(array $options): Options
-	{
-		$currentOptions = [];
-
-		foreach ($this as $k => $v)
-		{
-			$currentOptions[$k] = $v;
-		}
-
-		$options = array_replace_recursive($currentOptions, $options);
-
-		return new self($options);
 	}
 }

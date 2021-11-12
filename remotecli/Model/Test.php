@@ -24,24 +24,6 @@ class Test
 	/**
 	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
 	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
-	 * returns the Options for the best detected connection method.
-	 *
-	 * @param   Cli      $input            The input object.
-	 * @param   Output   $output           The output object.
-	 * @param   Options  $originalOptions  The API options. The format, verb and endpoint options _may_ be overwritten.
-	 *
-	 * @return  Options
-	 */
-	public function getBestOptions(Cli $input, Output $output, Options $originalOptions)
-	{
-		[$options,] = $this->getBestApiAndInformation($input, $output, $originalOptions);
-
-		return $options;
-	}
-
-	/**
-	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
-	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
 	 * returns only the API return object.
 	 *
 	 * @param   Cli      $input            The input object.
@@ -55,6 +37,24 @@ class Test
 		[, $apiresult] = $this->getBestApiAndInformation($input, $output, $originalOptions);
 
 		return $apiresult;
+	}
+
+	/**
+	 * Explores the best API connection method (verb, format, endpoint) OR uses the ones defined in the command line to
+	 * connect to the remote site. Then it checks that the remote site is on the correct API level for this script. It
+	 * returns the Options for the best detected connection method.
+	 *
+	 * @param   Cli      $input            The input object.
+	 * @param   Output   $output           The output object.
+	 * @param   Options  $originalOptions  The API options. The format, verb and endpoint options _may_ be overwritten.
+	 *
+	 * @return  Options
+	 */
+	public function getBestOptions(Cli $input, Output $output, Options $originalOptions)
+	{
+		[$options,] = $this->getBestApiAndInformation($input, $output, $originalOptions);
+
+		return $options;
 	}
 
 	/**
@@ -80,107 +80,87 @@ class Test
 		$apiResult = null;
 		$api       = null;
 
-		//foreach (['api', 'json'] as $view)
-		foreach (['api'] as $view)
+		$view       = strtolower($originalOptions->view ?? 'api');
+		$verbs      = $this->getVerbs($originalOptions);
+		$formats    = $this->getFormats($originalOptions);
+		$endpoints  = $this->getEndpoints($originalOptions);
+		$components = $this->getComponents($originalOptions);
+
+		foreach ($components as $component)
 		{
-			$verbs   = $this->getVerbs($input);
-			$format  = $this->getFormat($input);
-			$formats = [$format];
-
-			if (empty($format))
+			foreach ($verbs as $verb)
 			{
-				$formats = ($view == 'json') ? ['raw', 'html', ''] : ['json', 'raw'];
-			}
-
-			$endpoints      = $this->getEndpoints($originalOptions);
-			$encapsulation = ($view == 'json') ? Options::ENC_RAW : Options::ENC_NONE;
-
-			$components = ['com_akeeba', 'com_akeebabackup'];
-
-			if ((count($endpoints) === 1) && in_array('remote.php', $endpoints))
-			{
-				$components = [null];
-			}
-
-			foreach ($components as $component)
-			{
-				foreach ($verbs as $verb)
+				foreach ($formats as $format)
 				{
-					foreach ($formats as $format)
+					foreach ($endpoints as $endpoint)
 					{
-						foreach ($endpoints as $endpoint)
-						{
-							$options = $originalOptions->getModifiedClone([
-								'component'     => $component,
-								'verb'          => $verb,
-								'view'          => $view,
-								'format'        => $format,
-								'endpoint'      => $endpoint,
-								'encapsulation' => $encapsulation,
-							]);
+						$options = $originalOptions->getModifiedClone([
+							'component' => $component,
+							'verb'      => $verb,
+							'view'      => $view,
+							'format'    => $format,
+							'endpoint'  => $endpoint,
+						]);
 
-							try
+						try
+						{
+							$apiResult = null;
+							$api       = new Api($options, $output);
+							$apiResult = $api->doQuery('getVersion');
+
+							// This happens if we use the wrong encapsulation
+							if ($apiResult->body->status != 200)
 							{
 								$apiResult = null;
-								$api       = new Api($options, $output);
-								$apiResult = $api->doQuery('getVersion');
-
-								// This happens if we use the wrong encapsulation
-								if ($apiResult->body->status != 200)
-								{
-									$apiResult = null;
-
-									continue;
-								}
-
-								break 4;
-							}
-							catch (CommunicationError $communicationError)
-							{
-								/**
-								 * We might get this kind of exception if the endpoint is wrong or results in endless
-								 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
-								 * you do?
-								 */
-
-								if ($options->verbose)
-								{
-									$output->warning(sprintf(
-											'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
-											$verb,
-											$view,
-											$format,
-											$endpoint,
-											$encapsulation,
-											$communicationError->getMessage()
-										)
-									);
-								}
 
 								continue;
 							}
-							catch (ApiException $apiException)
-							{
-								/**
-								 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
-								 * with a broken third party plugin results in the output being ovewritten. So let's retry with
-								 * another way to connect to the site.
-								 */
-								if ($options->verbose)
-								{
-									$output->warning(sprintf(
-											'Remote API error with verb “%s”, format “%s”, endpoint “%s”, encapsulation “%s”. The error was ‘%s’.',
-											$verb,
-											$format,
-											$endpoint,
-											$encapsulation,
-											$apiException->getMessage()
-										)
-									);
-								}
 
-								continue;
+							break 4;
+						}
+						catch (CommunicationError $communicationError)
+						{
+							/**
+							 * We might get this kind of exception if the endpoint is wrong or results in endless
+							 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
+							 * you do?
+							 */
+
+							if ($options->verbose)
+							{
+								$output->warning(sprintf(
+										'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										$verb,
+										$view,
+										$format,
+										$endpoint,
+										$communicationError->getMessage()
+									)
+								);
 							}
+
+							continue;
+						}
+						catch (ApiException $apiException)
+						{
+							/**
+							 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
+							 * with a broken third party plugin results in the output being ovewritten. So let's retry with
+							 * another way to connect to the site.
+							 */
+							if ($options->verbose)
+							{
+								$output->warning(sprintf(
+										'Remote API error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										$verb,
+										$format,
+										$endpoint,
+										$apiException->getMessage()
+									)
+								);
+							}
+
+							continue;
 						}
 					}
 				}
@@ -210,58 +190,22 @@ class Test
 	}
 
 	/**
-	 * Get the verbs I will be testing for.
+	 * Get the component (option) list I will be testing for.
 	 *
-	 * @param   Cli  $input  The application input object
+	 * @param   Options  $options  The parsed options
 	 *
-	 * @return  array
+	 * @return  string[]
 	 */
-	private function getVerbs(Cli $input)
+	private function getComponents(Options $options): array
 	{
-		$defaultList = ['POST', 'GET'];
-		$verb        = $input->getCmd('verb', '');
-		$verb        = strtoupper($verb);
+		$defaultComponents = ['com_akeebabackup', 'com_akeeba', ''];
 
-		if (!in_array($verb, $defaultList))
+		if ($options->component === null)
 		{
-			$verb = '';
+			return $defaultComponents;
 		}
 
-		return empty($verb) ? $defaultList : [$verb];
-	}
-
-	/**
-	 * Get the formats I will be testing for.
-	 *
-	 * @param   Cli  $input  The application input object
-	 *
-	 * @return  string
-	 */
-	private function getFormat(Cli $input)
-	{
-		$defaultList = ['json', 'html', 'raw', ''];
-		$format      = $input->getCmd('format', null);
-		$format      = strtolower($format);
-
-		if (!in_array($format, $defaultList, true))
-		{
-			$format = '';
-		}
-
-		return $format;
-	}
-
-	/**
-	 * Get a list of the encapsulations to try using
-	 *
-	 * @return  array
-	 */
-	private function getEncapsulations()
-	{
-		return [
-			// Options::ENC_NONE,
-			Options::ENC_RAW,
-		];
+		return [strtolower($options->component ?: null)];
 	}
 
 	/**
@@ -271,11 +215,52 @@ class Test
 	 *
 	 * @return  array
 	 */
-	private function getEndpoints(Options $options)
+	private function getEndpoints(Options $options): array
 	{
 		$defaultList = ['index.php', 'remote.php'];
 		$endpoint    = $options->endpoint;
 
 		return empty($endpoint) ? $defaultList : [$endpoint];
+	}
+
+	/**
+	 * Get the formats I will be testing for
+	 *
+	 * @param   Options  $options  The parsed options
+	 *
+	 * @return  array
+	 */
+	private function getFormats(Options $options): array
+	{
+		$defaultFormats = ['json', 'raw'];
+		$format         = strtolower($options->format ?: '');
+		$format         = in_array($format, $defaultFormats, true) ? $format : '';
+
+		if (empty($format))
+		{
+			return $defaultFormats;
+		}
+
+		return [$format];
+	}
+
+	/**
+	 * Get the verbs I will be testing for.
+	 *
+	 * @param   Options  $options  The parsed options
+	 *
+	 * @return  array
+	 */
+	private function getVerbs(Options $options): array
+	{
+		$defaultList = ['POST', 'GET'];
+		$verb        = strtoupper($options->verb ?: '');
+
+		if (!in_array($verb, $defaultList))
+		{
+			return $defaultList;
+		}
+
+		return [$verb];
 	}
 }

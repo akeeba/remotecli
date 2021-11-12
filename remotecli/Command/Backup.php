@@ -18,27 +18,14 @@ use Akeeba\RemoteCLI\Output\Output;
 
 class Backup extends AbstractCommand
 {
-	public function prepare(Cli $input): void
-	{
-		if ($input->getBool('d', false))
-		{
-			$input->set('download', true);
-		}
-
-		if ($input->getBool('D', false))
-		{
-			$input->set('delete', true);
-		}
-	}
-
 	public function execute(Cli $input, Output $output): void
 	{
 		$this->assertConfigured($input);
 
-		$testModel   = new TestModel();
-		$backupModel = new BackupModel();
-		$downloadModel      = new Download();
-		$mustDownload = $input->getBool('download', false);
+		$testModel     = new TestModel();
+		$backupModel   = new BackupModel();
+		$downloadModel = new Download();
+		$mustDownload  = $input->getBool('download', false);
 
 		/**
 		 * DO NOT DELETE!
@@ -87,6 +74,18 @@ class Backup extends AbstractCommand
 		}
 	}
 
+	public function prepare(Cli $input): void
+	{
+		if ($input->getBool('d', false))
+		{
+			$input->set('download', true);
+		}
+
+		if ($input->getBool('D', false))
+		{
+			$input->set('delete', true);
+		}
+	}
 
 	public function startBackup(Cli $input, Output $output): void
 	{

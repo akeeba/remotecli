@@ -1,3 +1,7 @@
+Akeeba Remote CLI 2.3.3
+================================================================================
+~ Allow force–setting the component, format and view from the endpoint URL
+
 Akeeba Remote CLI 2.3.2
 ================================================================================
 ~ Updated cacert.pem. The file will be kept up-to-date using Composer.
