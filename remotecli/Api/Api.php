@@ -291,7 +291,7 @@ class Api
 		$bodyData = json_encode($body);
 
 		$jsonSource = [
-			'encapsulation' => $this->options->encapsulation,
+			'encapsulation' => 1,
 			'body'          => $bodyData,
 		];
 
