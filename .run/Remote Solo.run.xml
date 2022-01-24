@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Remote Solo" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="--action=backup --host=https://solo.local.web --secret=&quot;EQ24XeOMqbLLgZdoRRNWkNF1MkUgZzNi&quot; --certificate=/opt/homebrew/etc/httpd/ssl/ca-chain.crt --debug --verbose">
-    <method v="2" />
-  </configuration>
-</component>
