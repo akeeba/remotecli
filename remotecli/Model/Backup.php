@@ -33,27 +33,19 @@ class Backup
 		$archive        = '';
 		$backupID       = null;
 
-		$info = $this->startBackup($input, $output, $options);
-
-		$data = $info['data'];
+		$info           = $this->startBackup($input, $output, $options);
+		$data           = $info['data'];
+		$backupID       = ($info['backupID'] ?? null) ?: $backupID;
+		$backupRecordID = ($info['backupRecordID'] ?? 0) ?: $backupRecordID;
+		$archive        = ($info['archive'] ?? '') ?: $archive;
 
 		while (isset($data->body->data->HasRun) && $data->body->data->HasRun)
 		{
-			$backupID = $info['backupID'];
-
-			if (isset($info['backupRecordID']))
-			{
-				$backupRecordID = $info['backupRecordID'];
-			}
-
-			if (isset($info['archive']))
-			{
-				$archive = $info['archive'];
-			}
-
-			$info = $this->stepBackup($output, $options, $backupID);
-
-			$data = $info['data'];
+			$backupID       = ($info['backupID'] ?? null) ?: $backupID;
+			$backupRecordID = ($info['backupRecordID'] ?? 0) ?: $backupRecordID;
+			$archive        = ($info['archive'] ?? '') ?: $archive;
+			$info           = $this->stepBackup($output, $options, $backupID);
+			$data           = $info['data'];
 		}
 
 		if ($data->body->status != 200)
@@ -111,10 +103,10 @@ class Backup
 
 	public function startBackup(Cli $input, Output $output, Options $options)
 	{
-		$api            = new Api($options, $output);
-		$profile        = (int) ($input->getInt('profile', 1));
-		$description    = $input->getString('description', "Remote backup");
-		$comment        = $input->getHtml('comment', '');
+		$api         = new Api($options, $output);
+		$profile     = (int) ($input->getInt('profile', 1));
+		$description = $input->getString('description', "Remote backup");
+		$comment     = $input->getHtml('comment', '');
 
 		$config = [
 			'profile'     => $profile,
@@ -205,7 +197,7 @@ class Backup
 		$info = [
 			'backupID'       => $backupID,
 			'backupRecordID' => $backupRecordID,
-			'archive'        => $archive
+			'archive'        => $archive,
 		];
 
 		return $info;
