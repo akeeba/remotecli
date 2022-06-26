@@ -1,3 +1,7 @@
+Akeeba Remote CLI 2.3.5
+================================================================================
+~ Workaround for utf8_encode and _decode being deprecated in PHP 8.2
+
 Akeeba Remote CLI 2.3.4
 ================================================================================
 # [HIGH] Download after backup fails if the backup completes in a single step

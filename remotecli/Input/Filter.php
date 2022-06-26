@@ -618,18 +618,18 @@ class Filter
 			$trans_tbl = get_html_translation_table(HTML_ENTITIES);
 			foreach ($trans_tbl as $k => $v)
 			{
-				$ttr[$v] = utf8_encode($k);
+				$ttr[$v] = self::utf8_encode($k);
 			}
 		}
 		$source = strtr($source, $ttr);
 
 		// Convert decimal
-		$source = preg_replace_callback('/&#(\d+);/m', 'utf8_encode', $source);  // decimal notation
+		$source = preg_replace_callback('/&#(\d+);/m', [self::class, 'utf8_encode'], $source);  // decimal notation
 
 		// Convert hex
 		$source = preg_replace_callback('/&#x([a-f0-9]+);/mi',
 			function($x) {
-				return utf8_encode(chr('0x' . $x));
+				return self::utf8_encode(chr('0x' . $x));
 			}, $source); // hex notation
 		return $source;
 	}
@@ -716,5 +716,46 @@ class Filter
 		}
 
 		return $test;
+	}
+
+	private static function utf8_encode($s)
+	{
+		if (version_compare(PHP_VERSION, '8.1.999', 'le'))
+		{
+			return utf8_encode($s);
+		}
+
+		if (function_exists('mb_convert_encoding'))
+		{
+			return mb_convert_encoding($s, 'UTF-8', 'ISO-8859-1');
+		}
+
+		if (class_exists('UConverter'))
+		{
+			return UConverter::transcode($s, 'UTF8', 'ISO-8859-1');
+		}
+
+		if (function_exists('iconv'))
+		{
+			return iconv('ISO-8859-1', 'UTF-8', $s);
+		}
+
+		/**
+		 * Fallback to the pure PHP implementation from Symfony Polyfill for PHP 7.2
+		 *
+		 * @see https://github.com/symfony/polyfill-php72/blob/v1.26.0/Php72.php
+		 */
+		$s .= $s;
+		$len = \strlen($s);
+
+		for ($i = $len >> 1, $j = 0; $i < $len; ++$i, ++$j) {
+			switch (true) {
+				case $s[$i] < "\x80": $s[$j] = $s[$i]; break;
+				case $s[$i] < "\xC0": $s[$j] = "\xC2"; $s[++$j] = $s[$i]; break;
+				default: $s[$j] = "\xC3"; $s[++$j] = \chr(\ord($s[$i]) - 64); break;
+			}
+		}
+
+		return substr($s, 0, $j);
 	}
 }
