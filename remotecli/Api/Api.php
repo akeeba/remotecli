@@ -185,9 +185,10 @@ class Api
 	public function getURL(string $apiMethod, array $data = [], bool $forceGET = false): string
 	{
 		// Extract options. DO NOT REMOVE. empty() does NOT work on magic properties!
-		$url      = rtrim($this->options->host, '/');
-		$endpoint = $this->options->endpoint;
-		$verb     = $this->options->verb;
+		$url         = rtrim($this->options->host, '/');
+		$endpoint    = $this->options->endpoint;
+		$verb        = $this->options->verb;
+		$isWordPress = $this->options->isWordPress ?? false;
 
 		if (!empty($endpoint))
 		{
@@ -202,6 +203,11 @@ class Api
 			$uri->setVar('_akeebaAuth', $this->options->secret);
 		}
 
+		if ($isWordPress)
+		{
+			$uri->setVar('action', 'akeebabackup_api');
+		}
+
 		// If we're doing POST requests there's nothing more to do
 		if (!$forceGET && ($verb == 'POST'))
 		{
@@ -212,6 +218,13 @@ class Api
 		foreach ($this->getQueryStringParameters($apiMethod, $data) as $k => $v)
 		{
 			$uri->setVar($k, $v);
+		}
+
+		if ($isWordPress)
+		{
+			$uri->delVar('option');
+			$uri->delVar('view');
+			$uri->delVar('format');
 		}
 
 		return $uri->toString();

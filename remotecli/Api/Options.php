@@ -28,6 +28,7 @@ use Akeeba\RemoteCLI\Utility\Uri;
  * @property-read   bool   $legacy         Use legacy, unsafe AES CBC encryption (for old versions of Akeeba Backup /
  *                  Solo)
  * @property-read   string $view           View name. 'json' is the v1 JSON API. 'api' is the v2 JSON API.
+ * @property-read   bool   $isWordPress    Is this a WordPress site using admin-ajax.php as the entry point?
  */
 class Options
 {
@@ -54,6 +55,8 @@ class Options
 	private $verbose = false;
 
 	private $view = 'api';
+
+	private $isWordPress = false;
 
 	/**
 	 * OutputOptions constructor. The options you pass initialize the immutable object.
@@ -89,6 +92,14 @@ class Options
 		{
 			$this->format    = '';
 			$this->component = '';
+		}
+
+		// Akeeba Solo or Akeeba Backup for WordPress endpoint; do not use format and component parameters in the URL
+		if ($this->endpoint == 'admin-ajax.php')
+		{
+			$this->format      = '';
+			$this->component   = '';
+			$this->isWordPress = true;
 		}
 
 		// Make sure I have a valid CA cache path

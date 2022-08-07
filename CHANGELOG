@@ -1,5 +1,6 @@
 Akeeba Remote CLI 2.3.5
 ================================================================================
++ Support for the wp-admin/admin-ajax.php endpoint in WordPress.
 ~ Workaround for utf8_encode and _decode being deprecated in PHP 8.2
 
 Akeeba Remote CLI 2.3.4

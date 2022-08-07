@@ -217,7 +217,7 @@ class Test
 	 */
 	private function getEndpoints(Options $options): array
 	{
-		$defaultList = ['index.php', 'remote.php'];
+		$defaultList = ['index.php', 'remote.php', 'wp-admin/admin-ajax.php'];
 		$endpoint    = $options->endpoint;
 
 		return empty($endpoint) ? $defaultList : [$endpoint];
