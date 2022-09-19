@@ -1,33 +1,9 @@
 <h3>What's new?</h3>
 <p>
-    <strong>Updated cacert.pem. The file will be kept up-to-date using Composer</strong>.
-    The root Certification Authorities cache file (cacert.pem) is used to verify HTTPS connection to remote servers.
-    This file is regularly updated based on the trusted root CAs included in Mozilla Firefox. In the past we had to
-    manually update it every few months. We are now using Composer's <code>composer/ca-bundle</code> dependency to
-    automate this update every time we are making a new release. This file was a lready getting a bit old (last
-    updated in 2020), hence this release.
+    <strong>Support for the wp-admin/admin-ajax.php endpoint in WordPress.</strong> This was added in the latest version of Akeeba Backup for WordPress as an alternative to our endpoint which existed outside of WordPress.
 </p>
 
 <p>
     Bug fixes and minor improvements. Please check out the CHANGELOG below.
 </p>
 
-<h3>PHP versions supported</h3>
-<p>
-    We only officially support using our software with PHP 7.2, 7.3, 7.4 or 8.0.
-</p>
-<p>
-    While our software still runs on PHP 7.2, this versions of PHP is declared End of Life by the PHP project and no longer receives any security updates. We are no longer testing our software with these PHP versions and we strongly advise you to not use them on production sites.
-</p>
-<p>
-    We strongly advise you to run either of the two latest available version branches of PHP on a branch currently maintained by the PHP project for security and performance reasons. Older versions of PHP have known major security issues which are being actively exploited to hack sites and they have stopped receiving security updates, leaving you exposed to these issues. Moreover, they are slower, therefore consuming more server resources to perform the same tasks.
-</p>
-<p>
-    Please note that PHP 8.0 is, at the time of this writing, a very new PHP version which brings major changes to the PHP language. We strongly recommend holding off updating into it until April 2021 and only doing so after confirming that all of your extensions have been updated to support it. Do note that by “all extensions” we mean components, plugins, modules and <em>templates</em>.
-</p>
-<p>
-    Finally, please bear in mind that earlier PHP versions including but not limited to all PHP 4.x and 5.x versions, as well as PHP 7.0 are no longer supported. Our software no longer works on these old, unsupported versions of PHP. All of these versions of PHP have been end of life for several years. We <em>VERY STRONGLY</em> recommend upgrading to a version of PHP that's currently supported by the PHP project.
-</p>
-<p>
-    Our policy with regards to PHP version support is to officially support the PHP versions that the PHP project itself considers a <a href="https://www.php.net/supported-versions">Currently Supported version</a>, i.e. all versions of PHP in the Active Support and Security Support phase. We will show you a warning when we detect a PHP version that has entered Security Support so you have the chance to plan and implement a PHP version update. After a PHP versions becomes <a href="https://www.php.net/eol.php">End of Life (EOL)</a> we will only support it for a further 6 to 9 months. If we detect such a version we will show you a message so you can urgently plan and implement a PHP version update. After 6 to 9 months after a PHP version becomes EOL we may stop providing support for it without any prior notice. We also track the development of new versions of PHP. New versions of PHP will be unofficially supported sometime during their Release Candidate phase and fully supported about 4 to 8 weeks after the first stable version of that branch is officially released by the PHP project. Your site's participation in the opt-out usage statistics helps us collect anonymous information about the use of PHP versions on your sites and decide when to withdraw support for EOL versions of PHP.
-</p>
