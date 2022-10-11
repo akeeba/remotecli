@@ -46,7 +46,7 @@ files:
     source: '%%RELEASEDIR%%/remote*.zip'
     access: 1
   -
-    title: 'Documentation (PDF)'
+    title: 'Documentation (ePub)'
     connection: s3
-    source: '%%RELEASEDIR%%/remotecli.pdf'
+    source: '%%RELEASEDIR%%/remotecli.epub'
     access: 1

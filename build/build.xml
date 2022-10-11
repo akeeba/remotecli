@@ -21,7 +21,7 @@
 	</target>
 
 	<target name="documentation" description="Creates the documentation packages"
-		depends="doc-remote-pdf">
+		depends="doc-remote-epub">
 	</target>
 
 	<!--
@@ -68,18 +68,12 @@
 	Tasks - Documentation
 	====================================================================================================
 	-->
-	
-	<target name="doc-remote-pdf" description="Documentation for Remote CLI in PDF format">
-		<phingcall target="docbook-pdf">
-			<property name="docs.input" value="remotecli/remotecli.xml" />
-		</phingcall>
-	</target>
 
-    <target name="doc-epub" description="Documentation for Joomla! in ePub format">
+	<target name="doc-remote-epub" description="Documentation for Remote CLI in ePub format">
 		<phingcall target="docbook-epub">
 			<property name="docs.input" value="remotecli/remotecli.xml" />
 		</phingcall>
-    </target>
+	</target>
 
 	<!--
 	====================================================================================================
