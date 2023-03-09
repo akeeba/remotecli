@@ -1,5 +1,20 @@
-# Use the latest PHP 7 CLI based on Alpine Linux
-FROM php:7-alpine
+########################################################################################################################
+# USAGE:
+#
+# After tagging a releasing a new version the old-fashioned way you can also build the Dockerized version:
+#
+#     cd /path/to/this/repository
+#     export ARCCLI_LATEST_TAG=`git describe --abbrev=0`
+#     docker rmi akeebaltd/remotecli:latest
+#     docker build -t akeebaltd/remotecli:latest .
+#     docker tag akeebaltd/remotecli:latest akeebaltd/remotecli:$ARCCLI_LATEST_TAG
+#     docker push akeebaltd/remotecli:$ARCCLI_LATEST_TAG
+#     docker push akeebaltd/remotecli:latest
+#
+########################################################################################################################
+
+# Use the latest PHP 8 CLI based on Alpine Linux
+FROM php:8-alpine
 
 # Labels describing what this is all about
 LABEL org.label-schema.name = "AkeebaRemoteCLI" \

@@ -5,36 +5,36 @@
  * @license    GNU General Public License version 3, or later
  */
 
-use Akeeba\RemoteCLI\Command\Backup;
-use Akeeba\RemoteCLI\Command\BackupInfo;
-use Akeeba\RemoteCLI\Command\Delete;
-use Akeeba\RemoteCLI\Command\Deletefiles;
-use Akeeba\RemoteCLI\Command\Download;
-use Akeeba\RemoteCLI\Command\License;
-use Akeeba\RemoteCLI\Command\Listbackups;
-use Akeeba\RemoteCLI\Command\PHP;
-use Akeeba\RemoteCLI\Command\Profiles;
-use Akeeba\RemoteCLI\Command\Test;
-use Akeeba\RemoteCLI\Command\Update;
-use Akeeba\RemoteCLI\Input\Cli;
-use Akeeba\RemoteCLI\Kernel\Dispatcher;
-use Akeeba\RemoteCLI\Output\Output;
-use Akeeba\RemoteCLI\Output\OutputOptions;
-use Akeeba\RemoteCLI\Utility\LocalFile;
+use Akeeba\OLD\RemoteCLI\Command\Backup;
+use Akeeba\OLD\RemoteCLI\Command\BackupInfo;
+use Akeeba\OLD\RemoteCLI\Command\Delete;
+use Akeeba\OLD\RemoteCLI\Command\Deletefiles;
+use Akeeba\OLD\RemoteCLI\Command\Download;
+use Akeeba\OLD\RemoteCLI\Command\License;
+use Akeeba\OLD\RemoteCLI\Command\Listbackups;
+use Akeeba\OLD\RemoteCLI\Command\PHP;
+use Akeeba\OLD\RemoteCLI\Command\Profiles;
+use Akeeba\OLD\RemoteCLI\Command\Test;
+use Akeeba\OLD\RemoteCLI\Command\Update;
+use Akeeba\OLD\RemoteCLI\Input\Cli;
+use Akeeba\OLD\RemoteCLI\Kernel\Dispatcher;
+use Akeeba\OLD\RemoteCLI\Output\Output;
+use Akeeba\OLD\RemoteCLI\Output\OutputOptions;
+use Akeeba\OLD\RemoteCLI\Utility\LocalFile;
 
 // PHP Version check
-if (version_compare(PHP_VERSION, '7.2.0', 'lt'))
+if (version_compare(PHP_VERSION, '8.0.0', 'lt'))
 {
 	$yourPHP = PHP_VERSION;
 	echo <<< END
 
 ! ! !    S T O P    ! ! !
 
-Akeeba Remote CLI requires PHP version 7.2.0 or later.
+Akeeba Remote CLI requires PHP version 8.0.0 or later.
 
 You are currently using PHP $yourPHP as reported by PHP itself.
 
-Please ugprade PHP and retry running this script.
+Please upgrade PHP and retry running this script.
 
 END;
 

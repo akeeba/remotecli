@@ -1,0 +1,126 @@
+<?php
+/**
+ * @package    AkeebaRemoteCLI
+ * @copyright  Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license    GNU General Public License version 3, or later
+ */
+
+
+namespace Akeeba\OLD\RemoteCLI\Command;
+
+
+use Akeeba\OLD\RemoteCLI\Input\Cli;
+use Akeeba\OLD\RemoteCLI\Output\Output;
+use Akeeba\RemoteCLI\Api\Exception\NoBackupID;
+use Akeeba\RemoteCLI\Api\HighLevel\Backup as BackupModel;
+use Akeeba\RemoteCLI\Api\HighLevel\Download;
+use Akeeba\RemoteCLI\Api\HighLevel\Information as TestModel;
+
+class Backup extends AbstractCommand
+{
+	public function execute(Cli $input, Output $output): void
+	{
+		$this->assertConfigured($input);
+
+		$testModel     = new TestModel();
+		$backupModel   = new BackupModel();
+		$downloadModel = new Download();
+		$mustDownload  = $input->getBool('download', false);
+
+		/**
+		 * DO NOT DELETE!
+		 *
+		 * If I need to download after backup I must do a preliminary validation of the download parameters. Otherwise
+		 * I might waste my time backing up before I realize that I cannot download the backup because some important
+		 * parameter was missing all along.
+		 */
+		if ($mustDownload)
+		{
+			$downloadParameters = $downloadModel->getValidatedParameters($input);
+		}
+
+		// Find the best options to connect to the API
+		$options = $this->getApiOptions($input);
+		$options = $testModel->getBestOptions($input, $output, $options);
+
+		// Take a backup
+		[$backupRecordID, $archive] = $backupModel->backup($input, $output, $options);
+
+		// Do I also need to download the backup archive?
+		if (!$mustDownload)
+		{
+			return;
+		}
+
+		$input->set('id', $backupRecordID);
+		$input->set('archive', $archive);
+		$input->set('part', -1);
+
+		/**
+		 * DO NOT DELETE!
+		 *
+		 * I have to get the download parameters *again* since I've updated $input with the backup information. However,
+		 * I can not delete neither this instance of getValidatedParameters nor the one above because BOTH are required
+		 * for different reasons: the former to validate the download configuration before taking a backup; the latter
+		 * to get the actual parameters which let me download the backup archive.
+		 */
+		$downloadParameters = $downloadModel->getValidatedParameters($input);
+		$downloadModel->download($downloadParameters, $output, $options);
+
+		// Do I also have to delete the files after I download them?
+		if ($downloadParameters['delete'])
+		{
+			$downloadModel->deleteFiles($downloadParameters['id'], $output, $options);
+		}
+	}
+
+	public function prepare(Cli $input): void
+	{
+		if ($input->getBool('d', false))
+		{
+			$input->set('download', true);
+		}
+
+		if ($input->getBool('D', false))
+		{
+			$input->set('delete', true);
+		}
+	}
+
+	public function startBackup(Cli $input, Output $output): void
+	{
+		$this->assertConfigured($input);
+
+		$testModel   = new TestModel();
+		$backupModel = new BackupModel();
+
+		// Find the best options to connect to the API
+		$options = $this->getApiOptions($input);
+		$options = $testModel->getBestOptions($input, $output, $options);
+
+		// Take a backup
+		$backupModel->startBackup($input, $output, $options);
+	}
+
+	public function stepBackup(Cli $input, Output $output): void
+	{
+		$this->assertConfigured($input);
+
+		$backupID = $input->getString('backupid');
+
+		if (!$backupID)
+		{
+			throw new NoBackupID();
+		}
+
+		$testModel   = new TestModel();
+		$backupModel = new BackupModel();
+
+		// Find the best options to connect to the API
+		$options = $this->getApiOptions($input);
+		$options = $testModel->getBestOptions($input, $output, $options);
+
+		// Take a backup
+		$backupModel->stepBackup($output, $options, $backupID);
+	}
+}

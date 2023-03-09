@@ -1,62 +1,60 @@
 <?php
-/**
+/*
  * @package    AkeebaRemoteCLI
- * @copyright  Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright  Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
 
-
 namespace Akeeba\RemoteCLI\Api;
 
-use Akeeba\RemoteCLI\Utility\Uri;
-
+use Akeeba\RemoteCLI\Api\Exception\NoConfiguredHost;
+use Akeeba\RemoteCLI\Api\Exception\NoConfiguredSecret;
+use Composer\CaBundle\CaBundle;
+use Joomla\Uri\Uri;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
- * Immutable options for the API
+ * Immutable options for the Akeeba Backup JSON API Connector
  *
- * @property-read   string $host           Protocol, hostname and path to the endpoint
- * @property-read   string $secret         Secret key to use in communications (used for authentication)
- * @property-read   string $endpoint       Endpoint file, defaults to index.php. Using remote.php clears format and
- *                  component.
- * @property-read   string $component      Component used in Joomla! sites, defaults to com_akeeba
- * @property-read   string $verb           HTTP verb to use in the API< defaults to GET
- * @property-read   string $format         Format used for Joomla! sites, defaults to html
- * @property-read   string $ua             User Agent string to use
- * @property-read   string $capath         Certificate Authority cache path
- * @property-read   bool   $verbose        Should I be verbose about what I'm doing?
- * @property-read   int    $encapsulation  The API encapsulation, defaults to AES-128 CBC
- * @property-read   bool   $legacy         Use legacy, unsafe AES CBC encryption (for old versions of Akeeba Backup /
- *                  Solo)
- * @property-read   string $view           View name. 'json' is the v1 JSON API. 'api' is the v2 JSON API.
- * @property-read   bool   $isWordPress    Is this a WordPress site using admin-ajax.php as the entry point?
+ * @property-read   string               $host           Protocol, hostname and path to the endpoint
+ * @property-read   string               $secret         Secret key to use in communications (used for authentication)
+ * @property-read   string               $endpoint       Endpoint file, e.g. index.php.
+ * @property-read   string               $component      Component used in Joomla! sites, defaults to com_akeeba
+ * @property-read   string               $verb           HTTP verb to use in the API, default: GET
+ * @property-read   string               $format         Format used for Joomla! sites, default: html
+ * @property-read   string               $ua             User Agent string
+ * @property-read   string               $capath         Certificate Authority cache path
+ * @property-read   bool                 $verbose        Enable verbose (debug) mode.
+ * @property-read   string               $view           View name. 'json' is v1 API, 'api' is v2 API.
+ * @property-read   bool                 $isWordPress    Is this a WordPress site using admin-ajax.php as entry point?
+ * @property-read   LoggerInterface|null $logger         PSR-3 compatible logger
  */
 class Options
 {
-	public const ENC_NONE = 0;
+	private string $capath = '';
 
-	private $capath = null;
+	private string $host = '';
 
-	private $component = null;
+	private string $verb = 'GET';
 
-	private $endpoint = 'index.php';
+	private string $endpoint = 'index.php';
 
-	private $format = '';
+	private string $component = '';
 
-	private $host;
+	private string $view = 'api';
 
-	private $legacy = false;
+	private string $format = '';
 
-	private $secret;
+	private string $secret = '';
 
-	private $ua = '';
+	private string $ua = 'AkeebaRemoteCLI/' . ARCCLI_VERSION;
 
-	private $verb = 'GET';
+	private bool $verbose = false;
 
-	private $verbose = false;
+	private bool $isWordPress = false;
 
-	private $view = 'api';
-
-	private $isWordPress = false;
+	private ?LoggerInterface $logger;
 
 	/**
 	 * OutputOptions constructor. The options you pass initialize the immutable object.
@@ -65,9 +63,9 @@ class Options
 	 * @param   bool   $strict   When enabled, unknown $options keys will throw an exception instead of silently
 	 *                           skipped.
 	 */
-	public function __construct(array $options, $strict = false)
+	public function __construct(array $options, bool $strict = false)
 	{
-		$this->ua = 'AkeebaRemoteCLI/' . ARCCLI_VERSION;
+		$this->logger = new NullLogger();
 
 		foreach ($options as $k => $v)
 		{
@@ -75,7 +73,13 @@ class Options
 			{
 				if ($strict)
 				{
-					throw new \LogicException(sprintf('Class %s does not have property ‘%s’', __CLASS__, $k));
+					throw new \LogicException(
+						sprintf(
+							'Class %s does not have property ‘%s’',
+							__CLASS__,
+							$k
+						)
+					);
 				}
 
 				continue;
@@ -84,8 +88,19 @@ class Options
 			$this->$k = $v;
 		}
 
+		// Make sure we have a secret
+		if (empty($this->secret))
+		{
+			throw new NoConfiguredSecret();
+		}
+
 		// Normalize the host definition
 		$this->parseHost();
+
+		if (empty($this->host))
+		{
+			throw new NoConfiguredHost();
+		}
 
 		// Akeeba Solo or Akeeba Backup for WordPress endpoint; do not use format and component parameters in the URL
 		if ($this->endpoint == 'remote.php')
@@ -93,9 +108,8 @@ class Options
 			$this->format    = '';
 			$this->component = '';
 		}
-
 		// Akeeba Solo or Akeeba Backup for WordPress endpoint; do not use format and component parameters in the URL
-		if ($this->endpoint == 'admin-ajax.php')
+		elseif ($this->endpoint == 'admin-ajax.php')
 		{
 			$this->format      = '';
 			$this->component   = '';
@@ -103,16 +117,16 @@ class Options
 		}
 
 		// Make sure I have a valid CA cache path
-		if (empty($this->capath))
+		if (empty($this->capath) || !CaBundle::validateCaFile($this->capath))
 		{
-			$this->capath = AKEEBA_CACERT_PEM;
+			$this->capath = CaBundle::getSystemCaRootBundlePath();
 		}
 	}
 
 	/**
 	 * Magic getter, used to implement read only properties.
 	 *
-	 * @param   string  $name  The name of the property bneing read
+	 * @param   string  $name  The name of the property being read
 	 *
 	 * @return  mixed
 	 */
@@ -123,7 +137,25 @@ class Options
 			return $this->$name;
 		}
 
-		throw new \LogicException(sprintf('Class %s does not have property ‘%s’', __CLASS__, $name));
+		throw new \LogicException(
+			sprintf(
+				'Class %s does not have property ‘%s’',
+				__CLASS__,
+				$name
+			)
+		);
+	}
+
+	public function toArray(): array
+	{
+		$currentOptions = [];
+
+		foreach ($this as $k => $v)
+		{
+			$currentOptions[$k] = $v;
+		}
+
+		return $currentOptions;
 	}
 
 	/**
@@ -133,16 +165,10 @@ class Options
 	 *
 	 * @return  self
 	 */
-	public function getModifiedClone(array $options): Options
+	public function getModifiedClone(array $options = []): self
 	{
-		$currentOptions = [];
-
-		foreach ($this as $k => $v)
-		{
-			$currentOptions[$k] = $v;
-		}
-
-		$options = array_replace_recursive($currentOptions, $options);
+		$currentOptions = $this->toArray();
+		$options        = array_replace_recursive($currentOptions, $options);
 
 		return new self($options);
 	}
@@ -240,7 +266,7 @@ class Options
 			return [$originalPath, ''];
 		}
 
-		// The path was "some/thing/whatever.ext". If .ext is .php I have an endpoint. Otherwise I will strip it.
+		// The path was "some/thing/whatever.ext". If .ext is .php I have an endpoint. Otherwise, I will strip it.
 		if (substr($endpoint, -4) == '.php')
 		{
 			return [$path, $endpoint];

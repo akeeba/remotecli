@@ -2,12 +2,6 @@
 	"name": "akeeba/remotecli",
 	"type": "project",
 	"description": "Akeeba Remote Control CLI",
-	"require": {
-		"php": ">=7.2.0 <=8.2",
-		"ext-curl": "*",
-		"ext-json": "*",
-		"composer/ca-bundle": "^1.2"
-	},
 	"keywords": [
 		"backup",
 		"php",
@@ -24,10 +18,20 @@
 			"role": "Lead Developer"
 		}
 	],
+	"require": {
+		"php": ">=8.0.0 <8.3",
+		"ext-curl": "*",
+		"ext-json": "*",
+		"psr/log": "^3.0.0",
+		"composer/ca-bundle": "^1.2",
+		"joomla/data": "^2.0.1",
+		"joomla/http": "^2.0.2",
+		"joomla/filesystem": "^2.0.2"
+	},
 	"config": {
 		"vendor-dir": "remotecli/vendor",
 		"platform": {
-			"php": "7.2.0"
+			"php": "8.0.999"
 		}
 	},
 	"autoload": {
