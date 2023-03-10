@@ -7,15 +7,14 @@
 
 namespace Akeeba\RemoteCLI\Api\HighLevel;
 
-use Akeeba\OLD\RemoteCLI\Output\Output;
 use Akeeba\RemoteCLI\Api\Connector;
 use Akeeba\RemoteCLI\Api\DataShape\DownloadOptions;
 use Akeeba\RemoteCLI\Api\Exception\CannotDownloadFile;
 use Akeeba\RemoteCLI\Api\Exception\CannotWriteFile;
+use Akeeba\RemoteCLI\Api\Exception\CommunicationError;
 use Akeeba\RemoteCLI\Api\Exception\NoBackupID;
 use Akeeba\RemoteCLI\Api\Exception\NoFilesInBackupRecord;
-use Akeeba\RemoteCLI\Api\Options;
-use Exception;
+use Akeeba\RemoteCLI\Api\Exception\NoSuchPart;
 use Psr\Log\LoggerInterface;
 
 class Download
@@ -50,31 +49,86 @@ class Download
 		}
 	}
 
+	private function downloadIntoFile(string $url, $fp, int $from = 0, int $to = 0): void
+	{
+		if ($to < $from)
+		{
+			[$to, $from] = [$from, $to];
+		}
+
+		$ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
+		curl_setopt($ch, CURLOPT_CAINFO, $this->connector->getOptions()->capath);
+		curl_setopt($ch, CURLOPT_FAILONERROR, true);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+
+		if (!empty($from) || !empty($to))
+		{
+			curl_setopt($ch, CURLOPT_RANGE, sprintf('%d-%d', $from, $to));
+		}
+
+		$result      = curl_exec($ch);
+		$errno       = curl_errno($ch);
+		$errmsg      = curl_error($ch);
+		$http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($result === false)
+		{
+			throw new CommunicationError(
+				$errno,
+				sprintf('PHP cURL library error #%d with message ‘%s’', $errno, $errmsg)
+			);
+		}
+
+		if ($http_status > 299)
+		{
+			throw new CommunicationError(
+				$http_status,
+				sprintf('Unexpected HTTP status %d', $http_status)
+			);
+		}
+	}
+
 	private function downloadHTTP(DownloadOptions $params): void
 	{
 		// Get the backup info
 		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params);
 
-		$path       = $params['path'];
+		$path       = $params->path;
 		$part_start = 1;
 		$part_end   = $parts;
 
 		// Was I asked to download only one specific part?
-		if ($params['part'] > 0)
+		if ($params->part > 0)
 		{
-			$part_start = $params['part'];
-			$part_end   = $params['part'];
+			$part_start = $params->part;
+			$part_end   = $params->part;
 		}
 
 		for ($part = $part_start; $part <= $part_end; $part++)
 		{
 			// Open file pointer
-			$name     = $fileInformation[$part]?->name;
-			$size     = $fileInformation[$part]?->size;
+			$name = $fileInformation[$part]?->name;
+			$size = $fileInformation[$part]?->size;
+
+			if (empty($name))
+			{
+				throw new NoSuchPart();
+			}
+
 			$filePath = $path . DIRECTORY_SEPARATOR . $name;
 			$fp       = @fopen($filePath, 'w');
 
-			if ($fp == false)
+			if ($fp === false)
 			{
 				throw new CannotWriteFile($filePath);
 			}
@@ -82,103 +136,104 @@ class Download
 			try
 			{
 				// Get the signed URL
-				$url = $api->makeURL('downloadDirect', [
-					'backup_id' => $params['id'],
+				$url = $this->connector->makeURL('downloadDirect', [
+					'backup_id' => $params->id,
 					'part_id'   => $part,
 				], true);
 
-				$fetcher = new Fetcher();
-
-				switch (strtolower($fetcher->getAdapterName()))
-				{
-					case 'curl':
-						$fetcher->setAdapterOptions([
-							CURLOPT_CAINFO => $options->capath,
-						]);
-						break;
-
-					case 'fopen':
-						$fetcher->setAdapterOptions([
-							'ssl' => [
-								'cafile' => $options->capath,
-							],
-						]);
-						break;
-				}
-
-				$fetcher->getFromURL($url, true, $fp);
+				$this->downloadIntoFile($url, $fp, 0, 0);
 			}
-			catch (Exception $e)
+			catch (CommunicationError $e)
 			{
-				// Close the file pointer before re-throwing the exception
+				throw new CannotDownloadFile(
+					sprintf(
+						'Could not download file ‘%s’ -- Network error “%s”',
+						$filePath,
+						$e->getMessage()
+					),
+					105,
+					$e
+				);
+			}
+			catch (\Throwable $e)
+			{
+				throw new CannotDownloadFile(
+					sprintf(
+						'Could not download file ‘%s’ -- Uncaught error “%s”',
+						$filePath,
+						$e->getMessage()
+					),
+					105,
+					$e
+				);
+			}
+			finally
+			{
 				fclose($fp);
-
-				throw new CannotDownloadFile(sprintf("Could not download file ‘%s’ -- Network error “%s”", $filePath, $e->getMessage()), 105, $e);
 			}
 
 			// Check file size
 			clearstatcache();
-			$sizematch = true;
-			$filesize  = @filesize($filePath);
+			$filesize = @filesize($filePath);
 
-			if (($filesize !== false) && ($filesize != $size))
+			if ($filesize !== false && $filesize != $size)
 			{
-				$output->warning(sprintf("Filesize mismatch on %s", $filePath));
+				$this->logger->warning(
+					sprintf(
+						'Filesize mismatch on %s -- Expected %d, got %d',
+						$filePath,
+						$filesize,
+						$size
+					)
+				);
 
-				$sizematch = false;
+				throw new CannotDownloadFile(
+					sprintf(
+						'Could not download file ‘%s’ -- Expected file size %d, got %d',
+						$filePath,
+						$filesize,
+						$size
+					),
+					105
+				);
 			}
 
-			if ($sizematch)
-			{
-				$filename = $params['filename'];
+			$filename = $params->filename;
 
-				// Try renaming
-				if (strlen($filename))
+			// Try renaming
+			if (strlen($filename))
+			{
+				@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
+
+				if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
 				{
-					@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
-
-					if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
-					{
-						$output->info(sprintf("Successfully renamed %s to %s", $name, $filename));
-					}
-					else
-					{
-						$output->info(sprintf("Failed to rename %s to %s", $name, $filename));
-					}
+					$this->logger->debug(sprintf("Successfully renamed %s to %s", $name, $filename));
 				}
-
-				$output->info(sprintf("Successfully downloaded %s", $name), true);
+				else
+				{
+					$this->logger->debug(sprintf("Failed to rename %s to %s", $name, $filename));
+				}
 			}
+
+			$this->logger->debug(sprintf("Successfully downloaded %s", $name));
 		}
 	}
 
-	/**
-	 * Download a backup archive using multiple chunk HTTP download through the JSON API. Recommended for larger
-	 * archives.
-	 *
-	 * @param   array    $params   The download parameters, as determined by getValidatedParameters
-	 * @param   Output   $output   The output handler object
-	 * @param   Options  $options  API options
-	 *
-	 * @return  void
-	 */
-	private function downloadChunk(array $params, Output $output, Options $options)
+	private function downloadChunk(DownloadOptions $params): void
 	{
 		// Get the backup info
-		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params, $output, $options);
+		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params);
 
-		$api        = new Connector($options, $output);
-		$path       = $params['path'];
-		$chunk_size = $params['chunkSize'];
-
+		$path       = $params->path;
+		$chunk_size = $params->chunkSize;
 		$part_start = 1;
 		$part_end   = $parts;
 
-		// Did I asked to download only one specific part?
-		if ($params['part'] > 0)
+		// Was I asked to download only one specific part?
+		if ($params->part > 0)
 		{
-			$part_start = $params['part'];
-			$part_end   = $params['part'];
+			$part_start = $params->part;
+			$part_end   = $params->part;
 		}
 
 		for ($part = $part_start; $part <= $part_end; $part++)
@@ -189,7 +244,7 @@ class Download
 			$filePath = $path . DIRECTORY_SEPARATOR . $name;
 			$fp       = @fopen($filePath, 'w');
 
-			if ($fp == false)
+			if ($fp === false)
 			{
 				throw new CannotWriteFile($filePath);
 			}
@@ -199,8 +254,8 @@ class Download
 
 			while (!$done)
 			{
-				$data = $api->doQuery('download', [
-					'backup_id'  => $params['id'],
+				$data = $this->connector->doQuery('download', [
+					'backup_id'  => $params->id,
 					'part'       => $part,
 					'segment'    => ++$frag,
 					'chunk_size' => $chunk_size,
@@ -211,16 +266,16 @@ class Download
 					case 200:
 						$rawData = base64_decode($data->body->data);
 						$len     = strlen($rawData); //echo "\tWriting $len bytes\n";
-						$output->debug(sprintf('Writing a chunk of %d bytes', $len));
+						$this->logger->debug(sprintf('Writing a chunk of %d bytes', $len));
 						fwrite($fp, $rawData);
 						unset($rawData);
 						unset($data);
 						break;
 
 					case 404:
-						if ($frag == 1)
+						if ($frag === 1)
 						{
-							throw new NoFilesInBackupRecord($params['id']);
+							throw new NoFilesInBackupRecord($params->id);
 						}
 
 						$done = true;
@@ -237,68 +292,68 @@ class Download
 
 			// Check file size
 			clearstatcache();
-			$sizematch = true;
-			$filesize  = @filesize($filePath);
+			$filesize = @filesize($filePath);
 
-			if (($filesize !== false) && ($filesize != $size))
+			if ($filesize !== false && $filesize != $size)
 			{
-				$output->warning(sprintf("Filesize mismatch on %s", $filePath));
+				$this->logger->warning(
+					sprintf(
+						'Filesize mismatch on %s -- Expected %d, got %d',
+						$filePath,
+						$filesize,
+						$size
+					)
+				);
 
-				$sizematch = false;
+				throw new CannotDownloadFile(
+					sprintf(
+						'Could not download file ‘%s’ -- Expected file size %d, got %d',
+						$filePath,
+						$filesize,
+						$size
+					),
+					105
+				);
 			}
 
-			if ($sizematch)
-			{
-				$filename = $params['filename'];
+			$filename = $params->filename;
 
-				// Try renaming
-				if (strlen($filename))
+			// Try renaming
+			if (strlen($filename))
+			{
+				@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
+
+				if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
 				{
-					@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
-
-					if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
-					{
-						$output->info(sprintf("Successfully renamed %s to %s", $name, $filename));
-					}
-					else
-					{
-						$output->info(sprintf("Failed to rename %s to %s", $name, $filename));
-					}
+					$this->logger->debug(sprintf("Successfully renamed %s to %s", $name, $filename));
 				}
-
-				$output->info(sprintf("Successfully downloaded %s", $name), true);
+				else
+				{
+					$this->logger->debug(sprintf("Failed to rename %s to %s", $name, $filename));
+				}
 			}
+
+			$this->logger->debug(sprintf("Successfully downloaded %s", $name));
 		}
 
 	}
 
-	/**
-	 * Download a backup archive using cURL, bypassing the JSON API. This is useful when you have (S)FTP or WebDAV
-	 * access to the location of your backup archives.
-	 *
-	 * @param   array    $params   The download parameters, as determined by getValidatedParameters
-	 * @param   Output   $output   The output handler object
-	 * @param   Options  $options  API options
-	 *
-	 * @return  void
-	 */
-	private function downloadCURL(array $params, Output $output, Options $options)
+	private function downloadCURL(DownloadOptions $params): void
 	{
 		// Get the backup info
-		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params, $output, $options);
+		[, $parts, $fileInformation] = $this->getBackupArchiveInformation($params);
 
-		$path           = $params['path'];
-		$url            = $params['url'];
-		$authentication = $params['authentication'];
+		$path           = $params->path;
+		$url            = $params->url;
+		$authentication = $params->authentication;
+		$part_start     = 1;
+		$part_end       = $parts;
 
-		$part_start = 1;
-		$part_end   = $parts;
-
-		// Did I asked to download only one specific part?
-		if ($params['part'] > 0)
+		// Was I asked to download only one specific part?
+		if ($params->part > 0)
 		{
-			$part_start = $params['part'];
-			$part_end   = $params['part'];
+			$part_start = $params->part;
+			$part_end   = $params->part;
 		}
 
 		for ($part = $part_start; $part <= $part_end; $part++)
@@ -309,7 +364,7 @@ class Download
 			$filePath = $path . DIRECTORY_SEPARATOR . $name;
 			$fp       = @fopen($filePath, 'w');
 
-			if ($fp == false)
+			if ($fp === false)
 			{
 				throw new CannotWriteFile($filePath);
 			}
@@ -324,10 +379,9 @@ class Download
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
-			//curl_setopt($ch, CURLOPT_TIMEOUT, 180);
 			curl_setopt($ch, CURLOPT_FILE, $fp);
 			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0.1) Gecko/20110506 Firefox/4.0.1');
-			curl_setopt($ch, CURLOPT_CAINFO, $options->capath);
+			curl_setopt($ch, CURLOPT_CAINFO, $this->connector->getOptions()->capath);
 
 			if (!empty($authentication))
 			{
@@ -345,56 +399,73 @@ class Download
 
 			if ($errno !== 0)
 			{
-				throw new CannotDownloadFile(sprintf("Could not download ‘%s’ over cURL -- cURL error #%d : %s", $filePath, $errno, $errmessage));
+				throw new CannotDownloadFile(
+					sprintf(
+						'Could not download ‘%s’ over cURL -- cURL error #%d : %s',
+						$filePath,
+						$errno,
+						$errmessage
+					)
+				);
 			}
 
 			if ($status === false)
 			{
-				throw new NoFilesInBackupRecord($params['id']);
+				throw new NoFilesInBackupRecord($params->id);
 			}
 
 			// Check file size
 			clearstatcache();
-			$sizematch = true;
 			$filesize  = @filesize($filePath);
 
-			if (($filesize !== false) && ($filesize != $size))
+			if ($filesize !== false && $filesize != $size)
 			{
-				$output->warning(sprintf("Filesize mismatch on %s", $filePath));
+				$this->logger->warning(
+					sprintf(
+						'Filesize mismatch on %s -- Expected %d, got %d',
+						$filePath,
+						$filesize,
+						$size
+					)
+				);
 
-				$sizematch = false;
+				throw new CannotDownloadFile(
+					sprintf(
+						'Could not download file ‘%s’ -- Expected file size %d, got %d',
+						$filePath,
+						$filesize,
+						$size
+					),
+					105
+				);
 			}
 
-			if ($sizematch)
-			{
-				$filename = $params['filename'];
+			$filename = $params->filename;
 
-				// Try renaming
-				if (strlen($filename))
+			// Try renaming
+			if (strlen($filename))
+			{
+				@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
+
+				if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
 				{
-					@rename($filePath, $path . DIRECTORY_SEPARATOR . $filename);
-
-					if (file_exists($path . DIRECTORY_SEPARATOR . $filename))
-					{
-						$output->info(sprintf("Successfully renamed %s to %s", $name, $filename));
-					}
-					else
-					{
-						$output->info(sprintf("Failed to rename %s to %s", $name, $filename));
-					}
+					$this->logger->debug(sprintf("Successfully renamed %s to %s", $name, $filename));
 				}
-
-				$output->info(sprintf("Successfully downloaded %s", $name), true);
+				else
+				{
+					$this->logger->debug(sprintf("Failed to rename %s to %s", $name, $filename));
+				}
 			}
-		}
 
+			$this->logger->debug(sprintf("Successfully downloaded %s", $name));
+		}
 	}
 
 	private function getBackupArchiveInformation(DownloadOptions $params): array
 	{
 		$data            = $this->connector->doQuery(
 			'getBackupInfo', [
-				'backup_id' => $params['id'],
+				'backup_id' => $params->id,
 			]
 		);
 		$parts           = $data->body->data->multipart;
@@ -413,7 +484,7 @@ class Download
 
 		if (!(is_array($fileDefinitions) || $fileDefinitions instanceof \Countable ? count($fileDefinitions) : 0))
 		{
-			throw new NoFilesInBackupRecord($params['id']);
+			throw new NoFilesInBackupRecord($params->id);
 		}
 
 		return [

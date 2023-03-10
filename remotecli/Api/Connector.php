@@ -5,10 +5,10 @@
  * @license    GNU General Public License version 3, or later
  */
 
-
 namespace Akeeba\RemoteCLI\Api;
 
 use Akeeba\RemoteCLI\Api\DataShape\BackupOptions;
+use Akeeba\RemoteCLI\Api\DataShape\DownloadOptions;
 use Akeeba\RemoteCLI\Api\Exception\InvalidEncapsulatedJSON;
 use Akeeba\RemoteCLI\Api\Exception\InvalidJSONBody;
 use Akeeba\RemoteCLI\Api\Exception\InvalidSecretWord;
@@ -25,8 +25,9 @@ use Psr\Log\LoggerInterface;
  * @method  object  backup(BackupOptions $backupOptions, ?callable $progressCallback = null) Start a backup
  * @method  array   getBackups(int $from = 0, $limit = 200)  List backups
  * @method  object  getBackup(int $id = 0)  Get a backup record
- * @method  void    deleteFiles(int $id)
- * @method  void    delete(int $id)
+ * @method  void    deleteFiles(int $id) Delete the files of a backup record
+ * @method  void    delete(int $id) Delete a backup record
+ * @method  void    download(DownloadOptions $options) Download a backup record
  *
  * @since 3.0.0
  */
@@ -206,9 +207,9 @@ class Connector
 		$this->http = (new HttpFactory())->getHttp(
 			[
 				'curl.certpath'   => $this->options->capath,
-				'stream.certpath' => $this->options->capath,
+				'follow_location' => 1,
 			],
-			['curl', 'stream']
+			['curl']
 		);
 	}
 
