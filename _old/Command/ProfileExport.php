@@ -9,10 +9,10 @@
 namespace Akeeba\OLD\RemoteCLI\Command;
 
 
-use Akeeba\OLD\RemoteCLI\Exception\NoProfileID;
 use Akeeba\OLD\RemoteCLI\Input\Cli;
-use Akeeba\OLD\RemoteCLI\Model\Profiles as ProfilesModel;
 use Akeeba\OLD\RemoteCLI\Output\Output;
+use Akeeba\RemoteCLI\Api\Exception\NoProfileID;
+use Akeeba\RemoteCLI\Api\HighLevel\GetProfiles as ProfilesModel;
 use Akeeba\RemoteCLI\Api\HighLevel\Information as TestModel;
 
 class ProfileExport extends AbstractCommand

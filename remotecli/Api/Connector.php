@@ -28,6 +28,9 @@ use Psr\Log\LoggerInterface;
  * @method  void    deleteFiles(int $id) Delete the files of a backup record
  * @method  void    delete(int $id) Delete a backup record
  * @method  void    download(DownloadOptions $options) Download a backup record
+ * @method  array   getProfiles() Get the backup profiles
+ * @method  array   importConfiguration(string $jsonData) Import a backup profile from JSON
+ * @method  array   exportConfiguration(int $id) Export a backup profile to JSON
  *
  * @since 3.0.0
  */
