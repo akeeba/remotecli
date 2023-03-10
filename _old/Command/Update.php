@@ -9,10 +9,10 @@
 namespace Akeeba\OLD\RemoteCLI\Command;
 
 
-use Akeeba\OLD\RemoteCLI\Exception\LiveUpdateStability;
 use Akeeba\OLD\RemoteCLI\Input\Cli;
-use Akeeba\OLD\RemoteCLI\Model\Update as UpdateModel;
 use Akeeba\OLD\RemoteCLI\Output\Output;
+use Akeeba\RemoteCLI\Api\Exception\LiveUpdateStability;
+use Akeeba\RemoteCLI\Api\HighLevel\GetUpdateInformation as UpdateModel;
 use Akeeba\RemoteCLI\Api\HighLevel\Information as TestModel;
 
 class Update extends AbstractCommand

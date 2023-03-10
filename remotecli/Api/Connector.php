@@ -31,6 +31,11 @@ use Psr\Log\LoggerInterface;
  * @method  array   getProfiles() Get the backup profiles
  * @method  array   importConfiguration(string $jsonData) Import a backup profile from JSON
  * @method  array   exportConfiguration(int $id) Export a backup profile to JSON
+ * @method  object  getUpdateInformation(bool $force = false) Get the update information of the backup product
+ * @method  void    downloadUpdate() Download the update package to the server
+ * @method  void    extractUpdate() Extracts the update package to the server
+ * @method  void    installUpdate() Performs the necessary installation steps for the update on the server
+ * @method  void    cleanupUpdate() Cleans up the download update package on the server
  *
  * @since 3.0.0
  */
