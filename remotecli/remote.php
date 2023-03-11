@@ -39,8 +39,10 @@ You are currently using PHP $yourPHP as reported by PHP itself.
 
 Please upgrade PHP and retry running this script.
 
+
 END;
 
+	exit(255);
 }
 
 // Enable compatibility with PHAR archives

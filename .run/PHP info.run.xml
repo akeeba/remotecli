@@ -5,7 +5,7 @@
   -->
 
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Help" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php">
+  <configuration default="false" name="PHP info" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="php">
     <method v="2" />
   </configuration>
 </component>
