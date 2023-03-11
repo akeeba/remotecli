@@ -119,6 +119,7 @@ $dispatcher = new Dispatcher([
 // Dispatch the application
 try
 {
+	$dispatcher->setDefaultCommand('help');
 	$dispatcher->dispatch();
 }
 catch (Exception $e)

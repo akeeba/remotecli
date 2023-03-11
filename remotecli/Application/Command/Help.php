@@ -25,10 +25,11 @@ class Help extends AbstractCommand
 		}
 
 		global $argv;
-		$self = $argv[0];
+		$self = basename($argv[0]);
 		$version = ARCCLI_VERSION;
 
 		echo <<< PLAINTEXT
+
 USAGE
 --------------------------------------------------------------------------------
 	$self <command> [options]
