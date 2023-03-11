@@ -19,23 +19,17 @@ class BackupInfo extends AbstractCommand
 {
 	public function execute(): void
 	{
-		$this->assertConfigured($this->input);
-
-		$testModel = new TestModel();
-		$model     = new BackupModel();
-
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions();
-		$options = $testModel->getBestOptions($input, $output, $options);
+		$this->assertConfigured();
 
 		// Get and print the backup records
-		$backup = $model->getBackup($input, $output, $options);
+		$id = $this->input->getInt('id');
+		$backup = $this->getApiObject()->getBackup($id);
 
-		$output->header("Statistic info for backup #".$input->getInt('id'));
+		$this->output->header("Statistic info for backup #" . $id);
 
 		if (empty($backup))
 		{
-			$output->warning('No backup records was found');
+			$this->logger->warning('No backup records was found');
 
 			return;
 		}
@@ -44,19 +38,20 @@ class BackupInfo extends AbstractCommand
 		$status = str_pad($status, 8);
 
 		// If multipart is 0 it means that's a single backup archive
-		$parts	= (!$backup->multipart ? 1 : $backup->multipart);
+		$parts = (!$backup->multipart ? 1 : $backup->multipart);
 
-		$line   = sprintf('%6u|%s|%s|%s|%s|%s|%s',
-							$backup->id,
-							$backup->backupstart,
-							$status,
-							$backup->description,
-							$backup->profile_id,
-							$parts,
-							$backup->size ?? ''
+		$line = sprintf('%6u|%s|%s|%s|%s|%s|%s',
+			$backup->id,
+			$backup->backupstart,
+			$status,
+			$backup->description,
+			$backup->profile_id,
+			$parts,
+			$backup->size ?? ''
 		);
 
-		$output->info($line, true);
+		$this->logger->debug($line);
+		$this->output->info($line, true);
 	}
 
 	/**

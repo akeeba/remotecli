@@ -19,19 +19,13 @@ class Delete extends AbstractCommand
 {
 	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured();
 
-		$testModel     = new TestModel();
-		$downloadModel = new DownloadModel();
+		$id = $this->input->getInt('id');
 
-		$id = $input->getInt('id');
+		$this->getApiObject()->delete($id);
 
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
-		$options = $testModel->getBestOptions($input, $output, $options);
-
-		// Now delete the files of that backup record
-		$downloadModel->delete($id, $output, $options);
+		$this->logger->info(sprintf('Deleted backup record #%d', $id));
 	}
 
 	/**

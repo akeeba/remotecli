@@ -21,22 +21,17 @@ class Update extends AbstractCommand
 	{
 		$this->assertConfigured();
 
-		$testModel   = new TestModel();
+		$apiObject = $this->getApiObject();
 
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
-		$options = $testModel->getBestOptions($input, $output, $options);
+		$updateInfo = $apiObject->getUpdateInformation();
 
-		$updateModel = new UpdateModel();
-		$updateInfo = $updateModel->getUpdateInformation($input, $output, $options);
-
-		$output->header('Update found');
-		$output->info("Version   : {$updateInfo->version}");
-		$output->info("Date      : {$updateInfo->date}");
-		$output->info("Stability : {$updateInfo->stability}");
+		$this->output->header('Update found');
+		$this->output->info("Version   : {$updateInfo->version}");
+		$this->output->info("Date      : {$updateInfo->date}");
+		$this->output->info("Stability : {$updateInfo->stability}");
 
 		// Is it stable enough?
-		$minStability = $input->getCmd('minimum-stability', 'alpha');
+		$minStability = $this->input->getCmd('minimum-stability', 'alpha');
 		$minStability = !in_array($minStability, ['alpha', 'beta', 'rc', 'stable']) ? 'alpha' : $minStability;
 		$stabilities = array('alpha' => 0, 'beta' => 30, 'rc' => 60, 'stable' => 100);
 		$min         = array_key_exists($minStability, $stabilities) ? $stabilities[$minStability] : 0;
@@ -47,21 +42,21 @@ class Update extends AbstractCommand
 			throw new LiveUpdateStability("The available version does not fulfil your minimum stability preferences");
 		}
 
-		$output->header('Downloading update');
-		$updateModel->downloadUpdate($input, $output, $options);
-		$output->info('Update downloaded to your server', true);
+		$this->output->header('Downloading update');
+		$apiObject->downloadUpdate();
+		$this->output->info('Update downloaded to your server', true);
 
-		$output->header('Extracting update');
-		$updateModel->extractUpdate($input, $output, $options);
-		$output->info('Update extracted to your server', true);
+		$this->output->header('Extracting update');
+		$apiObject->extractUpdate();
+		$this->output->info('Update extracted to your server', true);
 
-		$output->header('Installing update');
-		$updateModel->installUpdate($input, $output, $options);
-		$output->info('updateInstall', true);
+		$this->output->header('Installing update');
+		$apiObject->installUpdate();
+		$this->output->info('updateInstall', true);
 
-		$output->header('Cleaning up');
-		$updateModel->cleanupUpdate($input, $output, $options);
-		$output->info('Cleanup complete', true);
+		$this->output->header('Cleaning up');
+		$apiObject->cleanupUpdate();
+		$this->output->info('Cleanup complete', true);
 	}
 
 }

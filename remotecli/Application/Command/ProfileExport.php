@@ -19,24 +19,18 @@ class ProfileExport extends AbstractCommand
 {
 	public function execute(): void
 	{
-		$this->assertConfigured($input);
-
-		$testModel = new TestModel();
-		$model     = new ProfilesModel();
-
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
-		$options = $testModel->getBestOptions($input, $output, $options);
+		$this->assertConfigured();
 
 		// Get and print profile configuration
-		$profile_data = $model->exportConfiguration($input, $output, $options);
+		$id           = $this->input->getInt('id', 0);
+		$profile_data = $this->getApiObject()->exportConfiguration($id);
 
 		// base64 encode configuration and filters since there could some bad chars breaking the format
-		$configuration = base64_encode($profile_data->configuration);
-		$filters	   = base64_encode($profile_data->filters);
+		$configuration = base64_encode($profile_data['configuration']);
+		$filters       = base64_encode($profile_data['filters']);
 
-		$output->header(sprintf("Export data for profile %d", $input->getInt('id')));
-		$output->info(sprintf('%s|%s|%s', $profile_data->description, $configuration, $filters), true);
+		$this->output->header(sprintf("Export data for profile %d", $id));
+		$this->output->info(sprintf('%s|%s|%s', $profile_data['description'], $configuration, $filters), true);
 	}
 
 	protected function assertConfigured(): void

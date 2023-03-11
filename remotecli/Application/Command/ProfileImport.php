@@ -19,19 +19,13 @@ class ProfileImport extends AbstractCommand
 {
 	public function execute(): void
 	{
-		$this->assertConfigured($input);
-
-		$testModel = new TestModel();
-		$model     = new ProfilesModel();
-
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
-		$options = $testModel->getBestOptions($input, $output, $options);
+		$this->assertConfigured();
 
 		// Get and print profile configuration
-		$model->importConfiguration($input, $output, $options);
+		$data = $this->input->get('data', '', 'raw');
+		$this->getApiObject()->importConfiguration($data);
 
-		$output->info(sprintf("Profile imported"));
+		$this->output->info(sprintf("Profile imported"));
 	}
 
 	protected function assertConfigured(): void

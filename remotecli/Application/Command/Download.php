@@ -28,22 +28,21 @@ class Download extends AbstractCommand
 	{
 		$this->assertConfigured();
 
-		$testModel     = new TestModel();
-		$downloadModel = new DownloadModel();
+		$downloadParameters = $this->getDownloadOptions();
 
-		$downloadParameters = $downloadModel->getValidatedParameters($input);
+		$this->logger->info('Downloading the backup archive file(s).');
 
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
-		$options = $testModel->getBestOptions($input, $output, $options);
+		$this->getApiObject()->download($downloadParameters);
 
-		// Now download the backup archive
-		$downloadModel->download($downloadParameters, $output, $options);
+		$this->logger->info(sprintf('Downloaded the backup archive file(s) for backup record #%s', $downloadParameters->id));
 
-		// Do I also have to delete the files after I download them?
-		if ($downloadParameters['delete'])
+		if ($downloadParameters->delete)
 		{
-			$downloadModel->deleteFiles($downloadParameters['id'], $output, $options);
+			$this->logger->info('Deleting the backup archive file(s) from the server.');
+
+			$this->getApiObject()->deleteFiles($downloadParameters->id);
+
+			$this->logger->info(sprintf('Deleted the backup archive file(s) for backup record #%s', $downloadParameters->id));
 		}
 	}
 

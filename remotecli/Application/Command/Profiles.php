@@ -20,21 +20,14 @@ class Profiles extends AbstractCommand
 	{
 		$this->assertConfigured();
 
-		$testModel = new TestModel();
-		$model     = new ProfilesModel();
-
-		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
-		$options = $testModel->getBestOptions($input, $output, $options);
-
 		// Get and print the backup profiles
-		$profiles = $model->getProfiles($input, $output, $options);
+		$profiles = $this->getApiObject()->getProfiles();
 
-		$output->header("List of profiles");
+		$this->output->header("List of profiles");
 
 		if (empty($profiles))
 		{
-			$output->warning('No backup profiles were found');
+			$this->logger->warning('No backup profiles were found');
 
 			return;
 		}
@@ -43,7 +36,8 @@ class Profiles extends AbstractCommand
 		{
 			$line = sprintf('%4u|%s', $profile->id, $profile->name);
 
-			$output->info($line, true);
+			$this->logger->debug($line);
+			$this->output->info($line, true);
 		}
 	}
 }
