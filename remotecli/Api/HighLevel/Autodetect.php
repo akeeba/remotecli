@@ -142,9 +142,10 @@ class Autodetect
 
 		$options->logger->debug(
 			sprintf(
-				'Found a connection method. Component: %s, Verb: %s, Format: %s, Endpoint: %s',
-				$options->component,
+				'Found a connection method. Verb: %s, Component: %s, View: %s, Format: %s, Endpoint: %s',
 				$options->verb,
+				$options->component,
+				$options->view,
 				$options->format,
 				$options->endpoint
 			)

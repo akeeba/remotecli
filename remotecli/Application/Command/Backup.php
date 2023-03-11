@@ -75,6 +75,8 @@ class Backup extends AbstractCommand
 
 	public function prepare(): void
 	{
+		parent::prepare();
+
 		if ($this->input->getBool('d', false))
 		{
 			$this->input->set('download', true);

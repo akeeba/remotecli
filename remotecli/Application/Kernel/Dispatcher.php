@@ -98,8 +98,8 @@ class Dispatcher
 
 		$this->logger->debug(sprintf('Executing command %s', $this->command));
 
-		$commandObject->prepare($this->input);
-		$commandObject->execute($this->input, $this->output);
+		$commandObject->prepare();
+		$commandObject->execute();
 	}
 
 	/**

@@ -18,6 +18,8 @@ class Download extends AbstractCommand
 {
 	public function prepare(): void
 	{
+		parent::prepare();
+
 		if ($this->input->getBool('D', false))
 		{
 			$this->input->set('delete', true);
