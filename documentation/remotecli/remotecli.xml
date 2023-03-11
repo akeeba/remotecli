@@ -498,7 +498,7 @@
             to your site in order to download the backup archives.</para>
 
             <para>If you are using FTP, you have to specify something like
-            <option>--dlurl="ftp://username:password@hostname:port/path/to/output/directory</option></para>
+            <option>--dlurl="ftp://username:password@hostname:port/path/to/output/directory"</option></para>
 
             <para>Username and Password are your FTP username and password.
             Hostname is the FTP server's host name. Port is the numeric TCP/IP
@@ -514,7 +514,7 @@
             <para>Example:</para>
 
             <para><option>--dlurl="ftp://myuser:
-            mypassword@ftp.example.com:21/public_html/administrator/components/com_akeeba/backup
+            mypassword@ftp.example.com:21/public_html/administrator/components/com_akeeba/backup"
             </option></para>
 
             <important>

@@ -69,23 +69,28 @@ class Options
 
 		foreach ($options as $k => $v)
 		{
-			if (!property_exists($this, $k))
+			if (property_exists($this, $k))
 			{
-				if ($strict)
-				{
-					throw new \LogicException(
-						sprintf(
-							'Class %s does not have property ‘%s’',
-							__CLASS__,
-							$k
-						)
-					);
-				}
-
-				continue;
+				$this->$k = $v;
 			}
 
-			$this->$k = $v;
+			if ($strict)
+			{
+				throw new \LogicException(
+					sprintf(
+						'Class %s does not have property ‘%s’',
+						__CLASS__,
+						$k
+					)
+				);
+			}
+
+			continue;
+		}
+
+		if ($options['debug'] ?? false)
+		{
+			$this->verbose = true;
 		}
 
 		// Make sure we have a secret

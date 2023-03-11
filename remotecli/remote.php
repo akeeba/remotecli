@@ -5,22 +5,25 @@
  * @license    GNU General Public License version 3, or later
  */
 
-use Akeeba\OLD\RemoteCLI\Command\Backup;
-use Akeeba\OLD\RemoteCLI\Command\BackupInfo;
-use Akeeba\OLD\RemoteCLI\Command\Delete;
-use Akeeba\OLD\RemoteCLI\Command\Deletefiles;
-use Akeeba\OLD\RemoteCLI\Command\Download;
-use Akeeba\OLD\RemoteCLI\Command\License;
-use Akeeba\OLD\RemoteCLI\Command\Listbackups;
-use Akeeba\OLD\RemoteCLI\Command\PHP;
-use Akeeba\OLD\RemoteCLI\Command\Profiles;
-use Akeeba\OLD\RemoteCLI\Command\Test;
-use Akeeba\OLD\RemoteCLI\Command\Update;
-use Akeeba\OLD\RemoteCLI\Input\Cli;
-use Akeeba\OLD\RemoteCLI\Kernel\Dispatcher;
-use Akeeba\OLD\RemoteCLI\Output\Output;
-use Akeeba\OLD\RemoteCLI\Output\OutputOptions;
-use Akeeba\OLD\RemoteCLI\Utility\LocalFile;
+use Akeeba\RemoteCLI\Application\Command\Backup;
+use Akeeba\RemoteCLI\Application\Command\BackupInfo;
+use Akeeba\RemoteCLI\Application\Command\Delete;
+use Akeeba\RemoteCLI\Application\Command\Deletefiles;
+use Akeeba\RemoteCLI\Application\Command\Download;
+use Akeeba\RemoteCLI\Application\Command\Help;
+use Akeeba\RemoteCLI\Application\Command\License;
+use Akeeba\RemoteCLI\Application\Command\Listbackups;
+use Akeeba\RemoteCLI\Application\Command\PHP;
+use Akeeba\RemoteCLI\Application\Command\ProfileExport;
+use Akeeba\RemoteCLI\Application\Command\ProfileImport;
+use Akeeba\RemoteCLI\Application\Command\Profiles;
+use Akeeba\RemoteCLI\Application\Command\Test;
+use Akeeba\RemoteCLI\Application\Command\Update;
+use Akeeba\RemoteCLI\Application\Input\Cli;
+use Akeeba\RemoteCLI\Application\Kernel\Dispatcher;
+use Akeeba\RemoteCLI\Application\Output\Output;
+use Akeeba\RemoteCLI\Application\Output\OutputOptions;
+use Akeeba\RemoteCLI\Application\Utility\LocalFile;
 
 // PHP Version check
 if (version_compare(PHP_VERSION, '8.0.0', 'lt'))
@@ -78,7 +81,7 @@ $output          = new Output(
 $cacert_path    = \Composer\CaBundle\CaBundle::getBundledCaBundlePath();
 $cacertContents = file_get_contents($cacert_path);
 
-// Let's use the tmpfile trick: in this way the file will removed once the $temp_cacert goes out of scope
+// Let's use the tmpfile trick: in this way the file will be removed once the $temp_cacert goes out of scope
 $temp_cacert = tmpfile();
 $temp_cacert_path = stream_get_meta_data($temp_cacert)['uri'];
 
@@ -97,17 +100,20 @@ define('AKEEBA_CACERT_PEM', $temp_cacert_path);
 
 // Create the dispatcher with all the commands
 $dispatcher = new Dispatcher([
+	Help::class,
 	PHP::class,
 	License::class,
 	Test::class,
 	Backup::class,
+	BackupInfo::class,
 	Download::class,
 	Deletefiles::class,
 	Delete::class,
 	Profiles::class,
+	ProfileExport::class,
+	ProfileImport::class,
 	Listbackups::class,
 	Update::class,
-	BackupInfo::class,
 ], $input, $output);
 
 // Dispatch the application
