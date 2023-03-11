@@ -193,7 +193,11 @@ class Connector
 			$uri->delVar('format');
 		}
 
-		return $uri->toString();
+		// Work around the Joomla Framework mysteriously choosing to URL-decode the query string, breaking the URL...
+		$query = $uri->getQuery(true);
+		$uri->setQuery('');
+
+		return $uri->toString() . '?' . http_build_query($query, '', null, PHP_QUERY_RFC3986);
 	}
 
 	public function getOptions(array $overrides = []): Options
