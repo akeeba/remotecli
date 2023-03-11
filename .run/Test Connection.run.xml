@@ -1,5 +1,11 @@
+<!--
+  ~ @package    AkeebaRemoteCLI
+  ~ @copyright  Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license    GNU General Public License version 3, or later
+  -->
+
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Test Connection" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="test -h &quot;https://boot4.local.web&quot; -s xkuyyoawjQvxfTMUe1t2nBZDM9WVt6tB --debug">
+  <configuration default="false" name="Test Connection" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="test -h &quot;https://boot4.local.web&quot; -s xkuyyoawjQvxfTMUe1t2nBZDM9WVt6tB --certificate /etc/apache2/ssl/boot4.local.web.crt --debug">
     <CommandLine workingDirectory="$PROJECT_DIR$" />
     <method v="2" />
   </configuration>

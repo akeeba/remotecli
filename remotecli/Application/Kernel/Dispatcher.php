@@ -10,24 +10,19 @@ namespace Akeeba\RemoteCLI\Application\Kernel;
 use Akeeba\RemoteCLI\Application\Exception\InvalidCommand;
 use Akeeba\RemoteCLI\Application\Exception\NoCommand;
 use Akeeba\RemoteCLI\Application\Input\Cli;
+use Akeeba\RemoteCLI\Application\Logger\File;
+use Akeeba\RemoteCLI\Application\Logger\MultiLogger;
+use Akeeba\RemoteCLI\Application\Logger\Output as OutputLogger;
 use Akeeba\RemoteCLI\Application\Output\Output;
+use Psr\Log\LoggerInterface;
 
 class Dispatcher
 {
-	/** @var   string  The name of the default command, in case none is specified */
-	protected $defaultCommand = '';
+	protected string $defaultCommand = '';
 
-	/** @var   Cli  Input variables */
-	protected $input = array();
+	protected string $command;
 
-	/** @var   Output  Output handler */
-	protected $output;
-
-	/** @var string  The command which will be routed by the dispatcher */
-	protected $command;
-
-	/** @var CommandInterface[] */
-	protected $commands = [];
+	protected LoggerInterface $logger;
 
 	/**
 	 * Public constructor
@@ -36,33 +31,19 @@ class Dispatcher
 	 * @param   Cli                          $input     Input handler
 	 * @param   Output                       $output    Output handler
 	 */
-	public function __construct(array $commands, Cli $input, Output $output)
+	public function __construct(private array $commands, private Cli $input, private Output $output)
 	{
-		$this->input    = $input;
-		$this->output   = $output;
-		$this->commands = [];
+		$this->logger = $this->createLogger($input, $output);
 
-		foreach ($commands as $command)
-		{
-			if (is_object($command) && ($command instanceof CommandInterface))
-			{
-				$this->commands[] = $command;
-
-				continue;
-			}
-
-			if (!is_string($command))
-			{
-				continue;
-			}
-
-			if (!is_subclass_of($command, CommandInterface::class))
-			{
-				continue;
-			}
-
-			$this->commands[] = new $command;
-		}
+		$this->commands = array_map(
+			fn($x) => $x->setLogger($this->logger),
+			array_filter(
+				array_map(
+					fn($x) => new $x,
+					$this->commands
+				)
+			)
+		);
 
 		$this->determineCommand();
 	}
@@ -118,6 +99,8 @@ class Dispatcher
 			throw new InvalidCommand($this->command);
 		}
 
+		$this->logger->debug(sprintf('Executing command %s', $this->command));
+
 		$commandObject->prepare($this->input);
 		$commandObject->execute($this->input, $this->output);
 	}
@@ -144,6 +127,11 @@ class Dispatcher
 		$this->defaultCommand = $defaultCommand;
 	}
 
+	public function getLogger(): LoggerInterface
+	{
+		return $this->logger;
+	}
+
 	/**
 	 * Determine the command to execute.
 	 *
@@ -152,23 +140,20 @@ class Dispatcher
 	 */
 	protected function determineCommand(): void
 	{
-		$this->command = $this->input->getCmd('action', null);
+		$command = $this->input->getCmd('action', null);
 
-		if (empty($this->command))
+		if (empty($command))
 		{
 			$args = $this->input->getArguments();
 
 			if (is_array($args) && !empty($args))
 			{
-				$this->command = array_shift($args);
+				$command = array_shift($args);
 			}
 		}
 
 		// Not redundant; if no command is set we have to use the default.
-		if (empty($this->command))
-		{
-			$this->command = $this->defaultCommand;
-		}
+		$this->command = $command ?: $this->defaultCommand;
 	}
 
 	/**
@@ -202,5 +187,24 @@ Copyright ©2006-$year Nicholas K. Dionysopoulos / Akeeba Ltd.
 --------------------------------------------------------------------------------
 
 BANNER;
+	}
+
+	private function createLogger(Cli $input, Output $output): LoggerInterface
+	{
+		$debug  = $input->getBool('debug', false);
+		$quiet = $input->getBool('quiet', false);
+
+		$logger = new OutputLogger($output, $debug, $quiet);
+
+		if ($debug)
+		{
+			// ALso log to a file
+			$logger = new MultiLogger([
+				$logger,
+				new File(getcwd() . '/remotecli_log.txt')
+			]);
+		}
+
+		return $logger;
 	}
 }

@@ -126,13 +126,13 @@ try
 }
 catch (Exception $e)
 {
-	$output->error(sprintf('Error #%d - %s', $e->getCode(), $e->getMessage()));
+	$dispatcher->getLogger()->error(sprintf('Error #%d - %s', $e->getCode(), $e->getMessage()));
 
-	$output->debug("Stack Trace (for debugging):");
+	$dispatcher->getLogger()->debug("Stack Trace (for debugging):");
 
 	foreach (explode("\n", $e->getTraceAsString()) as $line)
 	{
-		$output->debug($line);
+		$dispatcher->getLogger()->debug($line);
 	}
 
 	exit($e->getCode());

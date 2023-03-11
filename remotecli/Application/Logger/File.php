@@ -53,10 +53,11 @@ class File extends AbstractLogger implements LoggerInterface
 		fputs(
 			$this->fp,
 			sprintf(
-				'%-10s| %-20s| %s',
-				$level,
+				'%-10s| %-20s| %s%s',
+				strtoupper($level),
 				(new \DateTime())->format('Y-m-d H:i:s'),
-				$message
+				$message,
+				PHP_EOL
 			)
 		);
 	}

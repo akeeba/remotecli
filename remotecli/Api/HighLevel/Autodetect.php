@@ -140,6 +140,16 @@ class Autodetect
 			throw new RemoteApiVersionTooLow(102, $lastException);
 		}
 
+		$options->logger->debug(
+			sprintf(
+				'Found a connection method. Component: %s, Verb: %s, Format: %s, Endpoint: %s',
+				$options->component,
+				$options->verb,
+				$options->format,
+				$options->endpoint
+			)
+		);
+
 		$this->connector->setOptions($options);
 	}
 
@@ -153,13 +163,14 @@ class Autodetect
 	private function getComponents(Options $options): array
 	{
 		$defaultComponents = ['com_akeebabackup', 'com_akeeba', ''];
+		$component = $options->component;
 
-		if ($options->component === null)
+		if ($options->component == '')
 		{
 			return $defaultComponents;
 		}
 
-		return [strtolower($options->component ?: null)];
+		return empty($component) ? $defaultComponents : [strtolower($options->component ?: null)];
 	}
 
 	/**

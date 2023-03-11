@@ -9,10 +9,10 @@
 namespace Akeeba\RemoteCLI\Application\Command;
 
 
-use Akeeba\RemoteCLI\Application\Input\Cli;
-use Akeeba\RemoteCLI\Application\Output\Output;
 use Akeeba\RemoteCLI\Api\HighLevel\Backup as BackupModel;
 use Akeeba\RemoteCLI\Api\HighLevel\Information as TestModel;
+use Akeeba\RemoteCLI\Application\Input\Cli;
+use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Listbackups extends AbstractCommand
 {

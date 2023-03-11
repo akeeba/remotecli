@@ -14,9 +14,6 @@ use Akeeba\RemoteCLI\Api\Exception\NoConfiguredSecret;
 use Akeeba\RemoteCLI\Api\Options;
 use Akeeba\RemoteCLI\Application\Input\Cli;
 use Akeeba\RemoteCLI\Application\Kernel\CommandInterface;
-use Akeeba\RemoteCLI\Application\Logger\File;
-use Akeeba\RemoteCLI\Application\Logger\MultiLogger;
-use Akeeba\RemoteCLI\Application\Logger\Output as OutputLogger;
 use Akeeba\RemoteCLI\Application\Output\Output;
 use Psr\Log\LoggerInterface;
 
@@ -40,6 +37,13 @@ abstract class AbstractCommand implements CommandInterface
 		{
 			$input->set('secret', $opt);
 		}
+	}
+
+	public function setLogger(LoggerInterface $logger): self
+	{
+		$this->logger = $logger;
+
+		return $this;
 	}
 
 	/**
@@ -87,7 +91,7 @@ abstract class AbstractCommand implements CommandInterface
 	protected function getApiObject(Cli $input, Output $output, array $additional = []): Connector
 	{
 		$additional = array_merge([
-			'logger' => $this->getLogger($input, $output),
+			'logger' => $this->logger,
 		], $additional);
 		$options    = $this->getApiOptions($input, $additional);
 
@@ -110,29 +114,5 @@ abstract class AbstractCommand implements CommandInterface
 			'chunkSize' => $input->getInt('chunk_size', 0),
 			'url'       => $input->getString('dlurl', ''),
 		]);
-	}
-
-	private function getLogger(Cli $input, Output $output): LoggerInterface
-	{
-		if (isset($this->logger))
-		{
-			return $this->logger;
-		}
-
-		$debug  = $input->getBool('debug', false);
-		$quiet = $input->getBool('quiet', false);
-
-		$this->logger = new OutputLogger($output, $debug, $quiet);
-
-		if ($debug)
-		{
-			// ALso log to a file
-			$this->logger = new MultiLogger([
-				$this->logger,
-				new File(getcwd() . '/remotecli_log.txt')
-			]);
-		}
-
-		return $this->logger;
 	}
 }
