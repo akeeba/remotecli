@@ -31,12 +31,12 @@ abstract class AbstractCommand implements CommandInterface
 			$input->set('machine-readable', true);
 		}
 
-		if ($opt = $input->get('h', null))
+		if ($opt = $input->get('h', null, 'raw'))
 		{
 			$input->set('host', $opt);
 		}
 
-		if ($opt = $input->get('s', null))
+		if ($opt = $input->get('s', null, 'raw'))
 		{
 			$input->set('secret', $opt);
 		}

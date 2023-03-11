@@ -15,5 +15,6 @@
 
 /remotecli/arccli_version.php
 /remotecli/vendor
+/remotecli_log.txt
 
 /old_remotecli/arccli_version.php

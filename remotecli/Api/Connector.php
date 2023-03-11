@@ -58,7 +58,7 @@ class Connector
 		{
 			$class = __NAMESPACE__ . '\\HighLevel\\' . ucfirst($name);
 
-			if (!class_exists($class) || !is_callable($class))
+			if (!(class_exists($class, true)))
 			{
 				throw new \BadMethodCallException(
 					sprintf(
@@ -73,7 +73,7 @@ class Connector
 			$this->callables[$name] = new $class($this);
 		}
 
-		return call_user_func($name, ...$arguments);
+		return call_user_func($this->callables[$name], ...$arguments);
 	}
 
 	public function doQuery(string $apiMethod, array $data = []): object

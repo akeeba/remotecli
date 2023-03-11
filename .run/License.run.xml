@@ -1,11 +1,6 @@
-<!--
-  ~ @package    AkeebaRemoteCLI
-  ~ @copyright  Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
-  ~ @license    GNU General Public License version 3, or later
-  -->
-
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="License" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="license">
+    <CommandLine workingDirectory="$PROJECT_DIR$" />
     <method v="2" />
   </configuration>
 </component>
