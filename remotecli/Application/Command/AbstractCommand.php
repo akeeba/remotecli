@@ -19,31 +19,26 @@ use Psr\Log\LoggerInterface;
 
 abstract class AbstractCommand implements CommandInterface
 {
-	private LoggerInterface $logger;
-
-	public function prepare(Cli $input): void
+	public function __construct(protected Cli $input, protected Output $output, protected LoggerInterface $logger)
 	{
-		if ($input->getBool('m', false))
-		{
-			$input->set('machine-readable', true);
-		}
-
-		if ($opt = $input->get('h', null, 'raw'))
-		{
-			$input->set('host', $opt);
-		}
-
-		if ($opt = $input->get('s', null, 'raw'))
-		{
-			$input->set('secret', $opt);
-		}
 	}
 
-	public function setLogger(LoggerInterface $logger): self
+	public function prepare(): void
 	{
-		$this->logger = $logger;
+		if ($this->input->getBool('m', false))
+		{
+			$this->input->set('machine-readable', true);
+		}
 
-		return $this;
+		if ($opt = $this->input->get('h', null, 'raw'))
+		{
+			$this->input->set('host', $opt);
+		}
+
+		if ($opt = $this->input->get('s', null, 'raw'))
+		{
+			$this->input->set('secret', $opt);
+		}
 	}
 
 	/**
@@ -51,18 +46,16 @@ abstract class AbstractCommand implements CommandInterface
 	 * only checking that a host name and a secret key have been provided and are not empty. If the configuration check
 	 * fails a suitable exception will be thrown.
 	 *
-	 * @param   Cli  $input  The input object.
-	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input): void
+	protected function assertConfigured(): void
 	{
-		if (empty($input->getCmd('host', null)))
+		if (empty($this->input->getCmd('host', null)))
 		{
 			throw new NoConfiguredHost();
 		}
 
-		if (empty($input->getCmd('secret', null)))
+		if (empty($this->input->getCmd('secret', null)))
 		{
 			throw new NoConfiguredSecret();
 		}
@@ -71,14 +64,13 @@ abstract class AbstractCommand implements CommandInterface
 	/**
 	 * Return API options based on the command line parameters and the additional options defined programmatically.
 	 *
-	 * @param   Cli    $input       The input object.
 	 * @param   array  $additional  Any additional parameters you are defining.
 	 *
 	 * @return  Options
 	 */
-	protected function getApiOptions(Cli $input, array $additional = []): Options
+	protected function getApiOptions(array $additional = []): Options
 	{
-		$options = array_replace_recursive($input->getData(), [
+		$options = array_replace_recursive($this->input->getData(), [
 			'capath' => AKEEBA_CACERT_PEM,
 		], $additional);
 
@@ -88,12 +80,12 @@ abstract class AbstractCommand implements CommandInterface
 		return new Options($options, false);
 	}
 
-	protected function getApiObject(Cli $input, Output $output, array $additional = []): Connector
+	protected function getApiObject(array $additional = []): Connector
 	{
 		$additional = array_merge([
 			'logger' => $this->logger,
 		], $additional);
-		$options    = $this->getApiOptions($input, $additional);
+		$options    = $this->getApiOptions($additional);
 
 		$api = new Connector($options);
 
@@ -102,17 +94,17 @@ abstract class AbstractCommand implements CommandInterface
 		return $api;
 	}
 
-	protected function getDownloadOptions(Cli $input): DownloadOptions
+	protected function getDownloadOptions(): DownloadOptions
 	{
 		return new DownloadOptions([
-			'mode'      => $input->getCmd('dlmode', 'http'),
-			'path'      => $input->getPath('dlpath', getcwd()),
-			'id'        => $input->getInt('id', 0),
-			'filename'  => $input->getString('', ''),
-			'delete'    => $input->getBool('delete', false),
-			'part'      => $input->getInt('part', -1),
-			'chunkSize' => $input->getInt('chunk_size', 0),
-			'url'       => $input->getString('dlurl', ''),
+			'mode'      => $this->input->getCmd('dlmode', 'http'),
+			'path'      => $this->input->getPath('dlpath', getcwd()),
+			'id'        => $this->input->getInt('id', 0),
+			'filename'  => $this->input->getString('', ''),
+			'delete'    => $this->input->getBool('delete', false),
+			'part'      => $this->input->getInt('part', -1),
+			'chunkSize' => $this->input->getInt('chunk_size', 0),
+			'url'       => $this->input->getString('dlurl', ''),
 		]);
 	}
 }

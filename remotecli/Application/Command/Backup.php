@@ -15,11 +15,11 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Backup extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured();
 
-		$mustDownload  = $input->getBool('download', false);
+		$mustDownload  = $this->input->getBool('download', false);
 
 		/**
 		 * DO NOT DELETE!
@@ -30,17 +30,17 @@ class Backup extends AbstractCommand
 		 */
 		if ($mustDownload)
 		{
-			$this->getDownloadOptions($input);
+			$this->getDownloadOptions();
 		}
 
 		// Find the best options to connect to the API
-		$api = $this->getApiObject($input, $output);
+		$api = $this->getApiObject();
 
 		// Take a backup
 		$backupOptions = new BackupOptions(			[
-			'profile'     => $input->getInt('profile', 1),
-			'description' => $input->get('description', 'Remote backup', 'raw'),
-			'comment'     => $input->get('comment', '', 'raw'),
+			'profile'     => $this->input->getInt('profile', 1),
+			'description' => $this->input->get('description', 'Remote backup', 'raw'),
+			'comment'     => $this->input->get('comment', '', 'raw'),
 		]);
 
 		[$backupRecordID, $archive] = $api->backup($backupOptions);
@@ -51,9 +51,9 @@ class Backup extends AbstractCommand
 			return;
 		}
 
-		$input->set('id', $backupRecordID);
-		$input->set('archive', $archive);
-		$input->set('part', -1);
+		$this->input->set('id', $backupRecordID);
+		$this->input->set('archive', $archive);
+		$this->input->set('part', -1);
 
 		/**
 		 * DO NOT DELETE!
@@ -63,7 +63,7 @@ class Backup extends AbstractCommand
 		 * for different reasons: the former to validate the download configuration before taking a backup; the latter
 		 * to get the actual parameters which let me download the backup archive.
 		 */
-		$downloadParameters = $this->getDownloadOptions($input);
+		$downloadParameters = $this->getDownloadOptions();
 		$api->download($downloadParameters);
 
 		// Do I also have to delete the files after I download them?
@@ -73,16 +73,16 @@ class Backup extends AbstractCommand
 		}
 	}
 
-	public function prepare(Cli $input): void
+	public function prepare(): void
 	{
-		if ($input->getBool('d', false))
+		if ($this->input->getBool('d', false))
 		{
-			$input->set('download', true);
+			$this->input->set('download', true);
 		}
 
-		if ($input->getBool('D', false))
+		if ($this->input->getBool('D', false))
 		{
-			$input->set('delete', true);
+			$this->input->set('delete', true);
 		}
 	}
 }

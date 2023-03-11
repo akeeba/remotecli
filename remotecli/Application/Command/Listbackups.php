@@ -16,7 +16,7 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Listbackups extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
 		$this->assertConfigured($input);
 

@@ -17,14 +17,14 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Deletefiles extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured($this->input);
 
 		$testModel     = new TestModel();
 		$downloadModel = new DownloadModel();
 
-		$id = $input->getInt('id');
+		$id = $this->input->getInt('id');
 
 		// Find the best options to connect to the API
 		$options = $this->getApiOptions($input);
@@ -43,11 +43,11 @@ class Deletefiles extends AbstractCommand
 	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input): void
+	protected function assertConfigured(): void
 	{
-		parent::assertConfigured($input);
+		parent::assertConfigured();
 
-		$id = $input->getInt('id', -1);
+		$id = $this->input->getInt('id', -1);
 
 		if ($id <= 0)
 		{

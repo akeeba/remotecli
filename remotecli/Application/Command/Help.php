@@ -15,11 +15,11 @@ class Help extends AbstractCommand
 	/**
 	 * @inheritDoc
 	 */
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		if ($input->getBool('quiet') || $input->getBool('m') || $input->getBool('machine-readable'))
+		if ($this->input->getBool('quiet') || $this->input->getBool('m') || $this->input->getBool('machine-readable'))
 		{
-			$output->error('Help is only available in regular (not machine-readable) output format.');
+			$this->output->error('Help is only available in regular (not machine-readable) output format.');
 
 			return;
 		}

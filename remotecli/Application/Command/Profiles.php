@@ -16,9 +16,9 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Profiles extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured();
 
 		$testModel = new TestModel();
 		$model     = new ProfilesModel();

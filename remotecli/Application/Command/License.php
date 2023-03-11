@@ -14,7 +14,7 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class License extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
 		echo file_get_contents(__DIR__ . '/../../LICENSE.txt');
 	}

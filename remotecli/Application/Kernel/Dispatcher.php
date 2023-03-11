@@ -35,13 +35,10 @@ class Dispatcher
 	{
 		$this->logger = $this->createLogger($input, $output);
 
-		$this->commands = array_map(
-			fn($x) => $x->setLogger($this->logger),
-			array_filter(
-				array_map(
-					fn($x) => new $x,
-					$this->commands
-				)
+		$this->commands = array_filter(
+			array_map(
+				fn($x) => new $x($this->input, $this->output, $this->logger),
+				$this->commands
 			)
 		);
 
@@ -191,7 +188,7 @@ BANNER;
 
 	private function createLogger(Cli $input, Output $output): LoggerInterface
 	{
-		$debug  = $input->getBool('debug', false);
+		$debug = $input->getBool('debug', false);
 		$quiet = $input->getBool('quiet', false);
 
 		$logger = new OutputLogger($output, $debug, $quiet);
@@ -201,7 +198,7 @@ BANNER;
 			// ALso log to a file
 			$logger = new MultiLogger([
 				$logger,
-				new File(getcwd() . '/remotecli_log.txt')
+				new File(getcwd() . '/remotecli_log.txt'),
 			]);
 		}
 

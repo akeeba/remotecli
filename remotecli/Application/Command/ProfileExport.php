@@ -17,7 +17,7 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class ProfileExport extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
 		$this->assertConfigured($input);
 
@@ -39,11 +39,11 @@ class ProfileExport extends AbstractCommand
 		$output->info(sprintf('%s|%s|%s', $profile_data->description, $configuration, $filters), true);
 	}
 
-	protected function assertConfigured(Cli $input): void
+	protected function assertConfigured(): void
 	{
-		parent::assertConfigured($input);
+		parent::assertConfigured();
 
-		$id = $input->getInt('id', -1);
+		$id = $this->input->getInt('id', -1);
 
 		if ($id <= 0)
 		{

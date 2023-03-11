@@ -17,15 +17,15 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class BackupInfo extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured($this->input);
 
 		$testModel = new TestModel();
 		$model     = new BackupModel();
 
 		// Find the best options to connect to the API
-		$options = $this->getApiOptions($input);
+		$options = $this->getApiOptions();
 		$options = $testModel->getBestOptions($input, $output, $options);
 
 		// Get and print the backup records
@@ -68,11 +68,11 @@ class BackupInfo extends AbstractCommand
 	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input): void
+	protected function assertConfigured(): void
 	{
-		parent::assertConfigured($input);
+		parent::assertConfigured();
 
-		$id = $input->getInt('id', -1);
+		$id = $this->input->getInt('id', -1);
 
 		if ($id <= 0)
 		{

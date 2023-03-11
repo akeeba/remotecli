@@ -17,7 +17,7 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Delete extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
 		$this->assertConfigured($input);
 
@@ -43,11 +43,11 @@ class Delete extends AbstractCommand
 	 *
 	 * @return  void
 	 */
-	protected function assertConfigured(Cli $input): void
+	protected function assertConfigured(): void
 	{
-		parent::assertConfigured($input);
+		parent::assertConfigured();
 
-		$id = $input->getInt('id', -1);
+		$id = $this->input->getInt('id', -1);
 
 		if ($id <= 0)
 		{

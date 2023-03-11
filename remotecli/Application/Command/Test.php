@@ -12,19 +12,19 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Test extends AbstractCommand
 {
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured();
 
-		$api         = $this->getApiObject($input, $output);
+		$api         = $this->getApiObject();
 		$apiResult   = $api->information();
 		$versionInfo = $apiResult->body->data;
 		$version     = $versionInfo->component . ' (API level ' . $apiResult->body->data->api . ')';
 		$edition     = ($versionInfo->edition == 'pro') ? 'Professional' : 'Core';
 
-		$output->info("Successful connection to site");
-		$output->info("Akeeba Backup / Solo $edition $version");
-		$output->info('');
+		$this->output->info("Successful connection to site");
+		$this->output->info("Akeeba Backup / Solo $edition $version");
+		$this->output->info('');
 	}
 
 }

@@ -16,17 +16,17 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Download extends AbstractCommand
 {
-	public function prepare(Cli $input): void
+	public function prepare(): void
 	{
-		if ($input->getBool('D', false))
+		if ($this->input->getBool('D', false))
 		{
-			$input->set('delete', true);
+			$this->input->set('delete', true);
 		}
 	}
 
-	public function execute(Cli $input, Output $output): void
+	public function execute(): void
 	{
-		$this->assertConfigured($input);
+		$this->assertConfigured();
 
 		$testModel     = new TestModel();
 		$downloadModel = new DownloadModel();
