@@ -19,7 +19,7 @@ class Backup extends AbstractCommand
 	{
 		$this->assertConfigured();
 
-		$mustDownload  = $this->input->getBool('download', false);
+		$mustDownload = $this->input->getBool('download', false);
 
 		/**
 		 * DO NOT DELETE!
@@ -37,19 +37,53 @@ class Backup extends AbstractCommand
 		$api = $this->getApiObject();
 
 		// Take a backup
-		$backupOptions = new BackupOptions(			[
+		$backupOptions = new BackupOptions([
 			'profile'     => $this->input->getInt('profile', 1),
 			'description' => $this->input->get('description', 'Remote backup', 'raw'),
 			'comment'     => $this->input->get('comment', '', 'raw'),
 		]);
 
-		[$backupRecordID, $archive] = $api->backup($backupOptions);
+		$backupResult   = $api->backup(
+			$backupOptions,
+			function ($data)
+			{
+				$this->output->info('Received backup tick');
+				$this->output->info(sprintf('Domain   : %s', $data->Domain));
+				$this->output->info(sprintf('Step     : %s', $data->Step));
+				$this->output->info(sprintf('Substep  : %s', $data->Substep));
+				$this->output->info(sprintf('Progress : %0.2f%%', $data->Progress));
+
+				if (!empty($data->Warnings))
+				{
+					$this->output->info('Warnings :');
+
+					foreach ($data->Warnings as $warning)
+					{
+						$this->output->warning($warning);
+					}
+				}
+
+				if (!$data->HasRun && empty($data->Error))
+				{
+					$this->output->info('The backup finished successfully.');
+				}
+				elseif (!empty($data->Error))
+				{
+					$this->output->error('The backup finished with an error:');
+					$this->output->error($data->Error);
+				}
+			}
+		);
+		$backupRecordID = $backupResult->id;
+		$archive        = $backupResult->archive;
 
 		// Do I also need to download the backup archive?
 		if (!$mustDownload)
 		{
 			return;
 		}
+
+		$this->output->info('Downloading the backup archive.');
 
 		$this->input->set('id', $backupRecordID);
 		$this->input->set('archive', $archive);

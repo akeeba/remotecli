@@ -5,9 +5,7 @@
  * @license    GNU General Public License version 3, or later
  */
 
-
 namespace Akeeba\RemoteCLI\Api\HighLevel;
-
 
 use Akeeba\RemoteCLI\Api\Connector;
 use Akeeba\RemoteCLI\Api\DataShape\BackupOptions;
@@ -27,23 +25,28 @@ class Backup
 	public function __invoke(BackupOptions $backupOptions, ?callable $progressCallback = null): object
 	{
 		$info           = $this->startBackup($backupOptions);
-		$data           = $info['data'];
-		$backupID       = $info['backupID'] ?? null;
-		$backupRecordID = $info['backupRecordID'] ?? 0;
-		$archive        = $info['archive'] ?? '';
+		$data           = $info->data;
+		$backupID       = $info->backupID ?? null;
+		$backupRecordID = $info->backupRecordID ?? 0;
+		$archive        = $info->archive ?? '';
 
 		while ($data?->body?->data?->HasRun)
 		{
 			if ($progressCallback)
 			{
-				$progressCallback($data);
+				$progressCallback($data?->body?->data);
 			}
 
-			$backupID       = ($info['backupID'] ?? null) ?: $backupID;
-			$backupRecordID = ($info['backupRecordID'] ?? 0) ?: $backupRecordID;
-			$archive        = ($info['archive'] ?? '') ?: $archive;
+			$backupID       = ($info->backupID ?? null) ?: $backupID;
+			$backupRecordID = ($info->backupRecordID ?? 0) ?: $backupRecordID;
+			$archive        = ($info->archive ?? '') ?: $archive;
 			$info           = $this->stepBackup($backupID);
-			$data           = $info['data'];
+			$data           = $info->data;
+		}
+
+		if ($progressCallback)
+		{
+			$progressCallback($data?->body?->data);
 		}
 
 		if ($data->body->status != 200)
@@ -57,7 +60,7 @@ class Backup
 		]);
 	}
 
-	private function handleAPIResponse(object $data): array
+	private function handleAPIResponse(object $data): object
 	{
 		$backupID       = null;
 		$backupRecordID = 0;
@@ -86,16 +89,14 @@ class Backup
 			$this->logger->debug('Got archive name: ' . $archive);
 		}
 
-		$info = [
+		return (object) [
 			'backupID'       => $backupID,
 			'backupRecordID' => $backupRecordID,
 			'archive'        => $archive,
 		];
-
-		return $info;
 	}
 
-	private function startBackup(BackupOptions $backupOptions): array
+	private function startBackup(BackupOptions $backupOptions): object
 	{
 		$data = $this->connector->doQuery('startBackup', [
 			'profile'     => (int) $backupOptions->profile,
@@ -104,12 +105,12 @@ class Backup
 		]);
 		$info = $this->handleAPIResponse($data);
 
-		$info['data'] = $data;
+		$info->data = $data;
 
 		return $info;
 	}
 
-	private function stepBackup(?int $backupID): array
+	private function stepBackup(?string $backupID): object
 	{
 		$params = [];
 
@@ -121,7 +122,7 @@ class Backup
 		$data = $this->connector->doQuery('stepBackup', $params);
 		$info = $this->handleAPIResponse($data);
 
-		$info['data'] = $data;
+		$info->data = $data;
 
 		return $info;
 	}
