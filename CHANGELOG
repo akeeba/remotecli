@@ -1,3 +1,10 @@
+Akeeba Remote CLI 3.0.0
+================================================================================
+~ Refactored code
++ Convey wrong secret key errors instead of reporting there is no way to connect to the site
++ Remove --verbose option, it's implied when you use --debug
++ Using --debug also generates the log file remotecli_log.txt
+
 Akeeba Remote CLI 2.3.5
 ================================================================================
 + Support for the wp-admin/admin-ajax.php endpoint in WordPress.

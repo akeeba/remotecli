@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="License" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="license">
-    <CommandLine workingDirectory="$PROJECT_DIR$" />
-    <method v="2" />
-  </configuration>
-</component>

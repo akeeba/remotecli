@@ -35,6 +35,13 @@ class File extends AbstractLogger implements LoggerInterface
 			return;
 		}
 
+		if (PHP_EOL != "\n")
+		{
+			$message = str_replace(PHP_EOL, "\n", $message);
+		}
+
+		$messages = explode("\n", $message);
+
 		if (($context['exception'] ?? null) instanceof Throwable)
 		{
 			/** @var Throwable $exception */
@@ -47,19 +54,23 @@ class File extends AbstractLogger implements LoggerInterface
 				$exception->getFile(),
 				$exception->getLine()
 			);
-			$message .= (empty($message) ? '' : ' — ') . $exceptionMessage;
+
+			array_unshift($messages, $exceptionMessage);
 		}
 
-		fputs(
-			$this->fp,
-			sprintf(
-				'%-10s| %-20s| %s%s',
-				strtoupper($level),
-				(new \DateTime())->format('Y-m-d H:i:s'),
-				$message,
-				PHP_EOL
-			)
-		);
+		foreach ($messages as $message)
+		{
+			fputs(
+				$this->fp,
+				sprintf(
+					'%-10s| %-20s| %s%s',
+					strtoupper($level),
+					(new \DateTime())->format('Y-m-d H:i:s'),
+					$message,
+					PHP_EOL
+				)
+			);
+		}
 	}
 
 	private function openFile(string $file, bool $resetFile): void

@@ -30,33 +30,43 @@ class Output extends AbstractLogger implements LoggerInterface
 			return;
 		}
 
-		switch ($level)
+		if (PHP_EOL != "\n")
 		{
-			case LogLevel::DEBUG:
-				// Debug messages are only output when the debug mode is enabled
-				if (!$this->debug)
-				{
-					return;
-				}
+			$message = str_replace(PHP_EOL, "\n", $message);
+		}
 
-				$this->output->debug($message);
-				break;
+		$messages = explode("\n", $message);
 
-			case LogLevel::INFO:
-			case LogLevel::NOTICE:
-				$this->output->info($message);
-				break;
+		foreach ($messages as $message)
+		{
+			switch ($level)
+			{
+				case LogLevel::DEBUG:
+					// Debug messages are only output when the debug mode is enabled
+					if (!$this->debug)
+					{
+						return;
+					}
 
-			case LogLevel::WARNING:
-				$this->output->warning($message);
-				break;
+					$this->output->debug($message);
+					break;
 
-			case LogLevel::ERROR:
-			case LogLevel::CRITICAL:
-			case LogLevel::ALERT:
-			case LogLevel::EMERGENCY:
-				$this->output->error($message);
-				break;
+				case LogLevel::INFO:
+				case LogLevel::NOTICE:
+					$this->output->info($message);
+					break;
+
+				case LogLevel::WARNING:
+					$this->output->warning($message);
+					break;
+
+				case LogLevel::ERROR:
+				case LogLevel::CRITICAL:
+				case LogLevel::ALERT:
+				case LogLevel::EMERGENCY:
+					$this->output->error($message);
+					break;
+			}
 		}
 	}
 }

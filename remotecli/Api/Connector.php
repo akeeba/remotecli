@@ -12,6 +12,7 @@ use Akeeba\RemoteCLI\Api\DataShape\DownloadOptions;
 use Akeeba\RemoteCLI\Api\Exception\InvalidEncapsulatedJSON;
 use Akeeba\RemoteCLI\Api\Exception\InvalidJSONBody;
 use Akeeba\RemoteCLI\Api\Exception\InvalidSecretWord;
+use Akeeba\RemoteCLI\Api\Exception\UnknownMethod;
 use Joomla\Http\Http;
 use Joomla\Http\HttpFactory;
 use Joomla\Uri\Uri;
@@ -80,8 +81,9 @@ class Connector
 	{
 		$url = $this->makeURL($apiMethod, $data);
 
-		$this->logger->info('URL:  ' . $url);
-		$this->logger->debug('Data: ' . print_r($data, true));
+		$this->logger->debug(sprintf('Sending Akeeba Backup / Akeeba Solo JSON API request for method %s with %s', $apiMethod, $this->options->verb));
+		$this->logger->debug('URL: ' . $url);
+		$this->logger->debug('>> Data:' . PHP_EOL . print_r($data, true));
 
 		if ($this->options->verb == 'POST')
 		{
@@ -98,7 +100,7 @@ class Connector
 
 		if ($this->options->verbose)
 		{
-			$this->logger->debug('Raw Response: ' . $encapsulatedResponse);
+			$this->logger->debug('<< Response: ' . PHP_EOL . $encapsulatedResponse);
 		}
 
 		// Expose the encapsulated data
@@ -109,13 +111,20 @@ class Connector
 
 			if ($this->options->verbose)
 			{
-				$this->logger->debug('Parsed Response: ' . print_r($result, true));
+				$this->logger->debug('Parsed Response: ' . PHP_EOL . print_r($result, true));
 			}
 
 			// Decode the JSON encoded body
-			$result->body->data = json_decode($result->body->data, false);
+			try
+			{
+				$result->body->data = @json_decode($result->body->data, false);
+			}
+			catch (\Exception $e)
+			{
+				$result->body->data = null;
+			}
 
-			if (is_null($result->body->data))
+			if ($result->body->data === null)
 			{
 				throw new InvalidJSONBody();
 			}
@@ -139,6 +148,20 @@ class Connector
 		$apiResult = (object) [
 			'body' => $result,
 		];
+
+		if ($apiResult->body->status !== 200)
+		{
+			$this->logger->notice(
+				sprintf('Error status %d received from the API.', $apiResult->body->status)
+			);
+		}
+
+		if ($apiResult->body->status === 405)
+		{
+			throw new UnknownMethod(
+				sprintf('Server responded it does not know of API method %s. Is your installation broken?', $apiMethod)
+			);
+		}
 
 		if ($apiResult->body->status === 503)
 		{
