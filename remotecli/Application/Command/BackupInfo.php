@@ -35,12 +35,16 @@ class BackupInfo extends AbstractCommand
 		}
 
 		$status = ($backup->status == 'complete') && !($backup->filesexist) ? 'obsolete' : $backup->status;
-		$status = str_pad($status, 8);
+
+		if ($status === 'obsolete' && !empty($backup->remote_filename))
+		{
+			$status = 'remote';
+		}
 
 		// If multipart is 0 it means that's a single backup archive
 		$parts = (!$backup->multipart ? 1 : $backup->multipart);
 
-		$line = sprintf('%6u|%s|%s|%s|%s|%s|%s',
+		$line = sprintf('%6u|%s|%-8s|%s|%s|%s|%s',
 			$backup->id,
 			$backup->backupstart,
 			$status,

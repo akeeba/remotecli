@@ -5,9 +5,7 @@
  * @license    GNU General Public License version 3, or later
  */
 
-
 namespace Akeeba\RemoteCLI\Application\Command;
-
 
 use Akeeba\RemoteCLI\Api\HighLevel\Backup as BackupModel;
 use Akeeba\RemoteCLI\Api\HighLevel\Information as TestModel;
@@ -37,21 +35,24 @@ class Listbackups extends AbstractCommand
 		foreach ($backups as $record)
 		{
 			$status = ($record->status == 'complete') && !($record->filesexist) ? 'obsolete' : $record->status;
-			$status = str_pad($status, 8);
-			$meta   = str_pad($record->meta, 8);
+
+			if ($status === 'obsolete' && !empty($backup->remote_filename))
+			{
+				$status = 'remote';
+			}
 
 			// If multipart is 0 it means that's a single backup archive
 			$parts = (!$record->multipart ? 1 : $record->multipart);
 
-			$line = sprintf('%6u|%s|%s|%s|%s|%s|%s|%s',
+			$line = sprintf('%6u|%s|%-8s|%s|%s|%d|%-8s|%d',
 				$record->id,
 				$record->backupstart,
 				$status,
 				$record->description,
 				$record->profile_id,
 				$parts,
-				$meta,
-				$record->size ?? ''
+				$record->meta,
+				$record->size ?? null
 			);
 
 			$this->logger->debug($line);

@@ -9,6 +9,7 @@ namespace Akeeba\RemoteCLI\Api\HighLevel;
 
 use Akeeba\RemoteCLI\Api\Connector;
 use Akeeba\RemoteCLI\Api\Exception\CannotListBackupRecords;
+use Akeeba\RemoteCLI\Api\Exception\NoSuchBackupRecord;
 
 class GetBackup
 {
@@ -22,7 +23,7 @@ class GetBackup
 
 		if ($data->body->status != 200)
 		{
-			throw new CannotListBackupRecords("Could not list backup records");
+			throw new NoSuchBackupRecord();
 		}
 
 		return $data->body->data;
