@@ -5,6 +5,7 @@ Akeeba Remote CLI 3.0.0
 + Remove --verbose option, it's implied when you use --debug
 + Using --debug also generates the log file remotecli_log.txt
 + Works with sites on recalcitrant servers with way too verbose PHP error output
++ Now reports when a record does not exist instead of returning a more generic error about the failed operation
 # [LOW] Remote backups were listed as "obsolete"
 
 Akeeba Remote CLI 2.3.5

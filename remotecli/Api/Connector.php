@@ -335,7 +335,7 @@ class Connector
 			return substr($raw, $startPos + 3, $endPos - $startPos - 3);
 		}
 
-		return $this->extractResponseAmongstPHPErrorOutput($json);
+		return $this->extractResponseAmongstPHPErrorOutput($json) ?? '';
 	}
 
 	private function extractResponseAmongstPHPErrorOutput(string $raw): ?string

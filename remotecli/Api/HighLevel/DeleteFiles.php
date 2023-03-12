@@ -10,6 +10,7 @@ namespace Akeeba\RemoteCLI\Api\HighLevel;
 use Akeeba\RemoteCLI\Api\Connector;
 use Akeeba\RemoteCLI\Api\Exception\CannotDeleteFiles;
 use Akeeba\RemoteCLI\Api\Exception\NoBackupID;
+use Akeeba\RemoteCLI\Api\Exception\NoSuchBackupRecord;
 
 class DeleteFiles
 {
@@ -27,6 +28,11 @@ class DeleteFiles
 		$data = $this->connector->doQuery('deleteFiles', [
 			'backup_id' => $id
 		]);
+
+		if ($data->body->status == 404)
+		{
+			throw new NoSuchBackupRecord();
+		}
 
 		if ($data->body->status != 200)
 		{
