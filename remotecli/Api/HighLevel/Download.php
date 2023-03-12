@@ -14,6 +14,7 @@ use Akeeba\RemoteCLI\Api\Exception\CannotWriteFile;
 use Akeeba\RemoteCLI\Api\Exception\CommunicationError;
 use Akeeba\RemoteCLI\Api\Exception\NoBackupID;
 use Akeeba\RemoteCLI\Api\Exception\NoFilesInBackupRecord;
+use Akeeba\RemoteCLI\Api\Exception\NoSuchBackupRecord;
 use Akeeba\RemoteCLI\Api\Exception\NoSuchPart;
 use Psr\Log\LoggerInterface;
 
@@ -468,6 +469,12 @@ class Download
 				'backup_id' => $params->id,
 			]
 		);
+
+		if ($data->body->status == 404)
+		{
+			throw new NoSuchBackupRecord();
+		}
+
 		$parts           = $data->body->data->multipart;
 		$fileDefinitions = $data->body->data->filenames;
 		$fileRecords     = [];
