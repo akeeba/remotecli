@@ -4,6 +4,7 @@ Akeeba Remote CLI 3.0.0
 + Convey wrong secret key errors instead of reporting there is no way to connect to the site
 + Remove --verbose option, it's implied when you use --debug
 + Using --debug also generates the log file remotecli_log.txt
++ Works with sites on recalcitrant servers with way too verbose PHP error output
 
 Akeeba Remote CLI 2.3.5
 ================================================================================

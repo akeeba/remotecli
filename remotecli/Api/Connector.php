@@ -332,10 +332,73 @@ class Connector
 
 		if (($startPos !== false) && ($endPos !== false))
 		{
-			$json = substr($raw, $startPos + 3, $endPos - $startPos - 3);
+			return substr($raw, $startPos + 3, $endPos - $startPos - 3);
 		}
 
-		return $json;
+		return $this->extractResponseAmongstPHPErrorOutput($json);
+	}
+
+	private function extractResponseAmongstPHPErrorOutput(string $raw): ?string
+	{
+		try
+		{
+			$test = @json_decode($raw);
+
+			if ($test !== null)
+			{
+				return $raw;
+			}
+		}
+		catch (\Exception $e)
+		{
+			// No worries
+		}
+
+		// Remove obvious garbage
+		$openBrace = strpos($raw,'{');
+		$closeBrace = strrpos($raw, '}');
+
+		if ($openBrace === false || $closeBrace === false)
+		{
+			return null;
+		}
+
+		$raw = substr($raw, $openBrace, $closeBrace);
+		$tries = 0;
+
+		do {
+			$tries++;
+
+			if (empty($raw) || $tries > 1000)
+			{
+				break;
+			}
+
+			try
+			{
+				$test = @json_decode($raw);
+			}
+			catch (\Exception $e)
+			{
+				// No worries
+			}
+
+			if ($test !== null)
+			{
+				return $raw;
+			}
+
+			$openBrace = strpos($raw,'{', 1);
+
+			if ($openBrace === false)
+			{
+				break;
+			}
+
+			$raw = substr($raw, $openBrace);
+		} while (true);
+
+		return null;
 	}
 
 	private function randomString(): string
