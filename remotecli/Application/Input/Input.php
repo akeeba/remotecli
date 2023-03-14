@@ -29,7 +29,7 @@ namespace Akeeba\RemoteCLI\Application\Input;
  * @method    string   getPath($name, $default = null)
  * @method    string   getUsername($name, $default = null)
  */
-class Input implements \Serializable, \Countable
+class Input implements \Countable
 {
 	/** @var   Filter  Filter object to use. */
 	protected $filter = null;
@@ -304,43 +304,6 @@ class Input implements \Serializable, \Countable
 		$method = strtoupper($_SERVER['REQUEST_METHOD']);
 
 		return $method;
-	}
-
-	/**
-	 * Method to serialize the input.
-	 *
-	 * @return  string  The serialized input.
-	 */
-	public function serialize(): string
-	{
-		// Load all of the inputs.
-		$this->loadAllInputs();
-
-		// Remove $_ENV and $_SERVER from the inputs.
-		$inputs = $this->inputs;
-		unset($inputs['env']);
-		unset($inputs['server']);
-
-		// Serialize the data and inputs.
-		return serialize([$this->options, $this->data, $inputs]);
-	}
-
-	/**
-	 * Method to unserialize the input.
-	 *
-	 * @param   string  $input  The serialized input.
-	 *
-	 * @return  self  The input object.
-	 */
-	public function unserialize($input)
-	{
-		// Unserialize the data, and inputs.
-		[$this->options, $this->data, $this->inputs] = unserialize($input);
-
-		// Load the filter.
-		$this->filter = Filter::getInstance();
-
-		return $this;
 	}
 
 	/**

@@ -16,7 +16,7 @@ class ExportConfiguration
 	{
 	}
 
-	public function _invoke(int $id = -1): array
+	public function __invoke(int $id = -1): object
 	{
 		if ($id <= 0)
 		{

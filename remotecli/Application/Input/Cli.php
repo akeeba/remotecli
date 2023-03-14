@@ -131,6 +131,13 @@ class Cli extends Input
 		{
 			$arg = $argv[$i];
 
+			if ($arg === '--')
+			{
+				$this->args[] = $arg;
+
+				continue;
+			}
+
 			// --foo --bar=baz
 			if (substr($arg, 0, 2) === '--')
 			{

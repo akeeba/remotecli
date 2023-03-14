@@ -25,12 +25,30 @@ class ProfileExport extends AbstractCommand
 		$id           = $this->input->getInt('id', 0);
 		$profile_data = $this->getApiObject()->exportConfiguration($id);
 
-		// base64 encode configuration and filters since there could some bad chars breaking the format
-		$configuration = base64_encode($profile_data['configuration']);
-		$filters       = base64_encode($profile_data['filters']);
+		if (in_array('--', $this->input->getArguments()))
+		{
+			echo json_encode($profile_data);
+
+			return;
+		}
 
 		$this->output->header(sprintf("Export data for profile %d", $id));
-		$this->output->info(sprintf('%s|%s|%s', $profile_data['description'], $configuration, $filters), true);
+
+		$filePath = $this->input->getPath('file', getcwd() . '/profile.json');
+		$written  = @file_put_contents($filePath, json_encode($profile_data));
+
+		if ($written)
+		{
+			$this->output->info(
+				sprintf('Exported configuration to %s', $filePath)
+			);
+
+			return;
+		}
+
+		$this->output->error(
+			sprintf('Cannot write into %s', $filePath)
+		);
 	}
 
 	protected function assertConfigured(): void

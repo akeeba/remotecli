@@ -17,13 +17,13 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 
 class ProfileImport extends AbstractCommand
 {
+	private ?string $data;
+
 	public function execute(): void
 	{
 		$this->assertConfigured();
 
-		// Get and print profile configuration
-		$data = $this->input->get('data', '', 'raw');
-		$this->getApiObject()->importConfiguration($data);
+		$this->getApiObject()->importConfiguration($this->data);
 
 		$this->output->info(sprintf("Profile imported"));
 	}
@@ -32,11 +32,30 @@ class ProfileImport extends AbstractCommand
 	{
 		parent::assertConfigured();
 
-		$data = $this->input->get('data', '', 'raw');
+		$data = null;
+		$dataFile = $this->input->getPath('file', null);
+
+		if (in_array('--', $this->input->getArguments()))
+		{
+			while (!feof(STDIN))
+			{
+				$data .= fread(STDIN, 1048756);
+			}
+		}
+		elseif(!empty($dataFile) && @file_exists($dataFile) && @is_file($dataFile) && @is_readable($dataFile))
+		{
+			$data = @file_get_contents($dataFile) ?: null;
+		}
+		else
+		{
+			$data = $this->input->get('data', null, 'raw');
+		}
 
 		if (!$data)
 		{
 			throw new NoProfileData();
 		}
+
+		$this->data = $data;
 	}
 }
