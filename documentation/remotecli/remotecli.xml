@@ -31,17 +31,17 @@
       <title>Introduction</title>
 
       <para>Remote CLI is a powerful command-line script which allows you to
-      automate your backups (including download backup archives) with Akeeba
-      Backup for Joomla! or WordPress; or Akeeba Solo. It is designed for
-      power users and system administrators who want to automate these
-      backup-related tasks. It uses our remote JSON API, which means that you
-      can install the script on one machine (even your own PC) and control any
-      number of sites, across different hosts, remotely.</para>
+      automate your backup management (including download backup archives)
+      with Akeeba Backup for Joomla!, Akeeba Backup for WordPress, or Akeeba
+      Solo. It is designed for power users and system administrators who want
+      to automate these backup-related tasks. It uses our remote JSON API,
+      which means that you can install the script on one machine (even your
+      own PC) and control any number of sites, across different hosts,
+      remotely.</para>
 
       <para>The script is shipped as a PHAR file. This is an executable PHP
-      package which can be used with PHP 5.5.0 or later (PHP 7.0 or 7.1
-      recommended). The script is available for download free of charge from
-      our site.</para>
+      package which can be used with PHP 8.0 or later. The script is available
+      for download free of charge from our site.</para>
     </section>
   </chapter>
 
@@ -58,11 +58,11 @@
 
       <para>Remote CLI requires a command line version of PHP (a.k.a. PHP-CLI)
       to be installed on your machine. In the command line below, please
-      substitute php with the full path to your PHP CLI executable file. On
-      most Linux and Mac OS X systems, you don't need to specify a path, just
-      <command>php</command> will do as the executable file is already in the
-      path. On Windows, however, you most likely need to specify a full
-      path.</para>
+      substitute <code>php</code> with the full path to your PHP CLI
+      executable file. On most Linux and macOS systems, you don't need to
+      specify a path, just <command>php</command> will do as the executable
+      file is already in the path. On Windows, however, you most likely need
+      to specify a full path.</para>
 
       <tip>
         <para>The PHP project provides <link
@@ -75,14 +75,14 @@
       </tip>
 
       <important>
-        <para>Remote CLI requires PHP 5.5 with the optional "phar" extension
-        installed and activated. This is the default setup of PHP in most
-        cases.</para>
+        <para>Remote CLI requires PHP 8.0 with the optional <code>phar</code>
+        and <code>curl</code> extensions installed and activated. This is the
+        default setup of PHP in most cases.</para>
       </important>
 
-      <para>After downloading remote.phar (the Remote CLI executable PHP
-      archive) from our site you can use Remote CLI from the command line of
-      your operating system with a command like this:</para>
+      <para>After downloading <filename>remote.phar</filename> (the Remote CLI
+      executable PHP archive) from our site you can use Remote CLI from the
+      command line of your operating system with a command like this:</para>
 
       <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
 
@@ -98,30 +98,28 @@
       <programlisting>docker run --rm akeebaltd/remotecli <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para>The Dockerized version is self-contained, using the latest version
-      of PHP at the time we build the container image. It's much simpler to
+      of PHP at the time we built the container image. It's much simpler to
       use since it does not require installing or configuring anything on your
       host machine. Moreover, it's <emphasis>self-updating</emphasis>. The
       command line above always tries to use the latest version of Remote CLI
       we have published in Docker Hub.</para>
 
       <warning>
-        <para>There's a caveat. You can NOT use the Dockerized version with
-        local servers i.e. anything which resolves to an IP address only
-        routable by the host machine. If you want to try our Remote CLI
-        locally you have to use the PHAR file.</para>
+        <para>There's a caveat. You can <emphasis>not</emphasis> use the
+        Dockerized version with local servers i.e. anything which resolves to
+        an IP address only routable by the host machine. If you want to try
+        our Remote CLI locally you have to use the PHAR file.</para>
       </warning>
 
       <bridgehead>What are all these options?</bridgehead>
 
-      <para><replaceable>hostName</replaceable> is the URL to your site's
-      root, without a trailing slash, e.g. <uri>http://www.example.com</uri>.
-      If you are using Akeeba Backup for WordPress the
-      <replaceable>hostName</replaceable> must also include the path to Akeeba
-      Backup's index.php file tasked with handling the JSON API, e.g.
-      <uri>http://www.example.com/wp-content/plugins/akeebabackupwp/app/remote.php</uri>
-      where http://www.example.com is the URL to your site and akeebabackupwp
-      is the name of the folder where the Akeeba Backup for WordPress plugin
-      is installed.</para>
+      <para><replaceable>hostName</replaceable> is the URL to the Akeeba
+      Backup / Akeeba Solo JSON API <guilabel>Endpoint URL</guilabel> which
+      can be read off the Schedule Automatic Backups page of our backup
+      software. </para>
+
+      <para>Alternatively, you can use the URL to your site's root, without a
+      trailing slash, e.g. <uri>http://www.example.com</uri>. </para>
 
       <para><replaceable>secretKey</replaceable> is the Secret Key you have
       defined in the component Options (Akeeba Backup for Joomla!) or the
@@ -140,10 +138,30 @@
 
       <variablelist>
         <varlistentry>
+          <term>help</term>
+
+          <listitem>
+            <para>Prints an overview of the commands and available
+            options.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>license</term>
 
           <listitem>
             <para>Displays the license of the software and quits.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>php</term>
+
+          <listitem>
+            <para>Prints information about the execution environment of Akeeba
+            Remote CLI (NOT your site!). Use this when submitting support
+            requests so we know what is going on with your execution
+            environment.</para>
           </listitem>
         </varlistentry>
 
@@ -175,7 +193,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term>deletefile</term>
+          <term>deletefiles</term>
 
           <listitem>
             <para>Delete backup archives from the server</para>
@@ -208,6 +226,28 @@
         </varlistentry>
 
         <varlistentry>
+          <term>profileexport</term>
+
+          <listitem>
+            <para>Exports a backup profile as a JSON file, or a JSON string to
+            the standard output. The generated JSON is the same you get as
+            when exporting a backup profile from Akeeba Backup and Akeeba
+            Solo.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>profileimport</term>
+
+          <listitem>
+            <para>Imports a backup profile from a JSON string in the standard
+            input, a JSON string given as a parameter, or a JSON file
+            (exported by Akeeba Backup, Akeeba Solo, or Akeeba Remote
+            CLI).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term>backupinfo</term>
 
           <listitem>
@@ -216,7 +256,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term>upgrade</term>
+          <term>update</term>
 
           <listitem>
             <para>Upgrades Akeeba Backup on the server, if there is an update
@@ -225,12 +265,6 @@
         </varlistentry>
       </variablelist>
 
-      <tip>
-        <para>You can also use the legacy
-        <option>--action=<replaceable>actionName</replaceable></option> syntax
-        for backwards compatibility with version 1.x.</para>
-      </tip>
-
       <warning>
         <para>Before you can use Remote CLI with your site, you will need to
         enable the remote API in Akeeba Backup / Akeeba Solo. In order to do
@@ -238,7 +272,9 @@
         <guibutton>Options</guibutton> button in the toolbar (Akeeba Backup
         for Joomla!) or the <guibutton>System Configuration</guibutton> button
         towards the bottom of the page (Akeeba Backup for WordPress, Akeeba
-        Solo). You will have to set <guilabel>Enable front-end and remote
+        Solo). </para>
+
+        <para>You will have to set <guilabel>Enable front-end and remote
         backup</guilabel> to Yes. You will also need to supply a
         <guilabel>Secret Key</guilabel> of your liking. This is the password
         to connect to your site over Akeeba Backup's Remote API. Due to
@@ -282,6 +318,14 @@
       servers and testing environments, typically using self-signed
       certificates.</para>
 
+      <para>If something is not working, use the <option>--debug</option>
+      option. This will include much more detailed output, including what
+      Akeeba Remote CLI sends to and receives from your server. This
+      information will also be stored in the file
+      <filename>remotecli_log.txt</filename> in the current working directory.
+      Please include this file when requesting support with Akeeba Remote
+      CLI.</para>
+
       <para>Each action can be used with one or several options. Some of them
       are mandatory for the correct operation of Remote CLI. The following
       sections detail the parameters which can be used with each option. All
@@ -292,19 +336,13 @@
           <term>host</term>
 
           <listitem>
-            <para>The URL to your site's root, without a trailing slash, e.g.
-            <uri>http://www.example.com</uri> Please note that if your site is
-            located in a subdirectory, you have to give the full path to the
-            subdirectory, e.g. <uri>http://www.example.com/joomla</uri></para>
+            <para>The URL to the Akeeba Backup / Akeeba Solo JSON API
+            <guilabel>Endpoint URL</guilabel> which can be read off the
+            Schedule Automatic Backups page of our backup software.</para>
 
-            <para>If you are using Akeeba Backup for WordPress the
-            <replaceable>hostName</replaceable> must also include the path to
-            Akeeba Backup's index.php file tasked with handling the JSON API,
-            e.g.
-            <uri>http://www.example.com/wp-content/plugins/akeebabackupwp/app/index.php</uri>
-            where http://www.example.com is the URL to your site and
-            akeebabackupwp is the name of the folder where the Akeeba Backup
-            for WordPress plugin is installed.</para>
+            <para>Alternatively, you can use the URL to your site's root,
+            without a trailing slash, e.g.
+            <uri>http://www.example.com</uri>.</para>
           </listitem>
         </varlistentry>
 
@@ -312,12 +350,11 @@
           <term>secret</term>
 
           <listitem>
-            <para>The secret key, as defined in Akeeba Backup's component
-            parameters. In order to access it in the component, please log in
-            to your site's back-end, go to Components, Akeeba Backup and click
-            on the Component Parameters button. Make sure the Enable front-end
-            and remote backup option is enabled. Right below it, you will find
-            the Secret Key field.</para>
+            <para>The secret key, as defined in Akeeba Backup or Akeeba
+            Solo.</para>
+
+            <para>You can see the Secret Key in our backup software's Schedule
+            Automatic Backups.</para>
 
             <important>
               <para>We strongly advise you to use only lower and upper case
@@ -325,36 +362,27 @@
               as many servers will refuse to work with secret words containing
               special characters.</para>
             </important>
-
-            <important>
-              <para>If you are using sh404SEF make sure you have upgraded to
-              the latest release. Older versions conflicted with Akeeba
-              Backup's remote API feature and will cause Remote CLI to report
-              a JSON decoding error. No support will be provided for this
-              error. The only workaround is to upgrade your copy of sh404SEF
-              (which is a good idea anyway, as the older versions also
-              contained potential security vulnerabilities).</para>
-            </important>
-
-            <important>
-              <para>Some SEF and security components will corrupt or block the
-              request to Akeeba Backup's Remote API. In this case you will
-              most likely get a "JSON decoding error". If this happens you may
-              have to instruct your component to ignore com_akeeba or allow
-              full access to the
-              <uri>http://www.example.com/index.php?option=com_akeeba&amp;view=json</uri>
-              URL. If unsure, please consult with the developer of your SEF or
-              security component.</para>
-            </important>
           </listitem>
         </varlistentry>
       </variablelist>
 
       <para>Below you can find the options required by each command:</para>
 
+      <bridgehead>help</bridgehead>
+
+      <para>No extra options are used.</para>
+
+      <bridgehead>license</bridgehead>
+
+      <para>No extra options are used.</para>
+
+      <bridgehead>php</bridgehead>
+
+      <para>No extra options are used.</para>
+
       <bridgehead>test</bridgehead>
 
-      <para>No extra options are used</para>
+      <para>No extra options are used.</para>
 
       <bridgehead>backup</bridgehead>
 
@@ -404,6 +432,11 @@
             <option>--download</option> / <option>-d</option> in order to
             delete the backup archive after it has been downloaded to your
             PC.</para>
+
+            <para>When using the <option>--download</option> option you will
+            need to provide the same options as when using the
+            <command>download</command> command, <emphasis>except for
+            </emphasis><option>--id</option>.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -417,8 +450,8 @@
           <listitem>
             <para>The numeric backup ID to download (see listbackups). Note:
             when you use the --download or -d switch with the backup action
-            you must not use this option. In all other cases, this option is
-            mandatory.</para>
+            you <emphasis>must not</emphasis> use this option. In all other
+            cases, this option is mandatory.</para>
           </listitem>
         </varlistentry>
 
@@ -506,15 +539,15 @@
             <filename>/path/to/output/directory</filename> is the FTP path to
             your output directory. In order to figure out the latter, please
             use FileZilla to connect to your site and navigate to the backup
-            output directory (by default that is
-            <filename>administrator/components/com_akeeba/backup</filename>).
+            output directory (for example, on Joomla 4 and later this is
+            <filename>administrator/components/com_akeebabackup/backup</filename>).
             Copy the path shown above the right-hand folders pane. That's the
             one you want.</para>
 
             <para>Example:</para>
 
             <para><option>--dlurl="ftp://myuser:
-            mypassword@ftp.example.com:21/public_html/administrator/components/com_akeeba/backup"
+            mypassword@ftp.example.com:21/public_html/administrator/components/com_akeebabackup/backup"
             </option></para>
 
             <important>
@@ -561,6 +594,61 @@
 
       <para>This command has no options. It will simply return a list of
       profile IDs and descriptions.</para>
+
+      <bridgehead>profileexport</bridgehead>
+
+      <para>If you want to export the profile to the standard output (STDOUT),
+      e.g. to pipe it through a different programme, please use the command
+      line options <option>-m --silent --</option> and do NOT use the --debug
+      or --file options. The -m option tells Remote CLI to use machine
+      readable output. The --silent option tells it to skip the copyright
+      header output. The -- (two dashes) option tells it to output the
+      exported profile to the standard output.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>Required. The numeric ID of the profile you want to
+            export.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>file</term>
+
+          <listitem>
+            <para>The absolute filesystem path of the file where the exported
+            profile will be written to. This only applies if you have not used
+            the <option>--</option> option. If omitted the profile will be
+            exported to the file <filename>profile.json</filename> in the
+            current working directory.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <bridgehead>profileimport</bridgehead>
+
+      <para>If you want to import the profile from the standard output
+      (STDIN), e.g. to pipe it in froma different programme, please use the
+      command line options <option>-m --silent --</option> and do NOT use the
+      --debug or --file options. The -m option tells Remote CLI to use machine
+      readable output. The --silent option tells it to skip the copyright
+      header output. The -- (two dashes) option tells it to get the exported
+      profile data from the standard input.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>file</term>
+
+          <listitem>
+            <para>The absolute filesystem path of the file where the exported
+            profile will be read from. This only applies if you have not used
+            the <option>--</option> option.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
 
       <bridgehead>listbackups</bridgehead>
 
@@ -609,6 +697,11 @@
         <para>This feature IS NOT available on Joomla!. Extension updates are
         handled by Joomla! itself, not Akeeba Backup. Please refer to
         Joomla!'s documentation for information on updating extensions.</para>
+
+        <para>When you use this feature against a WordPress site the update
+        will use Akeeba Backup's built-in updater, NOT WordPress' plugin
+        updater. To use WordPress' plugin updater code please use WP-CLI
+        instead.</para>
       </important>
     </section>
 
@@ -678,9 +771,10 @@ profile=3</programlisting>
       <para>In this fictional example, the following assumptions are made:
       Your site can be found at <uri>http://www.example.com</uri> and the
       secret word is <option>0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA</option>. The
-      backup archives are stored in the default output directory
-      (<filename>administrator/components/com_akeeba/backup</filename>). The
-      site's FTP host is <uri>ftp.example.com</uri> and its username and
+      backup archives are stored in the default output directory for Joomla 4
+      and later sites
+      (<filename>administrator/components/com_akeebabackup/backup</filename>).
+      The site's FTP host is <uri>ftp.example.com</uri> and its username and
       password are <option>example</option> and <option>test</option>
       respectively. The site is under the <filename>public_html</filename>
       directory. We also assume that the PHP CLI executable is already in your
@@ -695,40 +789,72 @@ profile=3</programlisting>
 
       <para>You should see something like this:</para>
 
-      <screen>Akeeba Remote Control CLI svn724 (2011-06-14)
-Copyright ©2008-2014 Nicholas K. Dionysopoulos / Akeeba Ltd
+      <screen>Akeeba Remote Control CLI 3.0.0-dev202303140829-reva1cbd8e (2023-03-14)
+Copyright ©2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd.
 --------------------------------------------------------------------------------
  This program comes with ABSOLUTELY NO WARRANTY. This is Free Software and you
- are welcome to redistribute it under certain conditions. Use command line
- option --license for details.
+ are welcome to redistribute it under certain conditions. Use command license
+ for details.
 --------------------------------------------------------------------------------
 Successful connection to site</screen>
 
       <para>The last line tells you that the connection worked. However, if
       something goes wrong, you might get one of these error messages:</para>
 
-      <para><emphasis>Error 401 - Invalid login credentials</emphasis> : Your
-      secret word is wrong. Go to your site's back-end,
-      <guimenu>Components</guimenu>, <guimenuitem>Akeeba Backup</guimenuitem>,
-      click on <guibutton>Component Parameters</guibutton> and enter a secret
-      key of your liking. We strongly recommend using only a-z, A-Z and 0-9 to
-      work around limitations with some hosts.</para>
+      <para><emphasis>Error #42 - Authentication error (invalid Secret Word).
+      Please check the secret word, make sure it doesn't have any whitespace
+      you missed. Clear any site or external caches, making sure Akeeba
+      Backup's URL isn't cached.</emphasis> : Your secret word appears to be
+      wrong, or the Remote JSON API is disabled. Go to Akeeba Backup's /
+      Akeeba Solo's Options (Joomla) or System Configuration (WordPress,
+      Akeeba Solo) page, make sure Enable JSON API is set to Yes, and enter a
+      secret key of your liking. We strongly recommend using only a-z, A-Z and
+      0-9 to work around limitations with some hosts. The click on Save &amp;
+      Close.</para>
 
-      <para><emphasis>Error 503 - Access denied</emphasis>: You forgot to
-      enable the remote API or enter a secret word in Akeeba Backup. Go to
-      your site's back-end, <guimenu>Components</guimenu>, <guimenuitem>Akeeba
-      Backup</guimenuitem>, click on <guibutton>Component
-      Parameters</guibutton> and set <guilabel>Enable remote and front-end
-      backups</guilabel> to <option>Yes</option>. Then enter a secret key of
-      your liking. We strongly recommend using only a-z, A-Z and 0-9 to work
-      around limitations with some hosts.</para>
+      <important>
+        <para><emphasis role="bold">Applicable to Joomla sites
+        only</emphasis>. If you did not enable the remote JSON API and/or
+        enter a secret word yourself, through the component's Options page,
+        please note that the third party software which did that for you may
+        have done so in a way which is not compatible with your current
+        version of Joomla, or Akeeba Backup. If this happens, kindly note that
+        it's not a bug in our software and we are objectively unable to do
+        anything about it except give you the following instructions to do
+        thing in the only way we have a modicum of control and can help you
+        with, i.e. the only <emphasis>supported</emphasis> way.</para>
 
-      <para><emphasis>Your server does not seem to be compatible with Remote
-      Control</emphasis> : Check that you are using the correct host name,
-      including the http/https prefix. Also make sure that Akeeba Backup 3.3.0
-      or later is installed and activated. Also note that some SEF and
-      security extensions may be blocking the Remote API calls to your site.
-      In this case, you won't be able to use Remote CLI.</para>
+        <para>Go to Components, Akeeba Backup, Options, Front-end Backup and
+        make sure that:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Enable JSON API (remote backup) is set to Yes</para>
+          </listitem>
+
+          <listitem>
+            <para>The Secret Word is not empty, matches what you expect, and
+            consists entirely of characters a-z, A-Z, and 0-9.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Then click on Save &amp; Close. This is a <emphasis
+        role="bold">VERY </emphasis>important step! It clears Joomla's
+        internal component options cache. </para>
+
+        <para>If this didn't work for you go to System, Maintenance, Clear
+        Cache and click on the Delete All button in the toolbar.</para>
+      </important>
+
+      <para><emphasis>Error #36 - We cannot find a way to connect to your
+      server. It seems that your server is incompatible with Akeeba Remote
+      Control CLI.</emphasis> : Check that you are using the correct endpoint
+      URL with the <option>--host</option> option, including the http/https
+      schema prefix. </para>
+
+      <para>Also note that some SEF and security plugins may be blocking the
+      Remote JSON API calls to your site. In this case, you won't be able to
+      use Remote CLI.</para>
 
       <important>
         <para>If your host name, secret key or any other option contains
@@ -739,6 +865,12 @@ Successful connection to site</screen>
         having set the correct host name and secret key, try using double
         quotes around all of your option values.</para>
       </important>
+
+      <para><emphasis>Error #102 - You need to install a newer version of
+      Akeeba Backup / Akeeba Solo on your site</emphasis>: Make sure that you
+      are using an Akeeba Backup / Akeeba Solo version released within the
+      last 6 months. Very old versions of Akeeba Backup / Akeeba Solo might
+      not be compatible with newer versions of Remote CLI.</para>
 
       <bridgehead>Taking a backup</bridgehead>
 
@@ -753,7 +885,7 @@ Successful connection to site</screen>
       <screen>Backup finished successfully</screen>
 
       <para>And that's it! You now have a backup. Since it's useless without
-      downloading, let's try...</para>
+      downloading, let's try downloading it.</para>
 
       <bridgehead>Taking and downloading a backup</bridgehead>
 
@@ -764,13 +896,16 @@ Successful connection to site</screen>
       same as the backup command line, with the --download, --dlmethod and
       --dlpath added:</para>
 
-      <programlisting>php remote.phar --action=backup --host=http://www.example.com 
-    --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1
+      <programlisting>php remote.phar --action=backup --host=http://www.example.com \
+    --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1 \
     --download --dlmode=http --dlpath="c:\Downloads"</programlisting>
 
       <warning>
         <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only.</para>
+        have added the Linux / nacOS line continuation characters
+        (<code>\</code>) for typesetting purposes. These won't work on
+        Windows, unless using the Windows Subsystem for Linux (WSL) — in which
+        case you are, in fact, running Linux.</para>
       </warning>
 
       <para>This will take a backup and then download it to C:\Downloads (or
@@ -819,11 +954,14 @@ Successful connection to site</screen>
 --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1
 --download --dlmode=curl --dlpath="c:\Downloads"
 --dlurl="ftp://<emphasis role="bold">foo</emphasis>:<emphasis role="bold">bar</emphasis>@<emphasis
-          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeeba/backup</emphasis>"</programlisting>
+          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeebabackup/backup</emphasis>"</programlisting>
 
       <warning>
         <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only.</para>
+        have added the Linux / nacOS line continuation characters
+        (<code>\</code>) for typesetting purposes. These won't work on
+        Windows, unless using the Windows Subsystem for Linux (WSL) — in which
+        case you are, in fact, running Linux.</para>
       </warning>
 
       <para>One final note. After you download the backup archive, it's a good
@@ -835,11 +973,14 @@ Successful connection to site</screen>
   --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1
   --download --dlmode=curl --dlpath="c:\Downloads" --delete
   --dlurl="ftp://<emphasis role="bold">foo</emphasis>:<emphasis role="bold">bar</emphasis>@<emphasis
-          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeeba/backup</emphasis>"</programlisting>
+          role="bold">ftp.example.com</emphasis>/<emphasis role="bold">public_html/administrator/components/com_akeebabackup/backup</emphasis>"</programlisting>
 
       <warning>
         <para>The command line above should be entered ON A SINGLE LINE. We
-        have added the line break for typesetting purposes only.</para>
+        have added the Linux / nacOS line continuation characters
+        (<code>\</code>) for typesetting purposes. These won't work on
+        Windows, unless using the Windows Subsystem for Linux (WSL) — in which
+        case you are, in fact, running Linux.</para>
       </warning>
 
       <para>That's it!</para>
@@ -893,7 +1034,7 @@ REN NOT WORK!!!
 php-cli.exe remote.phar --action=backup --host=http://www.example.com
  --secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA --profile=1 --download
  --dlmode=curl --dlpath="c:\Downloads"
- --dlurl="ftp://foo:bar@ftp.example.com/public_html/administrator/components/com_akeeba/backup"
+ --dlurl="ftp://foo:bar@ftp.example.com/public_html/administrator/components/com_akeebabackup/backup"
  --delete</programlisting>
 
       <para>Note that we assume that the path to PHP is c:\PHP\php-cli.exe and
