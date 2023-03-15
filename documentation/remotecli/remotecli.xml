@@ -18,7 +18,7 @@
     </author>
 
     <copyright>
-      <year>2011-2022</year>
+      <year>2011-2023</year>
 
       <holder>Akeeba Ltd</holder>
     </copyright>
@@ -39,9 +39,17 @@
       own PC) and control any number of sites, across different hosts,
       remotely.</para>
 
+      <para>Akeeba Remote CLI supports sites using Akeeba Backup for Joomla
+      3.3.0 (released in July 2011, running on a minimum of Joomla! 1.5 and
+      PHP 5.1) and later, or any published version of Akeeba Backup for
+      WordPress and Akeeba Solo. Please note that not all Remote CLI features
+      are available on old versions of our software.</para>
+
       <para>The script is shipped as a PHAR file. This is an executable PHP
       package which can be used with PHP 8.0 or later. The script is available
       for download free of charge from our site.</para>
+
+      <para>Alternatively, you can use Remote CLI through Docker.</para>
     </section>
   </chapter>
 
@@ -116,10 +124,10 @@
       <para><replaceable>hostName</replaceable> is the URL to the Akeeba
       Backup / Akeeba Solo JSON API <guilabel>Endpoint URL</guilabel> which
       can be read off the Schedule Automatic Backups page of our backup
-      software. </para>
+      software.</para>
 
       <para>Alternatively, you can use the URL to your site's root, without a
-      trailing slash, e.g. <uri>http://www.example.com</uri>. </para>
+      trailing slash, e.g. <uri>http://www.example.com</uri>.</para>
 
       <para><replaceable>secretKey</replaceable> is the Secret Key you have
       defined in the component Options (Akeeba Backup for Joomla!) or the
@@ -272,7 +280,7 @@
         <guibutton>Options</guibutton> button in the toolbar (Akeeba Backup
         for Joomla!) or the <guibutton>System Configuration</guibutton> button
         towards the bottom of the page (Akeeba Backup for WordPress, Akeeba
-        Solo). </para>
+        Solo).</para>
 
         <para>You will have to set <guilabel>Enable front-end and remote
         backup</guilabel> to Yes. You will also need to supply a
@@ -383,6 +391,13 @@
       <bridgehead>test</bridgehead>
 
       <para>No extra options are used.</para>
+
+      <note>
+        <para>Akeeba Backup for Joomla versions older than 3.6.0 will only
+        report their version, but not whether they are the Core or
+        Professional version. This feature is missing from the Remote JSON API
+        of these legacy versions released well over a decade ago.</para>
+      </note>
 
       <bridgehead>backup</bridgehead>
 
@@ -628,6 +643,12 @@
         </varlistentry>
       </variablelist>
 
+      <note>
+        <para>This feature is not available on Akeeba Backup for Joomla
+        versions older than 3.6.0 and will result in an error about a missing
+        API method.</para>
+      </note>
+
       <bridgehead>profileimport</bridgehead>
 
       <para>If you want to import the profile from the standard output
@@ -649,6 +670,12 @@
           </listitem>
         </varlistentry>
       </variablelist>
+
+      <note>
+        <para>This feature is not available on Akeeba Backup for Joomla
+        versions older than 3.6.0 and will result in an error about a missing
+        API method.</para>
+      </note>
 
       <bridgehead>listbackups</bridgehead>
 
@@ -694,14 +721,14 @@
       site.</para>
 
       <important>
-        <para>This feature IS NOT available on Joomla!. Extension updates are
-        handled by Joomla! itself, not Akeeba Backup. Please refer to
-        Joomla!'s documentation for information on updating extensions.</para>
+        <para>This feature IS NOT available on Joomla! 4 and later versions.
+          Extension updates are handled by Joomla! itself, not Akeeba Backup.
+          Please refer to  Joomla!'s documentation for information on updating
+          extensions.</para>
 
         <para>When you use this feature against a WordPress site the update
-        will use Akeeba Backup's built-in updater, NOT WordPress' plugin
-        updater. To use WordPress' plugin updater code please use WP-CLI
-        instead.</para>
+        will use Akeeba Backup's built-in updater instead of WordPress' plugin
+        updater. To use WordPress' plugin updater please use WP-CLI instead.</para>
       </important>
     </section>
 
@@ -840,7 +867,7 @@ Successful connection to site</screen>
 
         <para>Then click on Save &amp; Close. This is a <emphasis
         role="bold">VERY </emphasis>important step! It clears Joomla's
-        internal component options cache. </para>
+        internal component options cache.</para>
 
         <para>If this didn't work for you go to System, Maintenance, Clear
         Cache and click on the Delete All button in the toolbar.</para>
@@ -850,7 +877,7 @@ Successful connection to site</screen>
       server. It seems that your server is incompatible with Akeeba Remote
       Control CLI.</emphasis> : Check that you are using the correct endpoint
       URL with the <option>--host</option> option, including the http/https
-      schema prefix. </para>
+      schema prefix.</para>
 
       <para>Also note that some SEF and security plugins may be blocking the
       Remote JSON API calls to your site. In this case, you won't be able to

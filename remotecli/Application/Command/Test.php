@@ -20,10 +20,11 @@ class Test extends AbstractCommand
 		$apiResult   = $api->information();
 		$versionInfo = $apiResult->body->data;
 		$version     = $versionInfo->component . ' (API level ' . $apiResult->body->data->api . ')';
-		$edition     = ($versionInfo->edition == 'pro') ? 'Professional' : 'Core';
+		$edition     = (($versionInfo->edition ?? '') === 'pro') ? 'Professional ' : 'Core ';
+		$edition     = ($versionInfo->edition ?? '') === '' ? '' : $edition;
 
 		$this->output->info("Successful connection to site");
-		$this->output->info("Akeeba Backup / Solo $edition $version");
+		$this->output->info("Akeeba Backup / Solo $edition$version");
 		$this->output->info('');
 	}
 

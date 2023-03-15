@@ -42,7 +42,7 @@ class Options
 
 	private string $component = '';
 
-	private string $view = 'api';
+	private string $view = '';
 
 	private string $format = '';
 

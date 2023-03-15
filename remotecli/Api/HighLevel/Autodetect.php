@@ -28,7 +28,7 @@ class Autodetect
 	public function __invoke(): void
 	{
 		$originalOptions = $this->connector->getOptions();
-		$view            = strtolower($originalOptions->view ?? 'api');
+		$views           = $this->getViews($originalOptions);
 		$verbs           = $this->getVerbs($originalOptions);
 		$formats         = $this->getFormats($originalOptions);
 		$endpoints       = $this->getEndpoints($originalOptions);
@@ -39,84 +39,78 @@ class Autodetect
 
 		foreach ($components as $component)
 		{
-			foreach ($verbs as $verb)
+			foreach ($views as $view)
 			{
-				foreach ($formats as $format)
+				foreach ($verbs as $verb)
 				{
-					foreach ($endpoints as $endpoint)
+					foreach ($formats as $format)
 					{
-						$lastException = null;
-
-						$options = $this->connector->getOptions([
-							'component' => $component,
-							'verb'      => $verb,
-							'view'      => $view,
-							'format'    => $format,
-							'endpoint'  => $endpoint,
-						]);
-
-						try
+						foreach ($endpoints as $endpoint)
 						{
-							$apiResult = null;
-							$api       = new Connector($options);
-							$apiResult = $api->doQuery('getVersion');
+							$lastException = null;
 
-							// This happens if we use the wrong encapsulation
-							if ($apiResult->body->status != 200)
+							$options = $this->connector->getOptions([
+								'component' => $component,
+								'verb'      => $verb,
+								'view'      => $view,
+								'format'    => $format,
+								'endpoint'  => $endpoint,
+							]);
+
+							try
 							{
-								$apiResult = null;
+								$api       = new Connector($options);
+								$apiResult = $api->doQuery('getVersion');
+
+								break 5;
+							}
+							catch (CommunicationError $communicationError)
+							{
+								/**
+								 * We might get this kind of exception if the endpoint is wrong or results in endless
+								 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
+								 * you do?
+								 */
+
+								$options->logger->warning(sprintf(
+										'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										$verb,
+										$view,
+										$format,
+										$endpoint,
+										$communicationError->getMessage()
+									)
+								);
+
+								$lastException = $communicationError;
 
 								continue;
 							}
+							catch (InvalidSecretWord $apiException)
+							{
+								// Invalid secret word exception gets re-thrown
+								throw $apiException;
+							}
+							catch (ApiException $apiException)
+							{
+								$lastException = $apiException;
 
-							break 4;
-						}
-						catch (CommunicationError $communicationError)
-						{
-							/**
-							 * We might get this kind of exception if the endpoint is wrong or results in endless
-							 * redirections. Of course it's also raised when it's a genuine network issue but, hey, what can
-							 * you do?
-							 */
+								/**
+								 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
+								 * with a broken third party plugin results in the output being ovewritten. So let's retry with
+								 * another way to connect to the site.
+								 */
+								$options->logger->warning(sprintf(
+										'Remote API error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
+										$verb,
+										$format,
+										$endpoint,
+										$apiException->getMessage()
+									)
+								);
 
-							$options->logger->warning(sprintf(
-									'Communication error with verb “%s”, view “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
-									$verb,
-									$view,
-									$format,
-									$endpoint,
-									$communicationError->getMessage()
-								)
-							);
-
-							$lastException = $communicationError;
-
-							continue;
-						}
-						catch (InvalidSecretWord $apiException)
-						{
-							// Invalid secret word exception gets re-thrown
-							throw $apiException;
-						}
-						catch (ApiException $apiException)
-						{
-							$lastException = $apiException;
-
-							/**
-							 * We got corrupt data back. This could be because, e.g. using the format=html on a Joomla! site
-							 * with a broken third party plugin results in the output being ovewritten. So let's retry with
-							 * another way to connect to the site.
-							 */
-							$options->logger->warning(sprintf(
-									'Remote API error with verb “%s”, format “%s”, endpoint “%s”. The error was ‘%s’.',
-									$verb,
-									$format,
-									$endpoint,
-									$apiException->getMessage()
-								)
-							);
-
-							continue;
+								continue;
+							}
 						}
 					}
 				}
@@ -164,7 +158,7 @@ class Autodetect
 	private function getComponents(Options $options): array
 	{
 		$defaultComponents = ['com_akeebabackup', 'com_akeeba', ''];
-		$component = $options->component;
+		$component         = $options->component;
 
 		if ($options->component == '')
 		{
@@ -228,5 +222,18 @@ class Autodetect
 		}
 
 		return [$verb];
+	}
+
+	private function getViews(Options $originalOptions)
+	{
+		$defaultList = ['api', 'json'];
+		$view        = strtolower($originalOptions->view ?? '');
+
+		if (empty($view))
+		{
+			return $defaultList;
+		}
+
+		return [$view];
 	}
 }

@@ -12,6 +12,7 @@ use Akeeba\RemoteCLI\Api\DataShape\DownloadOptions;
 use Akeeba\RemoteCLI\Api\Exception\InvalidEncapsulatedJSON;
 use Akeeba\RemoteCLI\Api\Exception\InvalidJSONBody;
 use Akeeba\RemoteCLI\Api\Exception\InvalidSecretWord;
+use Akeeba\RemoteCLI\Api\Exception\NotImplemented;
 use Akeeba\RemoteCLI\Api\Exception\UnknownMethod;
 use Joomla\Http\Http;
 use Joomla\Http\HttpFactory;
@@ -129,25 +130,27 @@ class Connector
 				throw new InvalidJSONBody();
 			}
 
-			return $result;
+			$apiResult = $result;
 		}
-
-		// JSON API v2: Get the JSON data and construct a result similar to what was returned by v1
-		$result = json_decode($encapsulatedResponse, false);
-
-		if (is_null($result) || !property_exists($result, 'status') || !property_exists($result, 'data'))
+		else
 		{
-			throw new InvalidEncapsulatedJSON($encapsulatedResponse);
-		}
+			// JSON API v2: Get the JSON data and construct a result similar to what was returned by v1
+			$result = json_decode($encapsulatedResponse, false);
 
-		if ($this->options->verbose)
-		{
-			$this->logger->debug('Parsed Response: ' . print_r($result, true));
-		}
+			if (is_null($result) || !property_exists($result, 'status') || !property_exists($result, 'data'))
+			{
+				throw new InvalidEncapsulatedJSON($encapsulatedResponse);
+			}
 
-		$apiResult = (object) [
-			'body' => $result,
-		];
+			if ($this->options->verbose)
+			{
+				$this->logger->debug('Parsed Response: ' . print_r($result, true));
+			}
+
+			$apiResult = (object) [
+				'body' => $result,
+			];
+		}
 
 		if ($apiResult->body->status !== 200)
 		{
@@ -159,8 +162,14 @@ class Connector
 		if ($apiResult->body->status === 405)
 		{
 			throw new UnknownMethod(
-				sprintf('Server responded it does not know of API method %s. Is your installation broken?', $apiMethod)
+				sprintf('Server responded it does not know of API method %s. Is your installation broken or your Akeeba Backup / Solo version too old?', $apiMethod),
+				127
 			);
+		}
+
+		if ($apiResult->body->status === 501)
+		{
+			throw new NotImplemented($apiMethod);
 		}
 
 		if ($apiResult->body->status === 503)

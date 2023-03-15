@@ -1,6 +1,23 @@
 <h3>What's new?</h3>
+
 <p>
-    <strong>Support for the wp-admin/admin-ajax.php endpoint in WordPress.</strong> This was added in the latest version of Akeeba Backup for WordPress as an alternative to our endpoint which existed outside of WordPress.
+    <strong>Supports Joomla 1.5 and later (Akeeba Backup 3.4 and later)</strong>. We extended our support for remote sites using an Akeeba Backup JSON API as old as the one supported by Akeeba Backup 3.3.0 which was released in mid-2011, supporting Joomla 1.5 and PHP 5.3. The maximum supported version is what we have released in March 2023. Of course this includes <em>all</em> versions of Akeeba Backup for WordPress and Akeeba Solo (released between mid-2013 and March 2023). In short, if you have a site using any version of our backup software released the past <em>thirteen (13) years</em> you can use Akeeba Remote CLI with it. Neat!<br/>
+    <small>Please note that not all features are available in all versions of our backup software. Exporting and importing profiles require API level 320 which was introduced in Akeeba Backup for Joomla! 3.6.0, released in mid-2012.</small>
+</p>
+<p>
+    <strong>Works with sites on recalcitrant servers with way too verbose PHP error output</strong>. In the past, our software could get stopped by servers outputting PHP deprecated notices, notices, and warnings in the output. While having servers outputting these PHP non-error messages in the output is a bad idea for various reasons (including <em>the security of your site</em>) we understand that in many cases the server configuration may not be under your control, e.g. when you want to take a backup of a site being handed over by the old site integrator.
+</p>
+<p>
+    <strong>Convey wrong secret key errors instead of reporting there is no way to connect to the site</strong>. Akeeba Remote CLI 2 would always report “there's no way to connect to your site” regardless of the actual reason of the error. This version will tell you if the problem is the wrong Secret Key, so you can troubleshoot a more narrow error condition without nearly as much frustration.
+</p>
+<p>
+    <strong>Now reports when a record does not exist instead of returning a more generic error about the failed operation</strong>. You previously got a generic error such as cannot download or cannot delete. Now you are told that the reason is the record does not exist. If you get the old error message it means that there was a server error instead.
+</p>
+<p>
+    <strong>Remove --verbose option, it's implied when you use --debug</strong>. We saw that some people, especially those who should know better, would constantly forget to add the --verbose option to get detailed information about why the Akeeba Backup JSON API did not work, thus misleading them into misdiagnosing the problem. Using the --debug flag will now turn on verbose output as well and override the --quiet flag as well.
+</p>
+<p>
+    <strong>Using --debug also generates the log file remotecli_log.txt</strong>. If you are trying to troubleshoot a backup issue, using the --debug flag (previously along with the --verbose flag) can generate a lot of output which overflows your terminal's scroll buffer, making it hard to get a cohesive view of what is going on. Using the --debug flag will now create the file remotecli_log.txt in the current working directory, mirroring the debug output you see on the screen. If you get lost, open this file, and you can see exactly what has been going on.
 </p>
 
 <p>

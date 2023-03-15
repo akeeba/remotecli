@@ -1,0 +1,5 @@
+Finish writing the Help text
+
+Document the endpoint URLs for each version of the software
+
+Change documentation part about needing a version of Akeeba Backup released within the last 6 months

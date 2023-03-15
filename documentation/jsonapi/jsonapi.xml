@@ -107,8 +107,7 @@
     were doing in the past.</para>
 
     <para><emphasis role="bold">Some API methods will be dropped</emphasis>.
-    Some API methods have been marked deprecated and will be removed from the
-    next API version.</para>
+    Some API methods have been marked deprecated and will be removed.</para>
 
     <para><emphasis role="bold">Co-existence of the two API
     versions</emphasis>. For a brief period of time both API versions will
@@ -304,41 +303,6 @@
             </listitem>
           </varlistentry>
 
-          <varlistentry>
-            <term>2</term>
-
-            <listitem>
-              <para>ENCAPSULATION_AESCTR128. OBSOLETE - NO LONGER USED.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>3</term>
-
-            <listitem>
-              <para>ENCAPSULATION_AESCTR256. OBSOLETE - NO LONGER USED.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>4</term>
-
-            <listitem>
-              <para>ENCAPSULATION_AESCBC128. OBSOLETE - NO LONGER
-              USED..</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>5</term>
-
-            <listitem>
-              <para>ENCAPSULATION_AESCBC256. OBSOLETE - NO LONGER
-              USED..</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
         <para>The only encapsulation you should use and expect to receive is
         1.</para>
       </section>
@@ -473,7 +437,7 @@
           <term>edition</term>
 
           <listitem>
-            <para>String. If we have Akeeba Backup Professional it return
+            <para>String. If we have Akeeba Backup Professional it returns
             "pro", otherwise "core". Since API level 320.</para>
           </listitem>
         </varlistentry>
@@ -1365,7 +1329,8 @@
       <title>getLog</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+      for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+      8</para>
 
       <para>Returns the contents of the log file associated with a given
       backup tag. A backup "tag" is an identifier which conventionally
@@ -1394,7 +1359,8 @@
       <title>getGUIConfiguration</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns a JSON definition for the configuration page. Available
       since API version 340.</para>
@@ -1420,9 +1386,6 @@
 
     <section>
       <title>exportConfiguration</title>
-
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
 
       <para>Returns a hash table with the profile's description, engine
       configuration and filters configuration. You can use it to export
@@ -1476,9 +1439,6 @@
     <section>
       <title>importConfiguration</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
-
       <para>Imports a hash table with the profile information either as a new
       profile or overwriting an existing profile. You can use it to import
       profiles you exported from the same or a different server. Available
@@ -1516,7 +1476,8 @@
       <title>saveConfiguration</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Saves the configuration of a backup profile. Available since API
       version 340.</para>
@@ -1555,7 +1516,8 @@
       <title>saveProfile</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Updates or creates a backup profile. Available since API version
       340.</para>
@@ -1623,7 +1585,8 @@
       <title>deleteProfile</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Deletes a backup profile. Available since API version 340.</para>
 
@@ -1649,7 +1612,8 @@
       <title>browse</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the list of subdirectories and directory information for a
       requested folder. Used to implement directory browsers, e.g. for the
@@ -1787,7 +1751,8 @@
       <title>getDBRoots</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the database roots for the backup profile. Available since
       API version 340.</para>
@@ -1838,7 +1803,8 @@
       <title>getDBFilters</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns a list of all the database entities and any exclusion
       filters applied to each one of them. Typically used to render a GUI for
@@ -1901,7 +1867,8 @@
       <title>getDBEntities</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the database entities exclusion filters for the chosen
       backup profile. Available since API version 340.</para>
@@ -2063,7 +2030,8 @@
       <title>setDBFilter</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Sets or resets a database exclusion filter. Available since API
       version 340.</para>
@@ -2146,7 +2114,8 @@
       <title>getFSRoots</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the filesystem roots for the backup profile. Available
       since API version 340.</para>
@@ -2194,7 +2163,8 @@
       <title>getFSFilters</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the filesystem exclusion filters for the chosen backup
       profile. Available since API version 340.</para>
@@ -2274,7 +2244,8 @@
       <title>getFSEntities</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the filesystem entities (files and folders) exclusion
       filters for the chosen backup profile. Available since API version
@@ -2417,7 +2388,8 @@
       <title>setFSFilter</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Sets or resets a filesystem exclusion filter. Available since API
       version 340.</para>
@@ -2500,7 +2472,8 @@
       <title>getIncludedDirectories</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Lists the additional included directories. Available since API
       version 340.</para>
@@ -2550,7 +2523,8 @@
       <title>setIncludedDirectory</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Add an additional included directory definition. Available since
       API version 340.</para>
@@ -2623,7 +2597,8 @@
       <title>removeIncludedDirectory</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Removes an additional included directory definition. Available
       since API version 340.</para>
@@ -2676,7 +2651,8 @@
       <title>getIncludedDBs</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Lists the additional included database definitions. Available
       since API version 340.</para>
@@ -2761,7 +2737,8 @@
       <title>setIncludedDB</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Adds an additional included database definition. Available since
       API version 340.</para>
@@ -2868,7 +2845,8 @@
       <title>removeIncludedDB</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Removes an additional included database definition. Available
       since API version 340.</para>
@@ -2902,7 +2880,8 @@
       <title>testDBConnection</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Test the connection to a database, used to test connection
       information before submitting it to setIncludedDB. Available since API
@@ -3002,7 +2981,8 @@
       <title>getRegexDBFilters</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the regular expression database exclusion filters for the
       backup profile. Available since API version 340.</para>
@@ -3061,7 +3041,8 @@
       <title>setRegexDBFilter</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Sets a regular expression database exclusion filter for the backup
       profile. Available since API version 340.</para>
@@ -3123,7 +3104,8 @@
       <title>getRegexFSFilters</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Returns the regular expression filesystem exclusion filters for
       the backup profile. Available since API version 340.</para>
@@ -3183,7 +3165,8 @@
       <title>setRegexFSFilter</title>
 
       <para>DEPRECATED - This method will be removed in Akeeba Backup
-      7.1</para>
+        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
+        8</para>
 
       <para>Sets a regular expression filesystem exclusion filter for the
       backup profile. Available since API version 340.</para>
