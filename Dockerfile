@@ -1,29 +1,27 @@
 ########################################################################################################################
-# USAGE:
+# Akeeba Remote CLI
 #
-# After tagging a releasing a new version the old-fashioned way you can also build the Dockerized version:
+# Dockerized version
 #
-#     cd /path/to/this/repository
-#     export ARCCLI_LATEST_TAG=`git describe --abbrev=0`
-#     docker rmi akeebaltd/remotecli:latest
-#     docker build -t akeebaltd/remotecli:latest .
-#     docker tag akeebaltd/remotecli:latest akeebaltd/remotecli:$ARCCLI_LATEST_TAG
-#     docker push akeebaltd/remotecli:$ARCCLI_LATEST_TAG
-#     docker push akeebaltd/remotecli:latest
-#
+# See documentation/Dockerized.md for build instructions
 ########################################################################################################################
 
 # Use the latest PHP 8 CLI based on Alpine Linux
 FROM php:8-alpine
 
 # Labels describing what this is all about
-LABEL org.label-schema.name = "AkeebaRemoteCLI" \
-      org.label-schema.description= "Akeeba Remote Control CLI (Dockerized) takes and download remote backups using Akeeba Backup and Akeeba Solo" \
-      org.label-schema.usage = "https://www.akeeba.com/documentation/arccli.html" \
-      org.label-schema.vcs-url = "https://github.com/akeeba/remotecli" \
-      org.label-schema.vendor = "Akeeba Ltd" \
-      org.label-schema.schema-version = "1.0" \
-      org.label-schema.docker.cmd = "docker run --rm akeebaltd/remotecli --action backup"
+LABEL org.label-schema.name="AkeebaRemoteCLI"
+LABEL org.label-schema.description="Akeeba Remote Control CLI (Dockerized) takes and download remote backups using Akeeba Backup and Akeeba Solo"
+LABEL org.label-schema.usage="https://www.akeeba.com/documentation/arccli.html"
+LABEL org.label-schema.vcs-url="https://github.com/akeeba/remotecli"
+LABEL org.label-schema.vendor="Akeeba Ltd"
+LABEL org.label-schema.schema-version="1.0"
+LABEL org.label-schema.docker.cmd="docker run --rm ghcr.io/akeeba/remotecli backup"
+# Labels specific to GitHub Container Registry
+LABEL org.opencontainers.image.source="https://github.com/akeeba/remotecli"
+LABEL org.opencontainers.image.licenses="GPL-3.0-or-later"
+LABEL org.opencontainers.image.description="Akeeba Remote Control CLI (Dockerized) takes and download remote backups using Akeeba Backup and Akeeba Solo"
+
 
 # Apply an infinite memory limit and set up the correct time zone
 RUN echo "memory_limit=-1" > "$PHP_INI_DIR/conf.d/memory-limit.ini" \
