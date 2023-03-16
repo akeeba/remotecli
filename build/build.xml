@@ -61,6 +61,15 @@
 			</element>
 		</metadata>
 		</pharpackage>
+
+		<zip destfile="${dirs.release}/remote.zip"
+			 basedir="${dirs.release}"
+			 comment="Akeeba Remote CLI ${version}"
+		>
+			<fileset dir="${dirs.release}">
+				<include name="remote.phar"/>
+			</fileset>
+		</zip>
 	</target>
 	
 	<!--
