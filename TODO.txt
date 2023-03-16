@@ -1,1 +1,0 @@
-Change documentation part about needing a version of Akeeba Backup released within the last 6 months

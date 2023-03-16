@@ -875,8 +875,8 @@ profile=3</programlisting>
 
         <para>Technically, there is no good reason. Practically, the minimum
         API Level we support supports Joomla 1.5 which was discontinued in
-        September 2012 and PHP 5.1 which was discontinued in August 2006.
-        </para>
+        September 2012 and PHP 5.1 which was discontinued in August
+        2006.</para>
 
         <para>For starters, a site which is still using this kind of ancient
         versions of Joomla and PHP is either completely abandoned with no
@@ -1153,9 +1153,11 @@ Successful connection to site</screen>
 
       <para><emphasis>Error #102 - You need to install a newer version of
       Akeeba Backup / Akeeba Solo on your site</emphasis>: Make sure that you
-      are using an Akeeba Backup / Akeeba Solo version released within the
-      last 6 months. Very old versions of Akeeba Backup / Akeeba Solo might
-      not be compatible with newer versions of Remote CLI.</para>
+      are using an Akeeba Backup / Akeeba Solo version which is not
+      <emphasis>too</emphasis> old. Keeping in mind that Remote CLI supports
+      versions released as far back as mid-2011, a version that's “too old” is
+      very likely to be installed on a site with critical vulnerabilities
+      which should no longer be online.</para>
 
       <bridgehead>Taking a backup</bridgehead>
 
