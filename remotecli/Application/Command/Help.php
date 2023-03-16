@@ -136,34 +136,80 @@ test
     Tests the connection to your site. Use with --debug for detailed information. 
 
 backup
-    TODO
+    Takes a backup of the site.
+    
+    --profile=<ID>
+        Use the backup profile to take the backup. Default: 1
+
+    --description=<DESCRIPTION>
+        Set the backup record's description. Default: Remote Backup
+    
+    --comment=<COMMENT>
+        Set the backup comment.
 
 backupinfo
-    TODO
+    Display information about a backup record
+    
+    --id=<ID>
+        Required. Specify the backup record ID to list. 
 
 listbackups
-    TODO
+    Lists backup records in reverse chronologicla order.
+    
+    --from=<FROM>
+        Skip this many items before starting listing records.
+    
+    --limit=<LIMIT>
+        How many records to display, 1-200. Default: 200
 
 delete
-    TODO
+    Delete a backup record
+    
+    --id=<ID>
+        Required. Specify the backup record ID to delete. 
 
 deletefiles
-    TODO
+    Delete the backup archives and log files of a backup record, but leaves the backup record in the database.
+
+    --id=<ID>
+        Required. Specify the backup record ID to delete files from. 
 
 download
-    TODO
+    Downloads the backup archives from a backup record. Requires using the DOWNLOAD OPTIONS documented above.
+    
+    --id=<ID>
+        Required. Specify the backup record ID to download files from.     
 
 profiles
-    TODO
+    Lists all backup profiles.
 
 profileexport
-    TODO
+    Exports a backup profile to JSON format.
+    
+    --id=<ID>
+        Required. Specify the backup profile ID to export     
+
+    --
+        Output to the standard output (STDOUT). Useful for piping the output ot other programmes. Use with -m --quiet
+    
+    --file=<FIILE>
+        Set the file where the export will be written. Cannot be used with the -- flag above.  
 
 profileimport
-    TODO
+    Imports a backup profile from a profile exported to JSON.
+    
+    --data=<DATA>
+        Use the given string as the profile JSON input.
+    
+    --file=<FILE>
+        Use the given file's contents as the profile JSON input.
+    
+    --
+        Use the standard input (STDIN) as the profile JSON input. Useful for piping from other programmes.
 
 update
-    TODO
+    Installs the latest update to the backup software. Only compatible with Akeeba Backup for WordPress and Akeeba Solo.
+    This command will fail on Joomla sites, reporting the method does not exist on the server.
 
 
 PLAINTEXT;

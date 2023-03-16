@@ -722,17 +722,18 @@
 
       <important>
         <para>This feature IS NOT available on Joomla! 4 and later versions.
-          Extension updates are handled by Joomla! itself, not Akeeba Backup.
-          Please refer to  Joomla!'s documentation for information on updating
-          extensions.</para>
+        Extension updates are handled by Joomla! itself, not Akeeba Backup.
+        Please refer to Joomla!'s documentation for information on updating
+        extensions.</para>
 
         <para>When you use this feature against a WordPress site the update
         will use Akeeba Backup's built-in updater instead of WordPress' plugin
-        updater. To use WordPress' plugin updater please use WP-CLI instead.</para>
+        updater. To use WordPress' plugin updater please use WP-CLI
+        instead.</para>
       </important>
     </section>
 
-    <section>
+    <section xml:id="config-files">
       <title>Configuration files</title>
 
       <para>Akeeba Remote CLI is looking for a personalized configuration
@@ -786,6 +787,263 @@ profile=3</programlisting>
       options (takes a backup with profile #1);</para>
 
       <programlisting>remote.phar backup --host=example --profile=1</programlisting>
+    </section>
+
+    <section xml:id="endpoints-and-api-versions">
+      <title>Endpoints and API versions per backup software version</title>
+
+      <para>When you give Akeeba Remote CLI just the site's URL it will try to
+      auto-detect the connection specifics every time it runs a command. This
+      requires making a lot of requests, it's slow, and it can possibly result
+      to a misleading error in some rare use cases. Instead, it makes more
+      sense to use a specific endpoint depending on which version of Akeeba
+      Backup for Joomla, Akeeba Backup for WordPress, or Akeeba Solo you are
+      using on your site.</para>
+
+      <bridgehead>API v1 versus API v2</bridgehead>
+
+      <para>The Akeeba Remote JSON API comes in two big version
+      families.</para>
+
+      <para>API v1 was the original specification which was available from its
+      first appearance in 2010 up to late-2023. It's not a “pure” JSON API in
+      that it encapsulates the actual JSON input and output. Originally, the
+      encapsulation was used to encrypt the data sent to and received from the
+      server since, at the time it was first implemented, HTTPS required very
+      expensive, paid SSL/TLS certificates and dedicated IP addresses on the
+      server. The encryption was removed from the Remote JSON API
+      specification in September 2014 because it could be broken with a
+      Padding Oracle attack. At the same time, HTTPS had become commonplace
+      thanks to free of charge TLS certificates issued by Let's Encrypt which
+      had launched two years prior. The API v1 is no longer supported and
+      removed from new versions of our backup software starting Q3
+      2023.</para>
+
+      <para>API v2 is the current specification and made its first appearance
+      in October 2020. It is a pure JSON API. It is meant to be used only over
+      HTTPS. It does not use its own encryption.</para>
+
+      <para>Akeeba Remote CLI supports both API v1 and API v2 endpoints to
+      ensure compatibility with old sites. Akeeba Remote CLI only supports the
+      <emphasis>unencrypted</emphasis> version of the v1 API, even on sites
+      running versions of our software released prior to September 2014 (you
+      shouldn't; they can get your site hacked, as we warned you back in
+      Septmeber 2014). If you have a version of Akeeba Backup or Akeeba Solo
+      released after October 2020 we very strongly recommend that you use the
+      API v2 endpoint. It uses slightly less resources and it's a little bit
+      faster.</para>
+
+      <bridgehead>API levels</bridgehead>
+
+      <para>Regardless of whether you access the Remote JSON API over the v1
+      or v2 API, the implementation of the API has changed over time. The very
+      first versions only allowed taking backups. Other features have been
+      added and removed in subsequent versions, and some features may have
+      gained new parameters, or had some of their parameters made mandatory.
+      Every time such a change happens we change the <emphasis>API
+      Level</emphasis>.</para>
+
+      <para>Akeeba Remote CLI supports API Level 320 which was introduced with
+      Akeeba Backup for Joomla 3.3.0 in July 2011, running on a minimum of
+      Joomla! 1.5 and PHP 5.1. The maximum supported API level is the latest
+      API level at the time your version of Akeeba Remote CLI was
+      released.</para>
+
+      <para>The differences between API levels means that some older sites may
+      not support some features, namely:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Reporting whether it's the free of charge Core or the
+          for-a-fee Professional edition of the software</para>
+        </listitem>
+
+        <listitem>
+          <para>Exporting and importing backup profiles</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Everything else will still work. Crucially, taking backups will
+      work across all API levels by any client which supports the latest
+      published API level, such as the latest published version of Akeeba
+      Remote CLI. This is a conscious choice, ensuring that Akeeba Remote CLI
+      will maintain backwards compatibility with older Akeeba Backup versions
+      over a period of <emphasis>decades</emphasis>.</para>
+
+      <note>
+        <para>Why do we not support even older API versions?</para>
+
+        <para>Technically, there is no good reason. Practically, the minimum
+        API Level we support supports Joomla 1.5 which was discontinued in
+        September 2012 and PHP 5.1 which was discontinued in August 2006.
+        </para>
+
+        <para>For starters, a site which is still using this kind of ancient
+        versions of Joomla and PHP is either completely abandoned with no
+        visitors and no need for backup, or completely hacked due to the
+        number of well-known critical vulnerabilities. This means there's
+        <emphasis>little to no practical utility</emphasis> supporting even
+        that ancient API Level.</para>
+
+        <para>Moreover, supporting an API Level requires us to be able to run
+        a test site with that version of Akeeba Backup, Joomla, and PHP. As of
+        March 2023 the oldest version of PHP we can conceivably access is PHP
+        5.6, limiting us to running Joomla 1.5.26 and Akeeba Backup 3.4.6;
+        anything older wouldn't run correctly or at all. There's no
+        <emphasis>reasonable</emphasis> way to run a PHP version older than
+        that other than spinning up a Windows XP virtual machine and
+        installing archived versions of PHP, Apache, and MySQL. Meanwhile,
+        we're talking about software which has been discontinued the better
+        part of two decades, making its practical utility even more
+        questionable. So, why go through all that trouble if nobody has a use
+        case for it?</para>
+
+        <para>As for Joomla 1.0: no version of Akeeba Backup for Joomla! 1.0
+        ever had the Akeeba Remote JSON API. In the Joomla 1.0 days Joomla
+        itself had an XML-RPC application and that's what we implemented in
+        Akeeba Backup's predecessor, JoomlaPack. XML-RPC is a completely
+        different use case which requires a completely different client than
+        what we're doing with Remote CLI. The practical problems of how do you
+        run these old versions is there —even more so, since they are even
+        older— and of course the practical utility for that is exactly zero:
+        nobody in their right mind would be using a live site still running on
+        Joomla! 1.0 after early 2009 at the latest.</para>
+      </note>
+
+      <bridgehead>Conventions in the examples</bridgehead>
+
+      <para>In all of the following examples, we assume your site's URL is
+      <uri>https://www.example.com</uri>. For WordPress, we assume the plugin
+      is installed in
+      <filename>wp-content/plugins/akeebabackupwp</filename>.</para>
+
+      <para>The preferred API endpoint for each version is marked in bold
+      type.</para>
+
+      <bridgehead>Akeeba Backup for Joomla!</bridgehead>
+
+      <para><emphasis role="bold">Akeeba Backup 3.3.0 to
+      7.4.0.1</emphasis></para>
+
+      <para>Only the API v1 endpoint is supported: <emphasis
+      role="bold"><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></emphasis></para>
+
+      <para>On some servers you may want to try format=component if
+      <code>format=raw</code> does not work for you.</para>
+
+      <para><emphasis role="bold">Akeeba Backup 7.5.x and
+      8.x</emphasis></para>
+
+      <para>The following API v1 endpoint is supported, but <emphasis>not
+      recommended</emphasis>:
+      <uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>The following API v2 endpoint is recommended instead: <emphasis
+      role="bold"><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></emphasis></para>
+
+      <para><emphasis role="bold">Akeeba Backup 9.0.0 and
+      later</emphasis></para>
+
+      <para>Only the following API v2 endpoint is supported: <emphasis
+      role="bold"><uri>https://www.example.com/index.php?option=com_akeebabackup&amp;view=api&amp;format=raw</uri></emphasis></para>
+
+      <bridgehead>Akeeba Backup for WordPress</bridgehead>
+
+      <para><emphasis role="bold">Akeeba Backup for WordPress 1.0.0 to
+      2.4.0</emphasis></para>
+
+      <para>Only the following API v1 endpoint is supported:</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></emphasis></para>
+
+      <para><emphasis role="bold">Akeeba Backup for WordPress 2.4.1 to
+      7.3.2.1</emphasis></para>
+
+      <para>Only the following API v1 endpoints are supported:</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></emphasis></para>
+
+      <para>and</para>
+
+      <para><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/remote.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para><emphasis role="bold">Akeeba Backup for WordPress 7.4.0 to
+      7.7.0</emphasis></para>
+
+      <para>The following API v1 endpoints are supported but NOT
+      recommended:</para>
+
+      <para><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>and</para>
+
+      <para><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/remote.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>The following API v2 endpoint is supported and recommended:</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></emphasis></para>
+
+      <para><emphasis role="bold">Akeeba Backup for WordPress 7.7.1 and later
+      7.x versions</emphasis></para>
+
+      <para>The following API v1 endpoints are supported but NOT
+      recommended:</para>
+
+      <para><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>and</para>
+
+      <para><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/remote.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>The following API v2 endpoints are supported:</para>
+
+      <para><uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></para>
+
+      <para>and</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/wp-admin/admin-ajax.php?action=akeebabackup_api&amp;option=com_akeeba&amp;view=api&amp;format=raw</uri></emphasis></para>
+
+      <bridgehead>Akeeba Solo</bridgehead>
+
+      <para><emphasis role="bold">Akeeba Solo1.0.0 to 2.4.0</emphasis></para>
+
+      <para>Only the following API v1 endpoint is supported:</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></emphasis></para>
+
+      <para><emphasis role="bold">Akeeba Solo 2.4.1 to
+      7.3.2.1</emphasis></para>
+
+      <para>Only the following API v1 endpoints are supported:</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></emphasis></para>
+
+      <para>and</para>
+
+      <para><uri>https://www.example.com/remote.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para><emphasis role="bold">Akeeba Solo 7.4.0 and later 7.x
+      versions</emphasis></para>
+
+      <para>The following API v1 endpoints are supported but NOT
+      recommended:</para>
+
+      <para><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>and</para>
+
+      <para><uri>https://www.example.com/remote.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+
+      <para>The following API v2 endpoint is supported and recommended:</para>
+
+      <para><emphasis
+      role="bold"><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></emphasis></para>
     </section>
 
     <section xml:id="walkthrough">
