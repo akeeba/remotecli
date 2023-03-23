@@ -800,9 +800,9 @@ profile=3</programlisting>
       Backup for Joomla, Akeeba Backup for WordPress, or Akeeba Solo you are
       using on your site.</para>
 
-      <bridgehead>API v1 versus API v2</bridgehead>
+      <bridgehead>API v1 versus API v2 versus API v3</bridgehead>
 
-      <para>The Akeeba Remote JSON API comes in two big version
+      <para>The Akeeba Remote JSON API comes in three big version
       families.</para>
 
       <para>API v1 was the original specification which was available from its
@@ -823,6 +823,12 @@ profile=3</programlisting>
       in October 2020. It is a pure JSON API. It is meant to be used only over
       HTTPS. It does not use its own encryption.</para>
 
+      <para>API v3 is a newer API specification which is only available on
+      Joomla 4.2.0 and later, using Akeeba Backup 9.6.0 and later. It is a
+      pure JSON API. Authentication is performed by Joomla itself,
+      <emphasis>not</emphasis> our own code. It is meant to be used only over
+      HTTPS. It does not use its own encryption.</para>
+
       <para>Akeeba Remote CLI supports both API v1 and API v2 endpoints to
       ensure compatibility with old sites. Akeeba Remote CLI only supports the
       <emphasis>unencrypted</emphasis> version of the v1 API, even on sites
@@ -832,6 +838,8 @@ profile=3</programlisting>
       released after October 2020 we very strongly recommend that you use the
       API v2 endpoint. It uses slightly less resources and it's a little bit
       faster.</para>
+
+      <para>Akeeba Remote CLI does not currently support API v3.</para>
 
       <bridgehead>API levels</bridgehead>
 
@@ -843,10 +851,10 @@ profile=3</programlisting>
       Every time such a change happens we change the <emphasis>API
       Level</emphasis>.</para>
 
-      <para>Akeeba Remote CLI supports API Level 320 which was introduced with
-      Akeeba Backup for Joomla 3.3.0 in July 2011, running on a minimum of
-      Joomla! 1.5 and PHP 5.1. The maximum supported API level is the latest
-      API level at the time your version of Akeeba Remote CLI was
+      <para>Akeeba Remote CLI supports a minimum of API Level 320 which was
+      introduced with Akeeba Backup for Joomla 3.3.0 in July 2011, running on
+      a minimum of Joomla! 1.5 and PHP 5.1. The maximum supported API level is
+      the latest API level at the time your version of Akeeba Remote CLI was
       released.</para>
 
       <para>The differences between API levels means that some older sites may
