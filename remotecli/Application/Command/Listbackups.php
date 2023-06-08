@@ -1,16 +1,11 @@
 <?php
 /**
  * @package    AkeebaRemoteCLI
- * @copyright  Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright  Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
 
 namespace Akeeba\RemoteCLI\Application\Command;
-
-use Akeeba\RemoteCLI\Api\HighLevel\Backup as BackupModel;
-use Akeeba\RemoteCLI\Api\HighLevel\Information as TestModel;
-use Akeeba\RemoteCLI\Application\Input\Cli;
-use Akeeba\RemoteCLI\Application\Output\Output;
 
 class Listbackups extends AbstractCommand
 {

@@ -1,17 +1,13 @@
 <?php
 /**
  * @package    AkeebaRemoteCLI
- * @copyright  Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright  Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
 
-
 namespace Akeeba\RemoteCLI\Application\Command;
 
-
-use Akeeba\RemoteCLI\Api\DataShape\BackupOptions;
-use Akeeba\RemoteCLI\Application\Input\Cli;
-use Akeeba\RemoteCLI\Application\Output\Output;
+use Akeeba\BackupJsonApi\DataShape\BackupOptions;
 
 class Backup extends AbstractCommand
 {

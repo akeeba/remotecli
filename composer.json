@@ -18,15 +18,27 @@
 			"role": "Lead Developer"
 		}
 	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/akeeba/json-backup-api"
+		}
+	],
 	"require": {
-		"php": ">=8.0.0 <8.3",
+		"php": ">=8.0.0 <=8.3",
 		"ext-curl": "*",
 		"ext-json": "*",
 		"psr/log": "^3.0.0",
+		"akeeba/json-backup-api": "@dev",
 		"composer/ca-bundle": "^1.2",
 		"joomla/data": "^2.0.1",
 		"joomla/http": "^2.0.2",
 		"joomla/filesystem": "^2.0.2"
+	},
+	"suggest": {
+		"ext-mbstring": "Allows for UTF8 encoding / decoding",
+		"ext-intl": "Allows for UTF8 encoding / decoding",
+		"ext-iconv": "Allows for UTF8 encoding / decoding"
 	},
 	"config": {
 		"vendor-dir": "remotecli/vendor",

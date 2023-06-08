@@ -1,17 +1,18 @@
 <?php
 /**
  * @package    AkeebaRemoteCLI
- * @copyright  Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright  Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license    GNU General Public License version 3, or later
  */
 
 namespace Akeeba\RemoteCLI\Application\Command;
 
-use Akeeba\RemoteCLI\Api\Connector;
-use Akeeba\RemoteCLI\Api\DataShape\DownloadOptions;
-use Akeeba\RemoteCLI\Api\Exception\NoConfiguredHost;
-use Akeeba\RemoteCLI\Api\Exception\NoConfiguredSecret;
-use Akeeba\RemoteCLI\Api\Options;
+use Akeeba\BackupJsonApi\Connector;
+use Akeeba\BackupJsonApi\DataShape\DownloadOptions;
+use Akeeba\BackupJsonApi\Exception\NoConfiguredHost;
+use Akeeba\BackupJsonApi\Exception\NoConfiguredSecret;
+use Akeeba\BackupJsonApi\HttpAbstraction\HttpClientJoomla;
+use Akeeba\BackupJsonApi\Options;
 use Akeeba\RemoteCLI\Application\Input\Cli;
 use Akeeba\RemoteCLI\Application\Kernel\CommandInterface;
 use Akeeba\RemoteCLI\Application\Output\Output;
@@ -19,9 +20,7 @@ use Psr\Log\LoggerInterface;
 
 abstract class AbstractCommand implements CommandInterface
 {
-	public function __construct(protected Cli $input, protected Output $output, protected LoggerInterface $logger)
-	{
-	}
+	public function __construct(protected Cli $input, protected Output $output, protected LoggerInterface $logger) {}
 
 	public function prepare(): void
 	{
@@ -87,7 +86,8 @@ abstract class AbstractCommand implements CommandInterface
 		], $additional);
 		$options    = $this->getApiOptions($additional);
 
-		$api = new Connector($options);
+		$httpClient = new HttpClientJoomla($options);
+		$api        = new Connector($httpClient);
 
 		$api->autodetect();
 
