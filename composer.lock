@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/akeeba/json-backup-api.git",
-                "reference": "77c37f04cd294399436fba52eea5a0e834cf53e1"
+                "reference": "3eee2d8ae4b69b9e4e1845a81ed1d8d291da062f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/akeeba/json-backup-api/zipball/77c37f04cd294399436fba52eea5a0e834cf53e1",
-                "reference": "77c37f04cd294399436fba52eea5a0e834cf53e1",
+                "url": "https://api.github.com/repos/akeeba/json-backup-api/zipball/3eee2d8ae4b69b9e4e1845a81ed1d8d291da062f",
+                "reference": "3eee2d8ae4b69b9e4e1845a81ed1d8d291da062f",
                 "shasum": ""
             },
             "require": {
@@ -47,6 +47,13 @@
                     "src/constants.php"
                 ]
             },
+            "archive": {
+                "exclude": [
+                    "/.idea",
+                    "/vendor",
+                    ".gitignore"
+                ]
+            },
             "license": [
                 "AGPL-3.0-or-later"
             ],
@@ -63,7 +70,7 @@
                 "source": "https://github.com/akeeba/json-backup-api/tree/main",
                 "issues": "https://github.com/akeeba/json-backup-api/issues"
             },
-            "time": "2023-06-07T16:30:14+00:00"
+            "time": "2023-06-12T18:29:41+00:00"
         },
         {
             "name": "composer/ca-bundle",
