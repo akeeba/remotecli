@@ -1,3 +1,7 @@
+Akeeba Remote CLI 3.1.0
+================================================================================
+~ Now using our Akeeba Backup JSON API Client Library (https://github.com/akeeba/json-backup-api) under the hood
+
 Akeeba Remote CLI 3.0.0
 ================================================================================
 ~ Refactored code
