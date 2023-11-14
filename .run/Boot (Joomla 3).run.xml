@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Boot (Joomla 3)" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="--action=backup --profile=33 --host=&quot;https://boot.local.web/index.php?option=com_akeeba&amp;view=api&amp;format=raw&quot; --secret=&quot;yIvOAsPv5Zoht00mFApMdnlo2VwsvQdi&quot; --certificate=&quot;/opt/homebrew/etc/httpd/ssl/ca-chain.crt&quot; --debug --verbose">
+    <CommandLine workingDirectory="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>

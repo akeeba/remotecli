@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Boot 4 (APIv2)" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="test --host=&quot;https://boot4.local.web/index.php?option=com_akeebabackup&amp;view=Api&amp;format=raw&quot; --secret=&quot;cKvSyCJjZjgmJPE87TYWOmaz3HbXpvxM&quot; --certificate=&quot;/opt/homebrew/etc/httpd/ssl/ca-chain.crt&quot; --debug">
+    <CommandLine workingDirectory="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>

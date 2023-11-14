@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="WordPress - APIv2, old endpoint" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="--action=test --host=&quot;https://wordpress.local.web/wp-content/plugins/akeebabackupwp/app/index.php?view=Api&quot; --secret=&quot;deBEjOa0hBFRq97XHVIiQHaypE_WsQgU&quot; --certificate=&quot;/opt/homebrew/etc/httpd/ssl/ca-chain.crt&quot; --debug --verbose">
+    <CommandLine workingDirectory="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>
