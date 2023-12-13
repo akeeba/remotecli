@@ -24,7 +24,7 @@
     </copyright>
   </info>
 
-  <section>
+  <section xml:id="introduction">
     <title>Introduction to the API</title>
 
     <para>The Professional (for-a-fee) versions Akeeba Backup for Joomla!,
@@ -42,16 +42,410 @@
     to see the communications taking place between the client and the server.
     We believe this is the best interactive demonstration of the API
     implementation.</para>
+
+    <para>If you are a PHP software developer who wants to make an integration
+    with the Akeeba Backup JSON API you can take a look at <link
+    xlink:href="https://github.com/akeeba/json-backup-api">the reference
+    client library</link>.</para>
   </section>
 
-  <section>
-    <title>Client and server data formats</title>
+  <section xml:id="intro-to-api-versions">
+    <title>Introduction to API versions</title>
 
-    <para>For historical reasons, version 1 requires that you
+    <para>Historically, there have been four (4) versions of a remote API to
+    Akeeba Backup.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>XML-RPC Remote Backup API (APIv0). Retired. This was the
+        original version of a remote API present in JoomlaPack (the precursor
+        to Akeeba Backup), using XML-RPC instead of JSON. This API is NOT
+        referenced in this documentation.</para>
+      </listitem>
+
+      <listitem>
+        <para>APIv1. Retired. This was the oldest version of the Akeeba Backup
+        JSON API, used between 2011 and 2023.</para>
+      </listitem>
+
+      <listitem>
+        <para>APIv2. Mature. This is the current and recommended version of
+        the Akeeba Backup JSON API. It is supported by all our backup
+        products: Akeeba Backup for Joomla!, Akeeba Backup for WordPress, and
+        Akeeba Solo. It was released in March 2020 and there is no sunset date
+        for it set yet.</para>
+      </listitem>
+
+      <listitem>
+        <para>APIv3. Emerging. Currently only implemented by Akeeba Backup for
+        Joomla! versions 9.6.0 and later. There is no date set yet for this
+        API version entering full production use.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>We expect APIv3 to be implemented across all our products by Q4
+    2025, and replace APIv2 by Q4 2027. These dates are currently
+    tentative.</para>
+  </section>
+
+  <section xml:id="client-library">
+    <title>The API client library</title>
+
+    <para>Writing an integration with a third party API is painful and
+    invariably complicated. You have to understand the mindset and goals of
+    the person designing the API, figure out its quirks, and write code which
+    not only integrates with the API, but also does error handling and
+    whatnot.</para>
+
+    <para>We strongly believe in Free and Open Source Software both for its
+    technical superiority, and for its educational value. Therefore, if you
+    are building a PHP-based Free and Open Source Software solution which
+    needs to integrate with Akeeba Backup and Akeeba Solo we strongly
+    encourage you to use our <link
+    xlink:href="https://packagist.org/packages/akeeba/json-backup-api">akeeba/json-backup-api
+    client library package</link> through Composer.</para>
+
+    <important>
+      <para>The library package is licensed under the GNU Affero General
+      Public License, version 3 of the license or, at your option, any later
+      version (GNU-AGPL-3+). The GNU-AGPL-3+ license has a further restriction
+      than the GNU General Public License (GNU-GPL-3+). If your software is
+      accessible over a network, you must provide its source code to everyone
+      who can access it over a network. If you are writing proprietary
+      software, e.g. you are building a hosted service, and do not want this
+      restriction we can sell you a proprietary license for the library.
+      Pricing is determined according to the number of sites you expect to use
+      this library with on a monthly basis, starting at €0.05 per site per
+      month, with a minimum of 100 sites.</para>
+    </important>
+
+    <para>This library is the reference implementation of an Akeeba Backup
+    JSON API client. This is what we use in Akeeba RemoteCLI (a CLI
+    application to take backups remotely), Akeeba UNiTE (a CLI application to
+    take backups remotely, and restore them unattended on a server), and
+    Akeeba Panopticon (our self-hosted site monitoring software which can also
+    take backups automatically).</para>
+
+    <para>To use this package, you will need two or three things in your
+    <filename>composer.json</filename> file:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The akeeba/json-backup-api package itself.</para>
+      </listitem>
+
+      <listitem>
+        <para>A compatible HTTP request library. The library supports Guzzle,
+        the Joomla Framework HTTP package, as well as any library which
+        implements PSR-17 and PSR-18 such as PHP-HTTP, HTTPlug, and so
+        on.</para>
+      </listitem>
+
+      <listitem>
+        <para>Optionally, composer/ca-bundle unless you can provide your own
+        TLS Certification Authority cache</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Assuming that you use Guzzle and composer/ca-bundle you can create a
+    high level Akeeba Backup API client in a few lines of code:</para>
+
+    <programlisting>// Create an Options object which tells the library where and
+// how to connect to the backup software
+$options = new \Akeeba\BackupJsonApi\Options([
+    'capath' =&gt; \Composer\CaBundle\CaBundle::getBundledCaBundlePath(),
+    'ua'     =&gt; 'MyFancyApp/1.2.3',
+    'host'   =&gt; 'example.com',
+    'secret' =&gt; 'Sυρ3rC4l1Fr@gil15ti(E&gt;&lt;pial!d0ciou5',
+]);
+// Create an HTTP client object. Here, we are using one that
+// makes use of Guzzle 7.
+$httpClient = new \Akeeba\BackupJsonApi\HttpAbstraction\HttpClientGuzzle($options);
+// Get the API client itself. 
+$apiClient = new \Akeeba\BackupJsonApi\Connector($httpClient);</programlisting>
+
+    <para>You can then use the high-level API client object to perform any
+    operation supported. For example, taking a backup is a piece of
+    cake:</para>
+
+    <programlisting>$backupOptions = new \Akeeba\BackupJsonApi\DataShape\BackupOptions([
+    'profile' =&gt; 5,
+    'description' =&gt; 'Remote backup using the API client',
+    'comment' =&gt; 'Look, mum! I can take backups without logging into the site!'
+]);
+$apiClient-&gt;backup($backupOptions, function ($data) {
+    echo "Received backup tick\n";
+    echo sprintf("Domain   : %s\n", $data-&gt;Domain);
+    echo sprintf("Step     : %s\n", $data-&gt;Step);
+    echo sprintf("Substep  : %s\n", $data-&gt;Substep);
+    echo sprintf("Progress : %0.2f%%\n", $data-&gt;Progress);
+
+    if (!empty($data-&gt;Warnings))
+    {
+        echo "Warnings\n========\n";
+
+        foreach ($data-&gt;Warnings as $warning)
+        {
+            echo $warning . "\n";
+        }
+    }
+
+    if (!$data-&gt;HasRun &amp;&amp; empty($data-&gt;Error))
+    {
+        echo "The backup finished successfully.\n";
+    }
+    elseif (!empty($data-&gt;Error))
+    {
+        echo "The backup finished with an error:\n{$data-&gt;Error}\n";
+    }
+});</programlisting>
+
+    <para>For all available high-level API calls look at <link
+    xlink:href="https://github.com/akeeba/json-backup-api/tree/main/src/HighLevel">https://github.com/akeeba/json-backup-api/tree/main/src/HighLevel</link>.
+    The method call is the same as the name of the invokable class in that
+    folder. The parameters of each method are those of the magic
+    <code>__invoke</code> method of the class. For example, to get the
+    information of the backup software you can just do:</para>
+
+    <programlisting>$info = $apiClient-&gt;information();</programlisting>
+
+    <para>The available methods are also present as phpDocumentor
+    <code>@method</code> tags in the
+    <classname>\Akeeba\BackupJsonApi\Connector</classname> class. Most IDEs
+    such as phpStorm, Visual Studio Code etc use this information to provide
+    code auto-completion for the high level API object (the
+    <code>$apiClient</code> in our example). This will greatly help you use
+    the library.</para>
+
+    <para>The data returned by each high-level API object method is what is
+    documented for the corresponding JSON API method. If you don't know which
+    JSON API method corresponds to each method, look for the
+    <code>doQuery()</code> calls in the same-named class under the
+    <methodname>\Akeeba\BackupJsonApi\HighLevel</methodname> namespace. The
+    first argument to the <code>doQuery()</code> method is the Akeeba Backup
+    JSON API method.</para>
+  </section>
+
+  <section xml:id="endpoints">
+    <title>API endpoints</title>
+
+    <para>Historically, API endpoints have been provided in one of two
+    ways:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>As a URL specific to the Joomla! component.</para>
+      </listitem>
+
+      <listitem>
+        <para>As a direct URL to an <filename>index.php</filename> or
+        <filename>remote.php</filename> file in Akeeba Backup for WordPresas
+        and Akeeba Solo.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The downside of this approach is that both Joomla! and WordPress may
+    allow third party code to interfere with the handling of the URL, leading
+    to unexpected breakage outside our control. Therefore, the following
+    endpoint methods are now preferred, or in development:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Using a Joomla! API application endpoint URL</para>
+      </listitem>
+
+      <listitem>
+        <para>Using WordPress' admin-ajax.php endpoint</para>
+      </listitem>
+
+      <listitem>
+        <para>Using WordPress' API application endpoint URL</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>While third party code still runs under these contexts, it's less
+    likely that it will interfere.</para>
+
+    <para>The <emphasis role="bold">APIv1</emphasis> endpoints are as
+    follows:</para>
+
+    <warning>
+      <para>APIv1 is retired and <emphasis role="bold">MUST NOT</emphasis> be
+      used.</para>
+
+      <para>Please note that some versions of our software may respond to an
+      APIv1 endpoint only to return an error either telling you that you need
+      to use APIv2, or telling you that the product has expired. In this case,
+      you <emphasis role="bold">MUST</emphasis> try APIv2 instead.</para>
+    </warning>
+
+    <itemizedlist>
+      <listitem>
+        <para>Akeeba Backup for Joomla! versions 3.3.0 to 8.3.x with the
+        endpoint
+        <uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Backup for WordPress versions 1.0.0 to 7.x with the
+        endpoint
+        <uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Backup for WordPress versions 7.4.0 and later 7.x
+        versions with the endpoint
+        <uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Solo versions 1.0.0 to 7.x versions with the endpoint
+        <uri>https://www.example.com/index.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Solo versions 2.4.1 to 7.x versions with the endpoint
+        <uri>https://www.example.com/remote.php?option=com_akeeba&amp;view=json&amp;format=raw</uri></para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The <emphasis role="bold">APIv2</emphasis> endpoints are as
+    follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Akeeba Backup for Joomla! versions 7.5.x to 8.x with the
+        endpoint
+        <uri>https://www.example.com/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Backup for Joomla! versions 9.x and later with the
+        endpoint
+        <uri>https://www.example.com/index.php?option=com_akeebabackup&amp;view=api&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Backup for Joomla! versions 9.6.0 and later with the
+        endpoint
+        <uri>https://www.example.com/api/index.php/v2/akeebabackup</uri> which
+        uses the Joomla! API application.</para>
+
+        <note>
+          <para>This endpoint requires that the Web Services - Akeeba Backup
+          plugin is published on the site.</para>
+        </note>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Backup for WordPress versions 7.4.0 and later 7.x
+        versions with the endpoint
+        <uri>https://www.example.com/wp-content/plugins/akeeabackupwp/app/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Backup for WordPress versions 7.7.1 to 8.x with the
+        endpoint
+        <uri>https://www.example.com/wp-admin/admin-ajax.php?action=akeebabackup_api&amp;option=com_akeeba&amp;view=api&amp;format=raw</uri></para>
+      </listitem>
+
+      <listitem>
+        <para>Akeeba Solo versions 7.4.0 to 8.x with the endpoint
+        <uri>https://www.example.com/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The <emphasis role="bold">APIv3</emphasis> endpoints are as
+    follows:</para>
+
+    <important>
+      <para>APIv3 is still in emergent state. You should not use it in
+      production just yet.</para>
+    </important>
+
+    <itemizedlist>
+      <listitem>
+        <para>Akeeba Backup for Joomla! versions 9.6.0 and later with the
+        endpoint
+        <uri>https://www.example.com/api/index.php/v3/akeebabackup</uri> which
+        uses the Joomla! API application.</para>
+
+        <note>
+          <para>This endpoint requires that the Web Services - Akeeba Backup
+          plugin is published on the site.</para>
+        </note>
+      </listitem>
+    </itemizedlist>
+
+    <bridgehead>APIv1 is retired (obsolete)</bridgehead>
+
+    <para>The APIv1 has been retired and superseded by APIv2 in all
+    products.</para>
+
+    <para>Moreover, <emphasis role="bold">APIv1 will no longer work on Akeeba
+    Backup for Joomla! after December 2023</emphasis>. This change was
+    announced in December 2019 with an original sunset date of API v1 set to
+    December 2020. Due to the COVID-19 pandemic we extended the sunset date,
+    but now the time has finally come.</para>
+
+    <bridgehead>Auto-detection strategy</bridgehead>
+
+    <para>When you need to detect the API endpoint and version to use on a
+    site, we suggest that you use the following strategy.</para>
+
+    <para>Check for products in the following order: Akeeba Backup 9.x using
+    the Joomla! API endpoint (APIv2, Akeeba Backup 9.6.0 or later), Akeeba
+    Backup for WordPress, Akeeba Solo.</para>
+
+    <para>Check for APIv2 endpoints <emphasis role="bold">BEFORE</emphasis>
+    APIv1 endpoints. Newer versions of some products implement APIv1 endpoints
+    only to return an error informing you that you should not be using APIv1.
+    Other products used to support APIv1 but they return an error message
+    since December 2023 letting you know that it has expired.</para>
+
+    <para>When iterating through endpoints, always look for the <emphasis
+    role="bold">newer</emphasis> endpoints before the older endpoints.</para>
+
+    <bridgehead>API and endpoint deprecation policy</bridgehead>
+
+    <para>Whenever we deprecate an API version we will provide a reasonable
+    period of time (no less than 6 months and no more than 12 months) where
+    both API versions will be supported by the same product simultaneously.
+    This will be followed by a short period of time (no less than 3 months and
+    no more than 6 months) where the old API version returns an error, letting
+    you know you should use the newer API version. After that time the old API
+    version's endpoint will be retired and its behaviour becomes
+    unpredictable.</para>
+
+    <para>Whenever we introduce a new API endpoint <emphasis>within the same
+    API version</emphasis> we will provide a reasonable period of time (no
+    less than 6 months and no more than 12 months) where both API endpoints
+    will be supported by the same product simultaneously. After that time the
+    old endpoint will be retired and its behaviour becomes
+    unpredictable.</para>
+  </section>
+
+  <section xml:id="apiv1">
+    <title>APIv1 reference</title>
+
+    <warning>
+      <para>APIv1 has been retired. This content serves as a historical
+      reminder only.</para>
+    </warning>
+
+    <para>APIv1 was designed back in the late '00s when HTTPS was a rare and
+    expensive commodity. TLS certificates cost a lot of money, and hosting
+    companies usually charged extra for a dedicated IP address to serve your
+    HTTPS site. Since running an API over plain HTTP was problematic, we had
+    designed APIv1 with its own encryption layer. This layer was removed in
+    2014 when Padding Oracle attacks against it became practical.</para>
+
+    <para>Due to these historical reasons, version 1 requires that you
     <emphasis>encapsulate</emphasis> the data you send to the server and
-    specifies that the returned data will also be returned encapsulated. The
-    encapsulation in this context means that the actual data is passed as a
-    string inside another, outer, JSON message. </para>
+    specifies that the returned data will also be returned encapsulated. Since
+    the encryption layer was removed, the encapsulation essentially means that
+    the actual data is passed as a string inside another, outer, JSON
+    message.</para>
 
     <para>For example, if you want to pass the message:</para>
 
@@ -70,52 +464,33 @@
   }
 }</programlisting>
 
-    <para>In the past this allowed the data string (body.data) to be encrypted
-    using AES. This was a misguided attempt to use encryption for
-    authentication (which is a bad idea due to attacks against the encryption
-    algorithm) and also as a way to work around the fact that the majority of
-    sites back in early 2011 didn't use HTTPS.</para>
+    <note>
+      <para>Historical note: Between 2011 and 2014, this allowed the data
+      string (body.data) to be encrypted using AES. This was a misguided
+      attempt to use encryption for authentication (which is a bad idea due to
+      attacks against the encryption algorithm) and also as a way to work
+      around the fact that the majority of sites back in early 2011 didn't use
+      HTTPS, as noted above.</para>
 
-    <para>Fast forward to 2019, when we started working on Akeeba Backup 7. It
-    was pretty clear that using encryption for authentication was a liability,
-    not an asset. Moreover, most sites would now use HTTPS since the cost of
-    SSL/TLS certificates had dropped to zero thanks to the free of charge
-    certification authority <orgname>Let's Encrypt</orgname>.</para>
+      <para>Fast forward to 2019, when we started working on Akeeba Backup 7.
+      It was pretty clear that using encryption for authentication was a
+      liability, not an asset. Moreover, most sites would now use HTTPS since
+      the cost of SSL/TLS certificates had dropped to zero thanks to the free
+      of charge certification authority <orgname>Let's
+      Encrypt</orgname>.</para>
 
-    <para>Therefore the decision was made to drop all encapsulations except
-    for RAW from Akeeba Backup 7. This documentation has been updated to
-    reflect this change.</para>
+      <para>Therefore the decision was made to drop all encapsulations except
+      for RAW from Akeeba Backup 7. This documentation has been updated to
+      reflect this change.</para>
+    </note>
 
-    <bridgehead>Further changes in the horizon</bridgehead>
-
-    <para>Within 2020 we are going to introduce the second version of our API.
-    The following changes will take place.</para>
-
-    <para><emphasis role="bold">There will be no encapsulation of the
-    message</emphasis>. The only reason for encapsulation was the support of
-    different encryption methods. This is no longer necessary, therefore
-    encapsulation can be dropped completely.</para>
-
-    <para><emphasis role="bold">Authentication will move to tokens</emphasis>.
-    In the current API implementation authentication takes place using an MD5
-    hash of a random salt and a static shared key. We had to do that to avoid
-    having the actual key appear in server logs since it's part of the GET
-    query. In the new API version we will be using a token that's sent to your
-    site as an HTTP header. You will be able to regenerate or revoke your
-    token anytime. This simplifies token management and does away with the
-    need to enforce a minimum password complexity for the secret key as we
-    were doing in the past.</para>
-
-    <para><emphasis role="bold">Some API methods will be dropped</emphasis>.
-    Some API methods have been marked deprecated and will be removed.</para>
-
-    <para><emphasis role="bold">Co-existence of the two API
-    versions</emphasis>. For a brief period of time both API versions will
-    co-exist. This will give a few months for third party implementations to
-    catch up with the new API.</para>
-
-    <section>
+    <section xml:id="apiv1-client">
       <title>Client-side</title>
+
+      <warning>
+        <para>APIv1 has been retired. This content serves as a historical
+        reminder only.</para>
+      </warning>
 
       <para>The client is sending its requests to the server over a standard
       HTTP GET operation to the endpoint URI of the component. An end-point
@@ -141,8 +516,13 @@
       increases the compatibility with poorly written third party Joomla!
       system plugins and we strongly recommend always using that.</para>
 
-      <section>
+      <section xml:id="apiv1-client-request">
         <title>The Request Object</title>
+
+        <warning>
+          <para>APIv1 has been retired. This content serves as a historical
+          reminder only.</para>
+        </warning>
 
         <para>The Request Object is a JSON object with the following
         fields:</para>
@@ -168,8 +548,13 @@
         </variablelist>
       </section>
 
-      <section>
+      <section xml:id="apiv1-client-body">
         <title>The Request Body</title>
+
+        <warning>
+          <para>APIv1 has been retired. This content serves as a historical
+          reminder only.</para>
+        </warning>
 
         <para>The Request Body is a JSON object with the following
         fields:</para>
@@ -212,17 +597,27 @@
       </section>
     </section>
 
-    <section>
+    <section xml:id="apiv1-server">
       <title>Server-side</title>
 
+      <warning>
+        <para>APIv1 has been retired. This content serves as a historical
+        reminder only.</para>
+      </warning>
+
       <para>When the server receives a request and processed it, it will reply
-      with a Response Object. </para>
+      with a Response Object.</para>
 
       <para>As of version 7 of our software the encapsulation of the Response
       Object will always be RAW.</para>
 
-      <section>
+      <section xml:id="apiv1-server-response">
         <title>The Response Object</title>
+
+        <warning>
+          <para>APIv1 has been retired. This content serves as a historical
+          reminder only.</para>
+        </warning>
 
         <para>The server's response comes as a JSON-encoded Response
         Object.</para>
@@ -284,111 +679,225 @@
         to the Methods Reference for the expected response data.</para>
       </section>
     </section>
+  </section>
 
-    <section>
-      <title>Constants Reference</title>
+  <section xml:id="apiv2">
+    <title>APIv2 reference</title>
 
-      <section>
-        <title>Encapsulation Identifiers</title>
+    <para>The APIv2 is a simple JSON API.</para>
 
-        <para>The predefined encapsulation identifiers are:</para>
+    <para>You can access the API using the HTTP verbs GET or POST against the
+    endpoint URL. It does not matter which verb you use; it's not a RESTful
+    API.</para>
 
-        <variablelist>
-          <varlistentry>
-            <term>1</term>
+    <bridgehead>Authentication</bridgehead>
 
-            <listitem>
-              <para>ENCAPSULATION_RAW. The JSON-encoded body is represented as
-              plain text (no encryption)</para>
-            </listitem>
-          </varlistentry>
+    <para>Authentication takes place by sending a secret to the endpoint. The
+    secret is defined in the <guilabel>Secret word</guilabel> field of Akeeba
+    Backup for Joomla!'s component Options page, or the System Configuration
+    page of Akeeba Backup for WordPress and Akeeba Solo under the
+    <guilabel>Front-end</guilabel> tab.</para>
 
-        <para>The only encapsulation you should use and expect to receive is
-        1.</para>
-      </section>
+    <para>You can pass the authentication secret in two ways:</para>
 
-      <section>
-        <title>Status identifiers</title>
+    <itemizedlist>
+      <listitem>
+        <para>The HTTP header X-Akeeba-Auth, e.g. <code>X-Akeeba-Auth:
+        My$up3r5eCr3+KeY</code></para>
+      </listitem>
 
-        <variablelist>
-          <varlistentry>
-            <term>200</term>
+      <listitem>
+        <para>As the GET or POST parameter _akeebaAuth, e.g.
+        <code>_akeebaAuth=My%24up3r5eCr3%2BKeY</code></para>
+      </listitem>
+    </itemizedlist>
 
-            <listitem>
-              <para>Normal reply. Your request was successful.</para>
-            </listitem>
-          </varlistentry>
+    <bridgehead>Request data format</bridgehead>
 
-          <varlistentry>
-            <term>401</term>
+    <para>You specify the API method to call by sending the POST or GET
+    parameter <code>method</code>, e.g.
+    <code>method=startBackup</code>.</para>
 
-            <listitem>
-              <para>Invalid credentials. The challenge you provided failed to
-              validate. Check your secret key.</para>
-            </listitem>
-          </varlistentry>
+    <para>Please note when you use the HTTP GET verb to access the API the
+    method parameter must be a GET parameter. Likewise, when using the HTTP
+    POST verb, the method parameter must be a POST parameter as well.</para>
 
-          <varlistentry>
-            <term>403</term>
+    <para>Methods which accept data must be provided this data as GET or POST
+    parameters. Again, if you use the GET HTTP verb you must send all data as
+    GET (URL) parameters. If you use HTTP POST you need to send all of your
+    data as POST parameters. When using POST you MUST use form encoding, NOT
+    multipart encoding.</para>
 
-            <listitem>
-              <para>Inadequate privileges. The system administrator doesn't
-              allow the requested action to be performed over the JSON API
-              (reserved status code for future use).</para>
-            </listitem>
-          </varlistentry>
+    <bridgehead>Return data format</bridgehead>
 
-          <varlistentry>
-            <term>404</term>
+    <para>You are returned a simple JSON object with the following
+    format:</para>
 
-            <listitem>
-              <para>Requested resource not found. This can imply that the
-              backup record ID or the file you requested to download is not
-              present in the system.</para>
-            </listitem>
-          </varlistentry>
+    <programlisting>{
+  'status': 200,
+  'data': ...
+}</programlisting>
 
-          <varlistentry>
-            <term>405</term>
+    <para>The <code>data</code> key contains a JSON value or object as
+    described in each method's documentation.</para>
 
-            <listitem>
-              <para>Unknown JSON method. The JSON method you requested is not
-              known to the API server. Check for typos or whether you're using
-              an obsolete method that has already been removed.</para>
-            </listitem>
-          </varlistentry>
+    <para>When an error occurs you receive a similar object, with a status
+    that is not 200. For example:</para>
 
-          <varlistentry>
-            <term>500</term>
+    <programlisting>{
+  'status': 500,
+  'data': "The Gremlins ate my dinner!"
+}</programlisting>
 
-            <listitem>
-              <para>An error occurred. An unspecified error occurred while
-              processing your request. More information will be provided in
-              the data part of the response.</para>
-            </listitem>
-          </varlistentry>
+    <para>The <code>data</code> key in this case contains a string that is the
+    error message. The explanation of error codes can be found in the
+    constants reference.</para>
+  </section>
 
-          <varlistentry>
-            <term>501</term>
+  <section xml:id="apiv3">
+    <title>APIv3 reference</title>
 
-            <listitem>
-              <para>Not implemented. The method you requested is known but
-              currently not implemented by the server. You can expect to see
-              that code for deprecated methods before they are completely
-              removed.</para>
-            </listitem>
-          </varlistentry>
+    <note>
+      <para>APIv3 is in emergent state. You should experiment with it, but not
+      use it in production.</para>
+    </note>
 
-          <varlistentry>
-            <term>503</term>
+    <para>APIv3 extends the native API applications of Joomla! and WordPress
+    to provide API endpoints for Akeeba Backup, using the native API calling
+    conventions of each CMS. Generally speaking, APIv3 is designed so that
+    upgrading to it from APIv2 will inflict the least amount of pain for the
+    integrator, unlike the APIv0 to APIv1, and the APIv1 to APIv2
+    migrations.</para>
 
-            <listitem>
-              <para>Remote service not activated. The system administrator has
-              not activated the Akeeba Backup JSON API feature.</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-      </section>
+    <para>Like APIv1 and APIv2, you can use either GET or POST to call each
+    method. The HTTP verb does not matter. This is a deliberate decision; if
+    there are redirections involved in accessing a site the non-GET requests
+    may fail (since the POST data part of the request is cleared). To prevent
+    that issue and let users take backups reliably we decided to treat GET and
+    POST as one and the same.</para>
+
+    <para>Specifying a method is done by appending the method name to the
+    endpoint URL, e.g.
+    <uri>https://www.example.com/api/index.php/v3/akeebabackup/startBackup</uri>
+    to start a backup on Joomla!.</para>
+
+    <para>The authentication method, sending data to the API methods, the
+    encapsulation of return data, and error reporting is left to the API
+    application implementation of the corresponding CMS. Please note that each
+    CMS may impose different requirements on the requests. For example,
+    Joomla! requires you to send an <code>Accept: application/json</code>
+    header.</para>
+  </section>
+
+  <section xml:id="constants">
+    <title>Constants Reference</title>
+
+    <section xml:id="constants-encapsulation">
+      <title>APIv1 Encapsulation Identifiers</title>
+
+      <warning>
+        <para>APIv1 has been retired. This content serves as a historical
+        reminder only.</para>
+      </warning>
+
+      <para>The predefined encapsulation identifiers are:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>1</term>
+
+          <listitem>
+            <para>ENCAPSULATION_RAW. The JSON-encoded body is represented as
+            plain text (no encryption)</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>The only encapsulation you should use and expect to receive is
+      1.</para>
+    </section>
+
+    <section xml:id="constants-status">
+      <title>Status identifiers</title>
+
+      <variablelist>
+        <varlistentry>
+          <term>200</term>
+
+          <listitem>
+            <para>Normal reply. Your request was successful.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>401</term>
+
+          <listitem>
+            <para>Invalid credentials. The challenge you provided failed to
+            validate. Check your secret key.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>403</term>
+
+          <listitem>
+            <para>Inadequate privileges. The system administrator doesn't
+            allow the requested action to be performed over the JSON API
+            (reserved status code for future use).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>404</term>
+
+          <listitem>
+            <para>Requested resource not found. This can imply that the backup
+            record ID or the file you requested to download is not present in
+            the system.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>405</term>
+
+          <listitem>
+            <para>Unknown JSON method. The JSON method you requested is not
+            known to the API server. Check for typos or whether you're using
+            an obsolete method that has already been removed.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>500</term>
+
+          <listitem>
+            <para>An error occurred. An unspecified error occurred while
+            processing your request. More information will be provided in the
+            data part of the response.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>501</term>
+
+          <listitem>
+            <para>Not implemented. The method you requested is known but
+            currently not implemented by the server. You can expect to see
+            that code for deprecated methods before they are completely
+            removed.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>503</term>
+
+          <listitem>
+            <para>Remote service not activated. The system administrator has
+            not activated the Akeeba Backup JSON API feature.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </section>
   </section>
 
@@ -1328,9 +1837,13 @@
     <section>
       <title>getLog</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-      for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-      8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the contents of the log file associated with a given
       backup tag. A backup "tag" is an identifier which conventionally
@@ -1358,9 +1871,13 @@
     <section>
       <title>getGUIConfiguration</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns a JSON definition for the configuration page. Available
       since API version 340.</para>
@@ -1475,9 +1992,13 @@
     <section>
       <title>saveConfiguration</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Saves the configuration of a backup profile. Available since API
       version 340.</para>
@@ -1515,9 +2036,13 @@
     <section>
       <title>saveProfile</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Updates or creates a backup profile. Available since API version
       340.</para>
@@ -1584,9 +2109,13 @@
     <section>
       <title>deleteProfile</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Deletes a backup profile. Available since API version 340.</para>
 
@@ -1611,9 +2140,13 @@
     <section>
       <title>browse</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the list of subdirectories and directory information for a
       requested folder. Used to implement directory browsers, e.g. for the
@@ -1750,9 +2283,13 @@
     <section>
       <title>getDBRoots</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the database roots for the backup profile. Available since
       API version 340.</para>
@@ -1802,9 +2339,13 @@
     <section>
       <title>getDBFilters</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns a list of all the database entities and any exclusion
       filters applied to each one of them. Typically used to render a GUI for
@@ -1866,9 +2407,13 @@
     <section>
       <title>getDBEntities</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the database entities exclusion filters for the chosen
       backup profile. Available since API version 340.</para>
@@ -2029,9 +2574,13 @@
     <section>
       <title>setDBFilter</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Sets or resets a database exclusion filter. Available since API
       version 340.</para>
@@ -2113,9 +2662,13 @@
     <section>
       <title>getFSRoots</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the filesystem roots for the backup profile. Available
       since API version 340.</para>
@@ -2162,9 +2715,13 @@
     <section>
       <title>getFSFilters</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the filesystem exclusion filters for the chosen backup
       profile. Available since API version 340.</para>
@@ -2243,9 +2800,13 @@
     <section>
       <title>getFSEntities</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the filesystem entities (files and folders) exclusion
       filters for the chosen backup profile. Available since API version
@@ -2387,9 +2948,13 @@
     <section>
       <title>setFSFilter</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Sets or resets a filesystem exclusion filter. Available since API
       version 340.</para>
@@ -2471,9 +3036,13 @@
     <section>
       <title>getIncludedDirectories</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Lists the additional included directories. Available since API
       version 340.</para>
@@ -2522,9 +3091,13 @@
     <section>
       <title>setIncludedDirectory</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Add an additional included directory definition. Available since
       API version 340.</para>
@@ -2596,9 +3169,13 @@
     <section>
       <title>removeIncludedDirectory</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Removes an additional included directory definition. Available
       since API version 340.</para>
@@ -2650,9 +3227,13 @@
     <section>
       <title>getIncludedDBs</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Lists the additional included database definitions. Available
       since API version 340.</para>
@@ -2736,9 +3317,13 @@
     <section>
       <title>setIncludedDB</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Adds an additional included database definition. Available since
       API version 340.</para>
@@ -2844,9 +3429,13 @@
     <section>
       <title>removeIncludedDB</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Removes an additional included database definition. Available
       since API version 340.</para>
@@ -2879,9 +3468,13 @@
     <section>
       <title>testDBConnection</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Test the connection to a database, used to test connection
       information before submitting it to setIncludedDB. Available since API
@@ -2980,9 +3573,13 @@
     <section>
       <title>getRegexDBFilters</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the regular expression database exclusion filters for the
       backup profile. Available since API version 340.</para>
@@ -3040,9 +3637,13 @@
     <section>
       <title>setRegexDBFilter</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Sets a regular expression database exclusion filter for the backup
       profile. Available since API version 340.</para>
@@ -3103,9 +3704,13 @@
     <section>
       <title>getRegexFSFilters</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Returns the regular expression filesystem exclusion filters for
       the backup profile. Available since API version 340.</para>
@@ -3164,9 +3769,13 @@
     <section>
       <title>setRegexFSFilter</title>
 
-      <para>DEPRECATED - This method will be removed in Akeeba Backup
-        for Joomla 10, Akeeba Backup for WordPress 8, and Akeeba Solo
-        8</para>
+      <warning>
+        <para><emphasis role="bold">DEPRECATED</emphasis> - This method will
+        be removed in Akeeba Backup for Joomla 10, Akeeba Backup for WordPress
+        8, and Akeeba Solo 8. Versions of our software released after
+        September 2023 may no longer include this method even if their major
+        version is below those specified in this message.</para>
+      </warning>
 
       <para>Sets a regular expression filesystem exclusion filter for the
       backup profile. Available since API version 340.</para>
