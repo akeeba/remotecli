@@ -97,9 +97,9 @@ class Backup extends AbstractCommand
 		$api->download($downloadParameters);
 
 		// Do I also have to delete the files after I download them?
-		if ($downloadParameters['delete'])
+		if ($downloadParameters->delete)
 		{
-			$api->deleteFiles($downloadParameters['id']);
+			$api->deleteFiles($downloadParameters->id);
 		}
 	}
 
