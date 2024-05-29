@@ -29,7 +29,8 @@ echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 Build, tag, and push the image with
 
 ```bash
-cd /path/to/this/repository
+#cd /path/to/this/repository
+cd ~/Projects/akeeba/remotecli
 export ARCCLI_LATEST_TAG=`git describe --abbrev=0`
 docker rmi ghcr.io/akeeba/remotecli:latest
 docker rmi ghcr.io/akeeba/remotecli:$ARCCLI_LATEST_TAG
@@ -37,7 +38,8 @@ docker buildx use mybuilder
 docker buildx build -t ghcr.io/akeeba/remotecli:latest --platform=linux/amd64,linux/arm64 --push .
 docker buildx build -t ghcr.io/akeeba/remotecli:$ARCCLI_LATEST_TAG --platform=linux/amd64,linux/arm64 --push .
 docker buildx stop
-docker buildx use default
+#docker buildx use default
+docker context use default
 ```
 
 ## Using the image
