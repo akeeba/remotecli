@@ -1,5 +1,6 @@
 Akeeba Remote CLI 3.1.1
 ================================================================================
++ listBackups, backupInfo now list the file paths and accept the --json argument
 # [MEDIUM] --delete option is broken when taking a backup
 
 Akeeba Remote CLI 3.1.0

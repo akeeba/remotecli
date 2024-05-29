@@ -691,12 +691,22 @@
         </varlistentry>
 
         <varlistentry>
-          <term>to</term>
+          <term>limit</term>
 
           <listitem>
-            <para>(Optional) Up to which record you want the listing to go to.
-            If not specified, 50 is assumed, therefore showing the latest 50
-            backup records.</para>
+            <para>(Optional) How many records you want to list. If not
+            specified, 200 is assumed.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>json</term>
+
+          <listitem>
+            <para>(Optional) Return the results in JSON format. Use with the
+            <option>-m</option> (machine readable) parameter for clean output
+            which can be directly piped to <command>jq</command> or a similar
+            tool for parsing.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -710,6 +720,17 @@
           <listitem>
             <para>The backup record's ID whose info you want displayed. Please
             see listbackups above.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>json</term>
+
+          <listitem>
+            <para>(Optional) Return the results in JSON format. Use with the
+            <option>-m</option> (machine readable) parameter for clean output
+            which can be directly piped to <command>jq</command> or a similar
+            tool for parsing.</para>
           </listitem>
         </varlistentry>
       </variablelist>

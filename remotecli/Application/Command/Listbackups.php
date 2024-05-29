@@ -16,9 +16,13 @@ class Listbackups extends AbstractCommand
 		// Get and print the backup records
 		$from    = $this->input->getInt('from', 0);
 		$limit   = $this->input->getInt('limit', 200);
+		$json    = $this->input->getBool('json', false);
 		$backups = $this->getApiObject()->getBackups($from, $limit);
 
-		$this->output->header("List of backup records");
+		if (!$json)
+		{
+			$this->output->header("List of backup records");
+		}
 
 		if (empty($backups))
 		{
@@ -26,6 +30,8 @@ class Listbackups extends AbstractCommand
 
 			return;
 		}
+
+		$outForJson = [];
 
 		foreach ($backups as $record)
 		{
@@ -39,7 +45,7 @@ class Listbackups extends AbstractCommand
 			// If multipart is 0 it means that's a single backup archive
 			$parts = (!$record->multipart ? 1 : $record->multipart);
 
-			$line = sprintf('%6u|%s|%-8s|%s|%s|%d|%-8s|%d',
+			$line = sprintf('%6u|%s|%-8s|%s|%s|%d|%-8s|%d|%s|%s',
 				$record->id,
 				$record->backupstart,
 				$status,
@@ -47,11 +53,69 @@ class Listbackups extends AbstractCommand
 				$record->profile_id,
 				$parts,
 				$record->meta,
-				$record->size ?? null
+				$record->size ?? 0,
+				$record->absolute_path ?? '',
+				$record->remote_filename ?? ''
 			);
 
-			$this->logger->debug($line);
-			$this->output->info($line, true);
+			if ($json)
+			{
+				$thisOut      = [
+					'id'              => $record->id,
+					'backupstart'     => $record->backupstart,
+					'status'          => $status,
+					'description'     => $record->description,
+					'profile_id'      => $record->profile_id,
+					'parts'           => $parts,
+					'meta'            => $record->meta,
+					'size'            => $record->size ?? 0,
+					'absolute_path'   => $record->absolute_path ?? '',
+					'remote_filename' => $record->remote_filename ?? '',
+					'part_files'      => [
+						basename(
+							($record->remote_filename ?? '') ?: ($record->remote_filename ?? '')
+						),
+					],
+				];
+
+				if (!in_array($record->meta, ['ok', 'remote']))
+				{
+					$thisOut['part_files'] = [];
+				}
+				elseif ($parts > 1)
+				{
+					$thisOut['part_files'] = $this->getPartFiles($thisOut['part_files'][0], $parts);
+				}
+
+				$outForJson[] = $thisOut;
+			}
+			else
+			{
+				$this->logger->debug($line);
+				$this->output->info($line, true);
+			}
+		}
+
+		if ($json)
+		{
+			echo json_encode($outForJson, JSON_PRETTY_PRINT);
 		}
 	}
+
+	private function getPartFiles(string $filename, int $numParts): array
+	{
+		$extension = substr($filename, -4);
+		$baseName  = substr($filename, 0, -4);
+		$out       = [];
+
+		for ($i = 0; $i < $numParts - 1; $i++)
+		{
+			$out[] = $baseName . substr($extension, 0, 2) . sprintf('%02u', $i);
+		}
+
+		$out[] = $filename;
+
+		return $out;
+	}
+
 }
