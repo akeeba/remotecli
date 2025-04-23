@@ -95,16 +95,50 @@
 	</target>
 	
 	<target name="docsdeploy-jsonapi" >
-		<phingcall target="docbook-deploy">
-			<property name="docsdeploy.path.source" value="jsonapi" />
-			<property name="docsdeploy.path.target" value="json-api" />
+		<phingcall target="docbook-zip">
+			<property name="docs.input" value="jsonapi/jsonapi.xml" />
 		</phingcall>
+
+		<property name="docsdeploy.path.source" value="jsonapi-import.zip" />
+		<property name="docsdeploy.path.target" value="json-api" />
+
+		<curlsftp
+				host="${scp.host}"
+				port="${scp.port}"
+				username="${scp.username}"
+				password="${scp.password}"
+				pubkeyfile="${scp.pubkeyfile}"
+				privkeyfile="${scp.privkeyfile}"
+				privkeyfilepassphrase="${scp.privkeyfilepassphrase}"
+				todir="${scp.dir.docs}/${docsdeploy.path.target}"
+				level="debug">
+			<fileset dir="${dirs.release}">
+				<include name="${docsdeploy.path.source}"/>
+			</fileset>
+		</curlsftp>
 	</target>
 
 	<target name="docsdeploy-remotecli" >
-		<phingcall target="docbook-deploy">
-			<property name="docsdeploy.path.source" value="remotecli" />
-			<property name="docsdeploy.path.target" value="arccli" />
+		<phingcall target="docbook-zip">
+			<property name="docs.input" value="remotecli/remotecli.xml" />
 		</phingcall>
+
+		<property name="docsdeploy.path.source" value="remotecli-import.zip" />
+		<property name="docsdeploy.path.target" value="arccli" />
+
+		<curlsftp
+				host="${scp.host}"
+				port="${scp.port}"
+				username="${scp.username}"
+				password="${scp.password}"
+				pubkeyfile="${scp.pubkeyfile}"
+				privkeyfile="${scp.privkeyfile}"
+				privkeyfilepassphrase="${scp.privkeyfilepassphrase}"
+				todir="${scp.dir.docs}/${docsdeploy.path.target}"
+				level="debug">
+			<fileset dir="${dirs.release}">
+				<include name="${docsdeploy.path.source}"/>
+			</fileset>
+		</curlsftp>
 	</target>
 </project>
