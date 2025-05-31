@@ -20,6 +20,10 @@
 		depends="new-release,setup-properties,remotecli">
 	</target>
 
+	<target name="all" description="Makes everything"
+			depends="git,native-binary,documentation">
+	</target>
+
 	<target name="documentation" description="Creates the documentation packages"
 		depends="doc-remote-epub">
 	</target>
@@ -41,6 +45,12 @@
 		</copy>
 
         <delete file="${dirs.release}/remote.phar" quiet="1" />
+        <delete file="${dirs.release}/remote.zip" quiet="1" />
+		<delete>
+			<fileset dir="${dirs.release}">
+				<include name="remote-*.zip" />
+			</fileset>
+		</delete>
 
 		<pharpackage 
 			destfile="${dirs.release}/remote.phar"
@@ -70,6 +80,72 @@
 				<include name="remote.phar"/>
 			</fileset>
 		</zip>
+	</target>
+
+	<target name="native-binary" depends="remotecli">
+		<exec description="Use PHPacker to create native binaries"
+			  executable="${dirs.phpacker}/phpacker"
+			  dir="${dirs.root}"
+			  passthru="true"
+			  checkreturn="true">
+			<arg value="build" />
+		</exec>
+
+		<!-- Linux ARM -->
+		<move file="${dirs.release}/linux/linux-arm" tofile="${dirs.release}/remotecli" />
+		<zip destfile="${dirs.release}/remote-${version}-linux-arm.zip" basedir="${dirs.release}"
+			 comment="Akeeba Remote CLI ${version} for Linux (ARM)"
+		>
+			<fileset dir="${dirs.release}">
+				<include name="remotecli"/>
+			</fileset>
+		</zip>
+
+		<!-- Linux x64 -->
+		<move file="${dirs.release}/linux/linux-x64" tofile="${dirs.release}/remotecli" />
+		<zip destfile="${dirs.release}/remote-${version}-linux-x64.zip" basedir="${dirs.release}"
+			 comment="Akeeba Remote CLI ${version} for Linux (x64)"
+		>
+			<fileset dir="${dirs.release}">
+				<include name="remotecli"/>
+			</fileset>
+		</zip>
+
+		<!-- Mac ARM -->
+		<move file="${dirs.release}/mac/mac-arm" tofile="${dirs.release}/remotecli" />
+		<zip destfile="${dirs.release}/remote-${version}-mac-apple-silicon.zip" basedir="${dirs.release}"
+			 comment="Akeeba Remote CLI ${version} for macOS (Apple Silicon)"
+		>
+			<fileset dir="${dirs.release}">
+				<include name="remotecli"/>
+			</fileset>
+		</zip>
+
+		<!-- Mac x64 -->
+		<move file="${dirs.release}/mac/mac-x64" tofile="${dirs.release}/remotecli" />
+		<zip destfile="${dirs.release}/remote-${version}-mac-intel.zip" basedir="${dirs.release}"
+			 comment="Akeeba Remote CLI ${version} for macOS (Intel)"
+		>
+			<fileset dir="${dirs.release}">
+				<include name="remotecli"/>
+			</fileset>
+		</zip>
+
+		<!-- Windows -->
+		<move file="${dirs.release}/windows/windows-x64.exe" tofile="${dirs.release}/remotecli.exe" />
+		<zip destfile="${dirs.release}/remote-${version}-windows-x64.zip" basedir="${dirs.release}"
+			 comment="Akeeba Remote CLI ${version} for Windows (x64)"
+		>
+			<fileset dir="${dirs.release}">
+				<include name="remotecli.exe"/>
+			</fileset>
+		</zip>
+
+		<delete dir="${dirs.release}/linux" includeemptydirs="true" quiet="true" />
+		<delete dir="${dirs.release}/mac" includeemptydirs="true" quiet="true" />
+		<delete dir="${dirs.release}/windows" includeemptydirs="true" quiet="true" />
+		<delete file="${dirs.release}/remotecli.exe" quiet="true" />
+		<delete file="${dirs.release}/remotecli" quiet="true" />
 	</target>
 	
 	<!--

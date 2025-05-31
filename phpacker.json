@@ -1,0 +1,8 @@
+{
+	"src": "./release/remote.phar",
+	"dest": "./release",
+	"ini": "./phpacker.ini",
+	"platform": "all",
+	"php": "8.3",
+	"repository": "akeeba/php-bin"
+}
