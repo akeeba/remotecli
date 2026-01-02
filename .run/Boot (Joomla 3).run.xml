@@ -1,3 +1,9 @@
+<!--
+  ~ @package    AkeebaRemoteCLI
+  ~ @copyright  Copyright (c)2008-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license    GNU General Public License version 3, or later
+  -->
+
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Boot (Joomla 3)" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/remotecli/remote.php" scriptParameters="--action=backup --profile=33 --host=&quot;https://boot.akeeba.dev/index.php?option=com_akeeba&amp;view=api&amp;format=raw&quot; --secret=&quot;yIvOAsPv5Zoht00mFApMdnlo2VwsvQdi&quot; --debug --verbose">
     <CommandLine workingDirectory="$PROJECT_DIR$" />
