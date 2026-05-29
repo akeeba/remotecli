@@ -722,11 +722,6 @@ class Filter
 
 	private static function utf8_encode($s)
 	{
-		if (version_compare(PHP_VERSION, '8.1.999', 'le'))
-		{
-			return utf8_encode($s);
-		}
-
 		if (function_exists('mb_convert_encoding'))
 		{
 			return mb_convert_encoding($s, 'UTF-8', 'ISO-8859-1');
