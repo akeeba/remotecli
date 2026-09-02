@@ -62,3 +62,7 @@ There was no Akeeba Backup and Remote JSON API for Joomla 1.0 sites; these sites
 This is one of the two official and supported clients for the Akeeba Backup JSON API, the other being Akeeba UNiTE.
 
 Akeeba Ltd does not provide any kind of support whatsoever for unofficial, third party consumers of the Akeeba Backup JSON API.
+
+## Regulatory status (EU Cyber Resilience Act)
+
+Akeeba Remote CLI is not monetized and is not placed on the market within the meaning of Regulation (EU) 2024/2847; Akeeba Ltd acts as its open-source software steward under Article 24 of that Regulation.
