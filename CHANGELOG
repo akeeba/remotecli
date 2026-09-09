@@ -9,6 +9,7 @@ Akeeba Remote CLI 3.2.0
 ~ The Docker image is built on a pinned PHP 8.5, not a floating latest-PHP-8 tag
 + PHPUnit unit tests and Docker-backed end-to-end integration tests under tests/
 # [LOW] The PHAR shipped its dependencies' test suites and IDE settings, 347KiB of dead weight
+~ Remove the unused Utility\Timer class, orphaned when the connector moved to its own library
 
 Akeeba Remote CLI 3.1.1
 ================================================================================
