@@ -63,11 +63,9 @@ Kindly note that older versions would only run on historic versions of Joomla (b
 
 There was no Akeeba Backup and Remote JSON API for Joomla 1.0 sites; these sites would only run Akeeba Backup's predecessor, JoomlaPack, which used an integration with Joomla 1.0's XML-RPC application. These ancient versions are _not_ supported by Akeeba Remote CLI. 
 
-## Important note on the Akeeba Backup JSON API support status
+## Development
 
-This is one of the two official and supported clients for the Akeeba Backup JSON API, the other being Akeeba UNiTE.
-
-Akeeba Ltd does not provide any kind of support whatsoever for unofficial, third party consumers of the Akeeba Backup JSON API.
+To build this software, you need to install [Akeeba Build Tools — Public Packager](https://github.com/akeeba/buildfiles-public) in a directory called `buildfiles` above the working copy of this repository. This lets you use Phing to build the software with `phing git`.
 
 ## Regulatory status (EU Cyber Resilience Act)
 
