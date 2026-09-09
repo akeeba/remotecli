@@ -25,15 +25,15 @@
 		}
 	],
 	"require": {
-		"php": ">=8.0.0 <=8.3",
+		"php": ">=8.2.0 <8.7",
 		"ext-curl": "*",
 		"ext-json": "*",
 		"psr/log": "^3.0.0",
-		"akeeba/json-backup-api": "@dev",
+		"akeeba/json-backup-api": "^1.1.0",
 		"composer/ca-bundle": "^1.2",
-		"joomla/data": "^2.0.1",
-		"joomla/http": "^2.0.2",
-		"joomla/filesystem": "^2.0.2"
+		"joomla/data": "^3.0.0",
+		"joomla/http": "^3.0.0",
+		"joomla/filesystem": "^3.0.0"
 	},
 	"suggest": {
 		"ext-mbstring": "Allows for UTF8 encoding / decoding",
@@ -43,12 +43,30 @@
 	"config": {
 		"vendor-dir": "remotecli/vendor",
 		"platform": {
-			"php": "8.0.999"
+			"php": "8.2.999"
 		}
 	},
 	"autoload": {
 		"psr-4": {
 			"Akeeba\\RemoteCLI\\": "remotecli/"
+		}
+	},
+	"extra": {
+		"akcompat": {
+			"locations": [
+				{
+					"file": "remotecli/remote.php",
+					"type": "variable",
+					"marker": "$minimumPhp",
+					"value": "PHP_MIN"
+				},
+				{
+					"file": "remotecli/remote.php",
+					"type": "variable",
+					"marker": "$maximumPhp",
+					"value": "PHP_MAX"
+				}
+			]
 		}
 	}
 }

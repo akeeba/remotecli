@@ -1,5 +1,12 @@
-Akeeba Remote CLI 3.1.2
+Akeeba Remote CLI 3.2.0
 ================================================================================
++ Support for the Akeeba Backup JSON API v3, over Joomla's API application
++ Authenticate with a Joomla API Token using the new --token (-t) option
++ New --api-version and --api-endpoint options to pin the JSON API version and the path to Joomla's API application
++ The test command now reports which JSON API version and credential were used
++ Accept the URL of Joomla's API application as the --host, splitting it into the site and the API endpoint
+~ Requires PHP 8.2 to 8.6; both ends of the range are now enforced at startup
+~ The Docker image is built on a pinned PHP 8.5, not a floating latest-PHP-8 tag
 
 Akeeba Remote CLI 3.1.1
 ================================================================================

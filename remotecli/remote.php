@@ -25,19 +25,28 @@ use Akeeba\RemoteCLI\Application\Output\Output;
 use Akeeba\RemoteCLI\Application\Output\OutputOptions;
 use Akeeba\RemoteCLI\Application\Utility\LocalFile;
 
-// PHP Version check
-if (version_compare(PHP_VERSION, '8.0.0', 'lt'))
+/**
+ * PHP version check.
+ *
+ * Both bounds are written here by the build script, from the `require.php` constraint in composer.json. Do not edit
+ * them by hand; run `phing version-constraints` instead. $maximumPhp is the first PHP version we do NOT support,
+ * which is why it is compared with 'ge' rather than 'gt'.
+ */
+$minimumPhp = '8.2.0';
+$maximumPhp = '8.7';
+
+if (version_compare(PHP_VERSION, $minimumPhp, 'lt') || version_compare(PHP_VERSION, $maximumPhp, 'ge'))
 {
 	$yourPHP = PHP_VERSION;
 	echo <<< END
 
 ! ! !    S T O P    ! ! !
 
-Akeeba Remote CLI requires PHP version 8.0.0 or later.
+Akeeba Remote CLI requires PHP $minimumPhp or later. It does not run on PHP $maximumPhp or later.
 
 You are currently using PHP $yourPHP as reported by PHP itself.
 
-Please upgrade PHP and retry running this script.
+Please use a supported PHP version and retry running this script.
 
 
 END;

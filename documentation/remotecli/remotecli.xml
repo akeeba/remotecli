@@ -52,8 +52,8 @@
       are available on old versions of our software.</para>
 
       <para>The script is shipped as a PHAR file. This is an executable PHP
-      package which can be used with PHP 8.0 or later. The script is available
-      for download free of charge from our site.</para>
+      package which can be used with PHP 8.2 up to and including PHP 8.6. The
+      script is available for download free of charge from our site.</para>
 
       <para>Alternatively, you can use Remote CLI through Docker.</para>
     </section>
@@ -89,16 +89,23 @@
       </tip>
 
       <important>
-        <para>Remote CLI requires PHP 8.0 with the optional <code>phar</code>
-        and <code>curl</code> extensions installed and activated. This is the
-        default setup of PHP in most cases.</para>
+        <para>Remote CLI requires PHP 8.2 up to and including PHP 8.6, with
+        the optional <code>phar</code>, <code>curl</code> and <code>json</code>
+        extensions installed and activated. This is the default setup of PHP
+        in most cases.</para>
+
+        <para>Both ends of that range are enforced. Remote CLI refuses to run
+        on a PHP version older than 8.2, and equally on PHP 8.7 or later,
+        which had not been released when this version was published and which
+        we have therefore not tested against. If you are on a newer PHP,
+        upgrade Remote CLI.</para>
       </important>
 
       <para>After downloading <filename>remote.phar</filename> (the Remote CLI
       executable PHP archive) from our site you can use Remote CLI from the
       command line of your operating system with a command like this:</para>
 
-      <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
+      <programlisting>php remote.phar <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --token=<replaceable>apiToken</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para><replaceable>php</replaceable> is the path to your PHP CLI
       executable. If this is not in your path or you are not sure, please ask
@@ -109,7 +116,7 @@
       <para>If you are using Docker you can make use of the Dockerized version
       of Remote CLI:</para>
 
-      <programlisting>docker run --rm akeebaltd/remotecli <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --secret=<replaceable>secretKey</replaceable> <replaceable>[options]</replaceable></programlisting>
+      <programlisting>docker run --rm akeebaltd/remotecli <replaceable>actionName</replaceable> --host=<replaceable>hostName</replaceable> --token=<replaceable>apiToken</replaceable> <replaceable>[options]</replaceable></programlisting>
 
       <para>The Dockerized version is self-contained, using the latest version
       of PHP at the time we built the container image. It's much simpler to
@@ -127,18 +134,36 @@
 
       <bridgehead>What are all these options?</bridgehead>
 
-      <para><replaceable>hostName</replaceable> is the URL to the Akeeba
-      Backup / Akeeba Solo JSON API <guilabel>Endpoint URL</guilabel> which
-      can be read off the Schedule Automatic Backups page of our backup
-      software.</para>
+      <para><replaceable>hostName</replaceable> is the URL to your site's
+      root, without a trailing slash, e.g.
+      <uri>https://www.example.com</uri>.</para>
 
-      <para>Alternatively, you can use the URL to your site's root, without a
-      trailing slash, e.g. <uri>http://www.example.com</uri>.</para>
+      <para>Alternatively, you can use the URL to the Akeeba Backup / Akeeba
+      Solo JSON API <guilabel>Endpoint URL</guilabel> which can be read off
+      the Schedule Automatic Backups page of our backup software; that is the
+      endpoint of the API v1 and v2. The URL of Joomla's API application, i.e.
+      the one ending in <filename>api/index.php</filename>, is accepted too:
+      we split it into the site and the path to the API application for
+      you.</para>
+
+      <para><replaceable>apiToken</replaceable> is the Joomla API Token of the
+      user account Remote CLI will act as. You will find it in your site's
+      backend, under User Menu, Edit Account, Joomla API Token. This is the
+      <emphasis>recommended</emphasis> way to authenticate, but it only works
+      on Joomla sites running Akeeba Backup 9.6.0 or later.</para>
 
       <para><replaceable>secretKey</replaceable> is the Secret Key you have
       defined in the component Options (Akeeba Backup for Joomla!) or the
       System Configuration (Akeeba Backup for WordPress, Akeeba Solo) page of
-      the backup application.</para>
+      the backup application. It is deprecated, but it remains the only
+      credential Akeeba Solo, Akeeba Backup for WordPress, and the older JSON
+      API versions understand.</para>
+
+      <para>You have to provide at least one of
+      <replaceable>apiToken</replaceable> and
+      <replaceable>secretKey</replaceable>. You may provide both, in which
+      case the token is tried first and the Secret Key is only used if the
+      token is refused.</para>
 
       <para>The options which are required for each action are described in
       the <link linkend="options">Options</link> chapter of this
@@ -289,13 +314,27 @@
         Solo).</para>
 
         <para>You will have to set <guilabel>Enable front-end and remote
-        backup</guilabel> to Yes. You will also need to supply a
-        <guilabel>Secret Key</guilabel> of your liking. This is the password
-        to connect to your site over Akeeba Backup's Remote API. Due to
-        several issues which have to do with server configuration, we strongly
-        recommend using only alphanumeric characters (a-z, A-Z, 0-9), dash and
-        underscore in your Secret Key. Other characters may lead to inability
-        to connect to your site. Use something long and complex.</para>
+        backup</guilabel> to Yes.</para>
+
+        <para>On a Joomla site running Akeeba Backup 9.6.0 or later that is
+        all you need to do, as long as you authenticate with a Joomla API
+        Token. Enable the <guilabel>API Authentication - Web Services Joomla
+        Token</guilabel> plugin, make sure the user account you will be using
+        has the API Login privilege, and read its token off User Menu, Edit
+        Account, Joomla API Token. Since Akeeba Backup 10.4.0 that account's
+        Akeeba Backup privileges are enforced per command, which lets you give
+        an unattended job an account which may take backups but may not
+        download or delete them.</para>
+
+        <para>Otherwise —on Akeeba Solo, on Akeeba Backup for WordPress, or on
+        older versions of Akeeba Backup for Joomla— you will also need to
+        supply a <guilabel>Secret Key</guilabel> of your liking. This is the
+        password to connect to your site over Akeeba Backup's Remote API. Due
+        to several issues which have to do with server configuration, we
+        strongly recommend using only alphanumeric characters (a-z, A-Z, 0-9),
+        dash and underscore in your Secret Key. Other characters may lead to
+        inability to connect to your site. Use something long and
+        complex.</para>
       </warning>
     </section>
 
@@ -343,20 +382,56 @@
       <para>Each action can be used with one or several options. Some of them
       are mandatory for the correct operation of Remote CLI. The following
       sections detail the parameters which can be used with each option. All
-      actions require the following mandatory options:</para>
+      actions require the <parameter>host</parameter> option, plus at least
+      one of the <parameter>token</parameter> and <parameter>secret</parameter>
+      options:</para>
 
       <variablelist>
         <varlistentry>
           <term>host</term>
 
           <listitem>
-            <para>The URL to the Akeeba Backup / Akeeba Solo JSON API
-            <guilabel>Endpoint URL</guilabel> which can be read off the
-            Schedule Automatic Backups page of our backup software.</para>
+            <para>The URL to your site's root, without a trailing slash, e.g.
+            <uri>https://www.example.com</uri>.</para>
 
-            <para>Alternatively, you can use the URL to your site's root,
-            without a trailing slash, e.g.
-            <uri>http://www.example.com</uri>.</para>
+            <para>Alternatively, you can use the URL to the Akeeba Backup /
+            Akeeba Solo JSON API <guilabel>Endpoint URL</guilabel> which can
+            be read off the Schedule Automatic Backups page of our backup
+            software; that is the endpoint of the API v1 and v2. The URL of
+            Joomla's API application, i.e. the one ending in
+            <filename>api/index.php</filename>, is accepted too: we split it
+            into the site and the path to the API application for you.</para>
+
+            <caution>
+              <para>The one case where that split gets it wrong is a site
+              which is itself installed in a directory called
+              <filename>api</filename>. There,
+              <uri>https://www.example.com/api</uri> is the site's root, not
+              Joomla's API application, and we have no way of telling the two
+              apart from the URL alone. Pass the
+              <parameter>api-endpoint</parameter> option explicitly on such a
+              site. Run with <option>--debug</option> to see whether we split
+              your host and what we made of it.</para>
+            </caution>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>token</term>
+
+          <listitem>
+            <para>The Joomla API Token of the user account Remote CLI will act
+            as. You will find it in your site's backend, under User Menu, Edit
+            Account, Joomla API Token.</para>
+
+            <para>This is the recommended way to authenticate. It is only
+            understood by the JSON API v3, i.e. Joomla sites running Akeeba
+            Backup 9.6.0 or later. Akeeba Solo and Akeeba Backup for WordPress
+            have no Joomla API Tokens; use the <parameter>secret</parameter>
+            option with them.</para>
+
+            <para>A token typically ends in one or two equals signs. Always
+            put it in double quotes on the command line.</para>
           </listitem>
         </varlistentry>
 
@@ -370,12 +445,24 @@
             <para>You can see the Secret Key in our backup software's Schedule
             Automatic Backups.</para>
 
+            <para>The Secret Key is deprecated. Unlike a Joomla API Token it
+            is an unscoped grant over the whole of the backup software: it
+            cannot be restricted to only some of the commands. Prefer the
+            <parameter>token</parameter> option where your site supports
+            it.</para>
+
             <important>
               <para>We strongly advise you to use only lower and upper case
               Latin letters and numbers (a-z, A-Z, 0-9) in your secret word,
               as many servers will refuse to work with secret words containing
               special characters.</para>
             </important>
+
+            <tip>
+              <para>If your automation already passes a Joomla API Token to
+              this option you do not have to change anything. We try whatever
+              you give us as a token first, and as a Secret Key second.</para>
+            </tip>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -788,11 +875,11 @@
 
       <programlisting>[akeebaremotecli]
 host=https://www.example.com
-secret=0123456789abcdef0123456789abcdef
+token="c2hhMjU2OjQyOkVYQU1QTEUtVE9LRU4tTk9ULUEtUkVBTC1DUkVERU5USUFMUw=="
 
 [mybackup]
 host=https://www.example.com
-secret=0123456789abcdef0123456789abcdef
+token="c2hhMjU2OjQyOkVYQU1QTEUtVE9LRU4tTk9ULUEtUkVBTC1DUkVERU5USUFMUw=="
 action=backup
 profile=2
 
@@ -800,6 +887,13 @@ profile=2
 host=https://www.example.com
 secret=0123456789abcdef0123456789abcdef
 profile=3</programlisting>
+
+      <important>
+        <para>Always wrap a <parameter>token</parameter> value in double
+        quotes, as shown above. A Joomla API Token typically ends in one or
+        two equals signs which would otherwise confuse the INI file
+        parser.</para>
+      </important>
 
       <para>Example using the default section (tests the connection):</para>
 
@@ -850,28 +944,49 @@ profile=3</programlisting>
       in October 2020. It is a pure JSON API. It is meant to be used only over
       HTTPS. It does not use its own encryption.</para>
 
-      <para>API v3 is a newer API specification which is only available on
+      <para>API v3 is the current specification. It is only available on
       Joomla 4.2.0 and later, using Akeeba Backup 9.6.0 and later. It is a
-      pure JSON API. Authentication is performed by Joomla itself,
-      <emphasis>not</emphasis> our own code. It is meant to be used only over
-      HTTPS. It does not use its own encryption.</para>
+      pure JSON API. It is not a view in your site's frontend like the older
+      versions; it is a route in Joomla's own API application, which lives at
+      <uri>https://www.example.com/api/index.php</uri>. Authentication is
+      performed by Joomla itself, <emphasis>not</emphasis> our own code, which
+      is what lets it accept a Joomla API Token. It is meant to be used only
+      over HTTPS. It does not use its own encryption.</para>
 
-      <para>Akeeba Remote CLI supports both API v1 and API v2 endpoints to
-      ensure compatibility with old sites. Akeeba Remote CLI only supports the
-      <emphasis>unencrypted</emphasis> version of the v1 API, even on sites
-      running versions of our software released prior to September 2014 (you
-      shouldn't; they can get your site hacked, as we warned you back in
-      Septmeber 2014). If you have a version of Akeeba Backup or Akeeba Solo
-      released after October 2020 we very strongly recommend that you use the
-      API v2 endpoint. It uses slightly less resources and it's a little bit
-      faster.</para>
+      <para>Akeeba Remote CLI supports all three API versions. It only
+      supports the <emphasis>unencrypted</emphasis> version of the v1 API,
+      even on sites running versions of our software released prior to
+      September 2014 (you shouldn't; they can get your site hacked, as we
+      warned you back in September 2014).</para>
 
-      <para>Akeeba Remote CLI does not currently support API v3.</para>
+      <para>Given just your site's URL, Akeeba Remote CLI tries the API
+      versions newest first and uses the first one your site answers on. If
+      you have a Joomla site running Akeeba Backup 9.6.0 or later we very
+      strongly recommend the API v3, authenticating with a Joomla API Token.
+      Otherwise, if you have a version of Akeeba Backup or Akeeba Solo
+      released after October 2020, use the API v2 endpoint. Either uses fewer
+      resources and is faster than the v1 API.</para>
+
+      <note>
+        <para>Unlike the older versions, the API v3 is not selected by giving
+        us a special endpoint URL. Give us your site's root URL as the
+        <parameter>host</parameter> and we will find the API application
+        ourselves. Pasting the API application's own URL works too; we split
+        it into the site and the path to the API application.</para>
+
+        <para>If you need to pin the version rather than have it
+        auto-detected, use <option>--api-version=3</option>. If Joomla's API
+        application lives somewhere other than
+        <filename>api/index.php</filename> on your site, or your site is
+        itself installed in a directory called <filename>api</filename>, tell
+        us where it is with
+        <option>--api-endpoint=<replaceable>path/to/it</replaceable></option>.</para>
+      </note>
 
       <bridgehead>API levels</bridgehead>
 
-      <para>Regardless of whether you access the Remote JSON API over the v1
-      or v2 API, the implementation of the API has changed over time. The very
+      <para>Regardless of which version of the Remote JSON API you access,
+      the implementation of the API has changed over time. The very
       first versions only allowed taking backups. Other features have been
       added and removed in subsequent versions, and some features may have
       gained new parameters, or had some of their parameters made mandatory.
@@ -976,11 +1091,32 @@ profile=3</programlisting>
       <para>The following API v2 endpoint is recommended instead: <emphasis
       role="bold"><uri>https://www.example.com/index.php?option=com_akeeba&amp;view=api&amp;format=raw</uri></emphasis></para>
 
-      <para><emphasis role="bold">Akeeba Backup 9.0.0 and
-      later</emphasis></para>
+      <para><emphasis role="bold">Akeeba Backup 9.0.0 to
+      9.5.x</emphasis></para>
 
       <para>Only the following API v2 endpoint is supported: <emphasis
       role="bold"><uri>https://www.example.com/index.php?option=com_akeebabackup&amp;view=api&amp;format=raw</uri></emphasis></para>
+
+      <para><emphasis role="bold">Akeeba Backup 9.6.0 and
+      later</emphasis></para>
+
+      <para>The following API v2 endpoint is supported, but <emphasis>not
+      recommended</emphasis>:
+      <uri>https://www.example.com/index.php?option=com_akeebabackup&amp;view=api&amp;format=raw</uri></para>
+
+      <para>The API v3 is supported and recommended instead. It is
+      <emphasis>not</emphasis> selected with an endpoint URL. Pass your site's
+      root URL as the host: <emphasis
+      role="bold"><uri>https://www.example.com</uri></emphasis></para>
+
+      <para>Pasting the URL of Joomla's API application,
+      <uri>https://www.example.com/api/index.php</uri>, works as well; we
+      split it for you.</para>
+
+      <para>This is the only API version which accepts a Joomla API Token
+      instead of the Secret Key. Akeeba Backup 10.4.0 and later additionally
+      enforce, per command, the Akeeba Backup privileges of the user account
+      the token belongs to.</para>
 
       <bridgehead>Akeeba Backup for WordPress</bridgehead>
 
@@ -1100,6 +1236,15 @@ profile=3</programlisting>
       directory. We also assume that the PHP CLI executable is already in your
       path.</para>
 
+      <note>
+        <para>The examples below authenticate with the Secret Word, so that
+        they apply to every site Remote CLI can talk to. If your site is
+        Joomla running Akeeba Backup 9.6.0 or later, replace
+        <option>--secret=0Lsp-MjOSLvUL8VuM1h9T2zWfM4EGqMA</option> with
+        <option>--token="<replaceable>YOUR_JOOMLA_API_TOKEN</replaceable>"</option>
+        throughout. That is the recommended way to authenticate.</para>
+      </note>
+
       <bridgehead>Connection test</bridgehead>
 
       <para>We begin by making sure that Remote CLI can access our
@@ -1116,21 +1261,35 @@ Copyright ©2006-2025 Nicholas K. Dionysopoulos / Akeeba Ltd.
  are welcome to redistribute it under certain conditions. Use command license
  for details.
 --------------------------------------------------------------------------------
-Successful connection to site</screen>
+Successful connection to site
+Akeeba Backup / Solo Professional 10.4.1 (API level 600)
+Using the JSON API v3, authenticating with a Joomla API Token.</screen>
 
-      <para>The last line tells you that the connection worked. However, if
-      something goes wrong, you might get one of these error messages:</para>
+      <para>The last three lines tell you that the connection worked, which
+      version of our backup software answered, and which JSON API version and
+      credential were used to reach it. That last line is the quickest way to
+      confirm you are on the API version you meant to be on.</para>
 
-      <para><emphasis>Error #42 - Authentication error (invalid Secret Word).
-      Please check the secret word, make sure it doesn't have any whitespace
-      you missed. Clear any site or external caches, making sure Akeeba
-      Backup's URL isn't cached.</emphasis> : Your secret word appears to be
-      wrong, or the Remote JSON API is disabled. Go to Akeeba Backup's /
-      Akeeba Solo's Options (Joomla) or System Configuration (WordPress,
-      Akeeba Solo) page, make sure Enable JSON API is set to Yes, and enter a
-      secret key of your liking. We strongly recommend using only a-z, A-Z and
-      0-9 to work around limitations with some hosts. The click on Save &amp;
+      <para>However, if something goes wrong, you might get one of these error
+      messages:</para>
+
+      <para><emphasis>Error #42 - Authentication error. Please check the
+      credential you are using — a Joomla API token or the Akeeba Backup
+      Secret Word — and make sure it doesn't have any whitespace you
+      missed.</emphasis> : The credential you gave us was refused, or the
+      Remote JSON API is disabled.</para>
+
+      <para>If you are using the Secret Word, go to Akeeba Backup's / Akeeba
+      Solo's Options (Joomla) or System Configuration (WordPress, Akeeba Solo)
+      page, make sure Enable JSON API is set to Yes, and enter a secret key of
+      your liking. We strongly recommend using only a-z, A-Z and 0-9 to work
+      around limitations with some hosts. Then click on Save &amp;
       Close.</para>
+
+      <para>If you are using a Joomla API Token, check that the <guilabel>API
+      Authentication - Web Services Joomla Token</guilabel> plugin is enabled
+      on your site, that the token has not been reset since you copied it, and
+      that the user account holding it has the API Login privilege.</para>
 
       <important>
         <para><emphasis role="bold">Applicable to Joomla sites
@@ -1185,6 +1344,17 @@ Successful connection to site</screen>
         having set the correct host name and secret key, try using double
         quotes around all of your option values.</para>
       </important>
+
+      <para><emphasis>Error #43 - Authorisation error: the Joomla user
+      account behind the API token is not allowed to call the API method
+      …</emphasis> : Your token is valid and we did log in with it, but the
+      user account it belongs to may not perform this particular operation.
+      Since Akeeba Backup 10.4.0 each API method requires the same Akeeba
+      Backup privilege as the equivalent action in your site's backend. Grant
+      that account the privilege in Components, Akeeba Backup, Options,
+      Permissions — or use a different account's token. You will never see
+      this error when authenticating with the Secret Word, which is an
+      unscoped grant over everything.</para>
 
       <para><emphasis>Error #102 - You need to install a newer version of
       Akeeba Backup / Akeeba Solo on your site</emphasis>: Make sure that you

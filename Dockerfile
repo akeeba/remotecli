@@ -6,8 +6,12 @@
 # See documentation/Dockerized.md for build instructions
 ########################################################################################################################
 
-# Use the latest PHP 8 CLI based on Alpine Linux
-FROM php:8-alpine
+# PHP CLI based on Alpine Linux.
+#
+# Pinned to a specific minor version on purpose. Remote CLI enforces the upper end of its supported PHP range, so a
+# floating `php:8-alpine` tag would silently start building containers which refuse to run the moment a PHP version
+# past that range is released. Bump this deliberately, alongside the range in composer.json.
+FROM php:8.5-alpine
 
 # Labels describing what this is all about
 LABEL org.label-schema.name AkeebaRemoteCLI

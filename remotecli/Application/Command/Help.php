@@ -49,12 +49,23 @@ COMMON OPTIONS
 These options apply to all commands talking to a site.
 
 --host <URL>, or -h <URL>
-    Which site to connect to.
+    Which site to connect to. Give us your site's root URL. The Endpoint URL of the JSON API v1 and v2, and the URL
+    of Joomla's API application, are also accepted; we split the latter into a site and an --api-endpoint for you.
     e.g. --host https://www.example.com
 
+--token <API_TOKEN>, or -t <API_TOKEN>
+    Recommended. The Joomla API Token of the user account this tool will act as. Only understood by the JSON API v3,
+    i.e. Akeeba Backup for Joomla 9.6.0 and later. The account's Akeeba Backup privileges are enforced per command.
+    Find it in your site's backend, under User Menu, Edit Account, Joomla API Token.
+    e.g. --token "c2hhMjU2OjQyOkVYQU1QTEUtVE9LRU4tTk9ULUEtUkVBTC1DUkVERU5USUFMUw=="
+
 --secret <SECRET_KEY>, or -s <SECRET_KEY>
-    The Secret Key for the Akeeba Backup / Akeeba Solo JSON API.
+    Deprecated. The Secret Word for the Akeeba Backup / Akeeba Solo JSON API. It is an unscoped grant over the whole
+    of the backup software. Still required for Akeeba Solo, Akeeba Backup for WordPress, and the JSON API v1 and v2.
     e.g. --secret q6TFprWKACdsKxQDBtthZkQU
+
+You must provide at least one of --token and --secret. Providing both is allowed; the token is tried first, and the
+Secret Word is only used if the token is refused.
 
 --certificate <PATH>
     Add a PEM certificate as a valid HTTPS Certification Authority. Use with sites using self-signed certificates.
@@ -67,15 +78,24 @@ You should not need to use these options unless our support instructs you to.
 --verb <HTTP_VERB>
     Which HTTP verb to use. One of POST, or GET. Default: auto-detect, prefers GET.
 
+--api-version <VERSION>
+    Pin the JSON API version. One of 3 (Joomla only, Akeeba Backup 9.6.0 and later, the preferred version), 2, or 1.
+    Default: auto-detect, newest first.
+
+--api-endpoint <PATH>
+    API v3 only. The path, relative to your site's root, of Joomla's API application.
+    Default: auto-detect, trying api/index.php and then api.
+
 --component <OPTION>
-     Which component to use. One of com_akeeba (Akeeba Backup for Joomla 3) or com_akeebabackup (Akeeba Backup for
-     Joomla 4). Default: auto-detect. Do not use with Akeeba Backup for WordPress or Akeeba Solo.
+     API v1 and v2 only. Which component to use. One of com_akeeba (Akeeba Backup for Joomla 3) or com_akeebabackup
+     (Akeeba Backup for Joomla 4 and later). Default: auto-detect. Do not use with Akeeba Backup for WordPress or
+     Akeeba Solo.
 
 --view <VIEW_NAME>
-    Which view to use. One of json (API v1) or api (API v2). Default: auto-detect.
+    Deprecated alias of --api-version. One of json (API v1) or api (API v2). Default: auto-detect.
 
 --format <FORMAT_NAME>
-    The format keyword to send to Joomla sites. One of html, json, raw. Default: auto-detect.
+    API v1 and v2 only. The format keyword to send to Joomla sites. One of html, json, raw. Default: auto-detect.
 
 --ua <USER_AGENT>
     Set the User Agent string. Default: "AkeebaRemoteCLI/$version".
