@@ -61,6 +61,27 @@
 		>
 		<fileset dir="${dirs.remotecli}">
 			<include name="**" />
+
+			<!--
+			  ~ Development files, ours and our dependencies'. None of it is reachable at runtime and all of it is
+			  ~ dead weight a user downloads: the JSON API client library alone ships its whole test suite, its IDE
+			  ~ settings and its PHPUnit configuration, which came to 347KiB of a 1.9MiB archive.
+			  ~
+			  ~ Our own suite lives in tests/ at the repository root, outside the directory this PHAR is built from,
+			  ~ so it is excluded by construction. These patterns are what keeps everyone else's out.
+			  -->
+			<exclude name="**/tests/**" />
+			<exclude name="**/test/**" />
+			<exclude name="**/Tests/**" />
+			<exclude name="**/.idea/**" />
+			<exclude name="**/.github/**" />
+			<exclude name="**/phpunit*.xml*" />
+			<exclude name="**/.phpunit*" />
+			<exclude name="**/rector.php" />
+			<exclude name="**/composer.lock" />
+			<exclude name="**/.editorconfig" />
+			<exclude name="**/.gitignore" />
+			<exclude name="**/.gitattributes" />
 		</fileset>
 		<metadata>
 			<element name="version" value="${version}" />

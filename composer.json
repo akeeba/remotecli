@@ -51,6 +51,20 @@
 			"Akeeba\\RemoteCLI\\": "remotecli/"
 		}
 	},
+	"archive": {
+		"exclude": [
+			"/tests",
+			"/phpunit.xml",
+			"/phpunit-integration.xml",
+			"/.phpunit.cache",
+			"/.phpunit.result.cache",
+			"/build",
+			"/release",
+			"/documentation",
+			"/.run",
+			"/.idea"
+		]
+	},
 	"extra": {
 		"akcompat": {
 			"locations": [

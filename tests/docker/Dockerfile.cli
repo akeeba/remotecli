@@ -1,0 +1,19 @@
+# The container Akeeba Remote CLI itself runs in.
+#
+# This is where the PHP version matters: the software under test is a command line application, so "supported on PHP
+# 8.2" means it has to run there. The suite drives this container from the host, exactly as a user drives the tool from
+# their shell, and `run.sh --matrix` rebuilds it once per supported PHP version.
+ARG PHP_VERSION=8.5
+
+FROM php:${PHP_VERSION}-cli
+
+# ext-curl is a hard requirement of Remote CLI and is not in the base image.
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends libcurl4-openssl-dev \
+	&& docker-php-ext-install curl \
+	&& rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# The container has to stay up between test cases: provisioning is the slow part, and every test runs the CLI in it.
+CMD ["sleep", "infinity"]

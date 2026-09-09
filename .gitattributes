@@ -39,3 +39,12 @@ RELEASENOTES text eol=lf
 *.exe binary
 *.jar binary
 *.phar binary
+
+# Never ship the test suites.
+#
+# The PHAR is built from the remotecli/ directory alone, so everything below is already outside it; these lines cover
+# the other way a distributable is made, `git archive`. Both belong to development, not to what a user downloads.
+/tests export-ignore
+/phpunit.xml export-ignore
+/phpunit-integration.xml export-ignore
+/.gitattributes export-ignore

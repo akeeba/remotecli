@@ -118,30 +118,34 @@ abstract class AbstractCommand implements CommandInterface
 			return;
 		}
 
-		$path = trim($parts['path'] ?? '', '/');
+		$path    = trim($parts['path'] ?? '', '/');
+		$trimmed = rtrim($host, '/');
 
 		foreach (Options::API_ENDPOINTS as $apiEndpoint)
 		{
-			if ($path !== $apiEndpoint && !str_ends_with($path, '/' . $apiEndpoint))
+			$suffix = '/' . $apiEndpoint;
+
+			/**
+			 * Whether to split is decided on the *parsed path*, so that a host which merely happens to be named `api`,
+			 * or a directory called `apidocs`, cannot match: `api` has to be a whole path segment.
+			 */
+			if ($path !== $apiEndpoint && !str_ends_with($path, $suffix))
 			{
 				continue;
 			}
 
-			$newHost = ($hasScheme ? $parts['scheme'] . '://' : '');
-
-			if (!empty($parts['user']))
+			/**
+			 * The split itself is textual, so that everything else in the URL survives it untouched — a port, HTTP
+			 * basic credentials, and in particular an authority too malformed to reassemble from its parts. Rebuilding
+			 * the URL from parse_url()'s output turned `http://:::/api/index.php` into `http://::`, replacing the
+			 * user's typo with a different one and taking their error message with it.
+			 */
+			if (!str_ends_with($trimmed, $suffix))
 			{
-				$newHost .= $parts['user'] . (isset($parts['pass']) ? ':' . $parts['pass'] : '') . '@';
+				continue;
 			}
 
-			$newHost .= $parts['host'] . (empty($parts['port']) ? '' : ':' . $parts['port']);
-
-			$remainder = $path === $apiEndpoint ? '' : substr($path, 0, -strlen('/' . $apiEndpoint));
-
-			if ($remainder !== '')
-			{
-				$newHost .= '/' . $remainder;
-			}
+			$newHost = substr($trimmed, 0, -strlen($suffix));
 
 			$this->input->set('host', $newHost);
 			$this->input->set('apiEndpoint', $apiEndpoint);
@@ -246,9 +250,14 @@ abstract class AbstractCommand implements CommandInterface
 	/**
 	 * Reads a command line option without any filtering, other than trimming whitespace.
 	 *
-	 * Credentials must not be filtered. A Joomla! API token is Base64 and ends in one or two equals signs; the `cmd`
-	 * filter this used to go through would eat them, and a partially eaten credential is worse than no credential at
-	 * all — it turns "you did not give me a token" into an authentication failure the user cannot explain.
+	 * This check used to read through the `cmd` filter, which strips everything outside [A-Za-z0-9_.-] — the padding
+	 * of a Base64 token included. That never corrupted a credential, because the value which actually travels comes
+	 * straight out of the input data; the filtered read was only ever asking whether the option was empty.
+	 *
+	 * What it did get wrong is the empty case. The command line parser turns a valueless `--token` into boolean true,
+	 * which the filter rendered as the string "1" — not empty, so the check passed and a bogus one-character
+	 * credential went to the site. The user then had to debug an authentication failure instead of being told they
+	 * had left the value off. Hence the raw read, the trim, and the explicit boolean guard below.
 	 *
 	 * @param   string  $name  The name of the option to read
 	 *

@@ -7,6 +7,8 @@ Akeeba Remote CLI 3.2.0
 + Accept the URL of Joomla's API application as the --host, splitting it into the site and the API endpoint
 ~ Requires PHP 8.2 to 8.6; both ends of the range are now enforced at startup
 ~ The Docker image is built on a pinned PHP 8.5, not a floating latest-PHP-8 tag
++ PHPUnit unit tests and Docker-backed end-to-end integration tests under tests/
+# [LOW] The PHAR shipped its dependencies' test suites and IDE settings, 347KiB of dead weight
 
 Akeeba Remote CLI 3.1.1
 ================================================================================

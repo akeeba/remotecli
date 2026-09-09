@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    The unit suite. In-process, no I/O, no network, no Docker.
+
+    Run it with the globally installed PHPUnit: `phpunit`. PHPUnit is deliberately NOT a dependency of this project;
+    the PHAR we ship must not carry a test framework around inside it.
+
+    The integration suite lives in phpunit-integration.xml and is run by tests/docker/run.sh.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         executionOrder="depends,defects"
+         failOnRisky="true"
+         failOnWarning="true"
+         beStrictAboutOutputDuringTests="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory suffix=".php">remotecli/Application/Command</directory>
+            <directory suffix=".php">remotecli/Application/Input</directory>
+            <directory suffix=".php">remotecli/Application/Output</directory>
+            <directory suffix=".php">remotecli/Application/Utility</directory>
+            <file>remotecli/Application/Kernel/Dispatcher.php</file>
+        </include>
+    </source>
+</phpunit>

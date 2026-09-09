@@ -19,3 +19,9 @@
 /remotecli/remotecli_log.txt
 
 /old_remotecli/arccli_version.php
+
+# Test suites. Generated or local-only; the committed templates are tests/config.dist.php and tests/docker/env.dist.
+/.phpunit.cache
+/.phpunit.result.cache
+/tests/config.php
+/tests/docker/.env

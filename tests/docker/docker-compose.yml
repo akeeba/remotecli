@@ -1,0 +1,60 @@
+# The disposable stack the integration suite runs against.
+#
+# Never composed or run by hand: run.sh is the supported entry point, and it is what makes sure a previous run cannot
+# leak into this one.
+
+name: ${E2E_PROJECT_NAME:-akeeba-remotecli-e2e}
+
+services:
+  # The site under test. Every name below resolves to this container, so a test can address it the way a user would.
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        PHP_VERSION: ${E2E_SERVER_PHP_VERSION:-8.4}
+    container_name: ${E2E_PROJECT_NAME:-akeeba-remotecli-e2e}-web
+    # The fixture is in the image as well, so it is self-contained; mounting it too means an edit to the fixture takes
+    # effect on the next request rather than on the next rebuild. Read-only: its state lives in /var/www/state.
+    volumes:
+      - ./fixture:/var/www/html:ro
+    environment:
+      FIXTURE_SECRET: ${E2E_SECRET:-TheAkeebaBackupSecretWord}
+      FIXTURE_TOKEN: ${E2E_TOKEN:-token}
+      FIXTURE_RESTRICTED_TOKEN: ${E2E_RESTRICTED_TOKEN:-restricted}
+    ports:
+      - "127.0.0.1:${E2E_HTTP_PORT:-18090}:80"
+    networks:
+      e2e:
+        aliases:
+          - www.example.test
+          - solo.example.test
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/health.php') === 'OK' ? 0 : 1);"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Where Remote CLI runs. The working copy is mounted, so an edit is picked up without a rebuild.
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+      args:
+        PHP_VERSION: ${E2E_PHP_VERSION:-8.5}
+    container_name: ${E2E_PROJECT_NAME:-akeeba-remotecli-e2e}-cli
+    volumes:
+      - ../../:/app
+    working_dir: /app
+    # A home directory of its own, so the configuration file tests cannot touch the real one on the host.
+    environment:
+      HOME: /home/tester
+    networks:
+      - e2e
+    depends_on:
+      web:
+        condition: service_healthy
+
+networks:
+  e2e:
+    name: ${E2E_PROJECT_NAME:-akeeba-remotecli-e2e}-net
