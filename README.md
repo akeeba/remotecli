@@ -4,6 +4,12 @@
 
 The command line tool to take and download backups remotely using Akeeba Backup for Joomla!, Akeeba Backup for WordPress and Akeeba Solo.
 
+> [!IMPORTANT]
+> Developing and maintaining world-class software is neither easy nor free. The development of this software is subsidised by sales of our commercial offerings. If you like this software and would like to see it maintained in the future, please consider [purchasing a subscription](https://www.akeeba.com/subscribe.html) to one of our commercial offerings. _Thank you!_
+
+> [!NOTE]
+> The software is free of charge, support is not. We do provide support for this software to subscribers of our commercial backup software offerings: Akeeba Backup Professional for Joomla, Akeeba Backup Professional for WordPress, and Akeeba Solo.
+
 ## Using the PHAR version
 
 You can download Akeeba Remote CLI as a PHAR file from [our downloads page](https://www.akeeba.com/download.html#remotecli)/  
@@ -65,4 +71,4 @@ Akeeba Ltd does not provide any kind of support whatsoever for unofficial, third
 
 ## Regulatory status (EU Cyber Resilience Act)
 
-Akeeba Remote CLI is not monetized and is not placed on the market within the meaning of Regulation (EU) 2024/2847; Akeeba Ltd acts as its open-source software steward under Article 24 of that Regulation.
+Akeeba Remote CLI is not monetised and is not placed on the market within the meaning of Regulation (EU) 2024/2847.
