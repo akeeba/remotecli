@@ -766,12 +766,17 @@ $apiClient-&gt;backup($backupOptions, function ($data) {
       use it in production.</para>
     </note>
 
-    <para>APIv3 extends the native API applications of Joomla! and WordPress
-    to provide API endpoints for Akeeba Backup, using the native API calling
-    conventions of each CMS. Generally speaking, APIv3 is designed so that
-    upgrading to it from APIv2 will inflict the least amount of pain for the
-    integrator, unlike the APIv0 to APIv1, and the APIv1 to APIv2
-    migrations.</para>
+    <important>
+      <para>APIv3 is currently only available on Joomla!, through Joomla's own
+      API application. Akeeba Backup for WordPress and Akeeba Solo only
+      support APIv2 at this time.</para>
+    </important>
+
+    <para>APIv3 extends Joomla!'s native API application to provide API
+    endpoints for Akeeba Backup, using Joomla's own API calling conventions.
+    Generally speaking, APIv3 is designed so that upgrading to it from APIv2
+    will inflict the least amount of pain for the integrator, unlike the
+    APIv0 to APIv1, and the APIv1 to APIv2 migrations.</para>
 
     <para>Like APIv1 and APIv2, you can use either GET or POST to call each
     method. The HTTP verb does not matter. This is a deliberate decision; if
@@ -785,12 +790,60 @@ $apiClient-&gt;backup($backupOptions, function ($data) {
     <uri>https://www.example.com/api/index.php/v3/akeebabackup/startBackup</uri>
     to start a backup on Joomla!.</para>
 
-    <para>The authentication method, sending data to the API methods, the
-    encapsulation of return data, and error reporting is left to the API
-    application implementation of the corresponding CMS. Please note that each
-    CMS may impose different requirements on the requests. For example,
-    Joomla! requires you to send an <code>Accept: application/json</code>
-    header.</para>
+    <para>The encapsulation of return data, and error reporting is handled by
+    Joomla's own API application. Please note that Joomla requires you to
+    send an <code>Accept: application/json</code> header.</para>
+
+    <bridgehead renderas="sect3">Authentication modes</bridgehead>
+
+    <para>APIv3 supports two, mutually exclusive, authentication modes.</para>
+
+    <variablelist>
+      <varlistentry>
+        <term>Secret Word (legacy authentication)</term>
+
+        <listitem>
+          <para>The same front-end Secret Word used by APIv1 and APIv2,
+          presented the same way (the <code>X-Akeeba-Auth</code> header or
+          the <code>_akeebaAuth</code> parameter). Possession of the Secret
+          Word is treated as both authentication <emphasis>and</emphasis>
+          authorisation: <emphasis role="bold">there is no scoping at
+          all</emphasis>. Every endpoint and every feature is available to
+          whoever holds the Secret Word, with no Joomla user, group, or ACL
+          privilege involved anywhere in the request. This makes the Secret
+          Word equivalent to Super User access — indeed, stronger, since it
+          does not even require a Joomla account to exist. This is precisely
+          why Secret Word authentication is deprecated: it will be removed in
+          Akeeba Backup 11.0, currently planned for release alongside
+          Joomla! 7.0 in October 2027. Do not rely on it for anything you
+          cannot afford to have a Super User do.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Joomla API Token</term>
+
+        <listitem>
+          <para>A native Joomla API token, issued to a specific Joomla user
+          from their account's Options page. When you authenticate this way,
+          APIv3 runs under the identity of that Joomla user: every endpoint,
+          and every feature within an endpoint, is scoped to whatever ACL
+          privileges that user actually holds. A user who is not a Super
+          User, and who has not been granted every Akeeba Backup privilege,
+          will find some endpoints — or some features of an endpoint — are
+          not available to them. Each method is authorised against the same
+          ACL privilege its equivalent backend page or action requires, e.g.
+          <code>akeebabackup.backup</code> for <code>startBackup</code> and
+          <code>stepBackup</code>, or <code>akeebabackup.configure</code> for
+          anything that touches the profile's stored configuration. Some
+          methods additionally require a higher privilege for specific
+          parameters — see the <code>overrides</code> parameter of
+          <code>startBackup</code> for an example. This is the recommended
+          authentication mode, and the only one that will remain once the
+          Secret Word is retired.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </section>
 
   <section xml:id="constants">
@@ -1044,6 +1097,40 @@ $apiClient-&gt;backup($backupOptions, function ($data) {
           <listitem>
             <para>Array. Configuration variable overrides. Available since API
             version 335.</para>
+
+            <warning>
+              <para>Under APIv3, authenticated with a Joomla API Token (see
+              <link linkend="apiv3">the APIv3 reference</link> for the two
+              authentication modes), the <code>startBackup</code> endpoint
+              itself is scoped to the <code>akeebabackup.backup</code>
+              privilege — "may take a backup". The <code>overrides</code>
+              parameter is scoped separately, to
+              <code>akeebabackup.configure</code>, because it can rewrite the
+              active profile's configuration for the duration of the backup.
+              A Joomla user who only holds <code>akeebabackup.backup</code>
+              may call <code>startBackup</code>, but any request that
+              supplies a non-empty <code>overrides</code> is rejected unless
+              that user also holds <code>akeebabackup.configure</code>. This
+              restriction does not apply when authenticating with the
+              front-end Secret Word — used by APIv1 and APIv2, and available
+              as a legacy fallback authentication mode on APIv3 — since
+              possession of the Secret Word already grants every method,
+              unscoped, including <code>akeebabackup.configure</code>.</para>
+
+              <para>Regardless of API version — v1, v2 or v3 — or whether you
+              are calling through the JSON API at all (the
+              <literal>akeeba:backup:take</literal> Joomla CLI command goes
+              through the same code path), every key in
+              <code>overrides</code> is additionally filtered before it is
+              applied: a key is only honoured if it starts with
+              <code>akeeba.</code>, or if it is already a known
+              configuration parameter for the active profile. Any other key
+              — most notably anything under the <code>volatile.</code>
+              namespace — is silently dropped. Do not rely on
+              <code>overrides</code> to set arbitrary engine configuration;
+              it is meant for run-scoped values such as
+              <code>akeeba.tuning.*</code>.</para>
+            </warning>
           </listitem>
         </varlistentry>
       </variablelist>
