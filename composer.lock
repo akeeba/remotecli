@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8f5a95c7e2a0b5f97e8aa80eb0a6307e",
+    "content-hash": "62753aa64475e87d8f3503ef1922e01b",
     "packages": [
         {
             "name": "akeeba/json-backup-api",
@@ -93,16 +93,16 @@
         },
         {
             "name": "composer/ca-bundle",
-            "version": "1.5.14",
+            "version": "1.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/ca-bundle.git",
-                "reference": "0c8abba0634f637bd78c4e451981da368d403463"
+                "reference": "0c64479fae6952ba4cf021a72c0ac530394c91d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/0c8abba0634f637bd78c4e451981da368d403463",
-                "reference": "0c8abba0634f637bd78c4e451981da368d403463",
+                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/0c64479fae6952ba4cf021a72c0ac530394c91d4",
+                "reference": "0c64479fae6952ba4cf021a72c0ac530394c91d4",
                 "shasum": ""
             },
             "require": {
@@ -149,7 +149,7 @@
             "support": {
                 "irc": "irc://irc.freenode.org/composer",
                 "issues": "https://github.com/composer/ca-bundle/issues",
-                "source": "https://github.com/composer/ca-bundle/tree/1.5.14"
+                "source": "https://github.com/composer/ca-bundle/tree/1.6.1"
             },
             "funding": [
                 {
@@ -161,7 +161,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-21T14:57:29+00:00"
+            "time": "2026-10-29T14:10:42+00:00",
+            "published-time": "2026-10-29T14:45:12+00:00"
         },
         {
             "name": "joomla/data",
@@ -215,7 +216,8 @@
                 "issues": "https://github.com/joomla-framework/data/issues",
                 "source": "https://github.com/joomla-framework/data/tree/3.0.3"
             },
-            "time": "2025-07-19T12:27:51+00:00"
+            "time": "2025-07-19T12:27:51+00:00",
+            "published-time": "2025-07-19T12:34:42+00:00"
         },
         {
             "name": "joomla/filesystem",
@@ -269,7 +271,8 @@
                 "issues": "https://github.com/joomla-framework/filesystem/issues",
                 "source": "https://github.com/joomla-framework/filesystem/tree/3.3.1"
             },
-            "time": "2026-08-18T15:40:35+00:00"
+            "time": "2026-08-18T15:40:35+00:00",
+            "published-time": "2026-08-18T15:46:25+00:00"
         },
         {
             "name": "joomla/http",
@@ -330,7 +333,8 @@
                 "issues": "https://github.com/joomla-framework/http/issues",
                 "source": "https://github.com/joomla-framework/http/tree/3.1.4"
             },
-            "time": "2026-01-07T16:36:43+00:00"
+            "time": "2026-01-07T16:36:43+00:00",
+            "published-time": "2026-01-08T07:19:31+00:00"
         },
         {
             "name": "joomla/registry",
@@ -389,7 +393,8 @@
                 "issues": "https://github.com/joomla-framework/registry/issues",
                 "source": "https://github.com/joomla-framework/registry/tree/3.0.3"
             },
-            "time": "2026-09-04T10:03:16+00:00"
+            "time": "2026-09-04T10:03:16+00:00",
+            "published-time": "2026-09-04T10:08:08+00:00"
         },
         {
             "name": "joomla/string",
@@ -468,7 +473,8 @@
                 "issues": "https://github.com/joomla-framework/string/issues",
                 "source": "https://github.com/joomla-framework/string/tree/3.0.4"
             },
-            "time": "2025-07-19T15:25:56+00:00"
+            "time": "2025-07-19T15:25:56+00:00",
+            "published-time": "2025-07-19T15:26:21+00:00"
         },
         {
             "name": "joomla/uri",
@@ -523,7 +529,8 @@
                 "issues": "https://github.com/joomla-framework/uri/issues",
                 "source": "https://github.com/joomla-framework/uri/tree/3.0.2"
             },
-            "time": "2025-07-12T12:01:42+00:00"
+            "time": "2025-07-12T12:01:42+00:00",
+            "published-time": "2025-07-13T10:27:21+00:00"
         },
         {
             "name": "joomla/utilities",
@@ -576,7 +583,8 @@
                 "issues": "https://github.com/joomla-framework/utilities/issues",
                 "source": "https://github.com/joomla-framework/utilities/tree/3.0.2"
             },
-            "time": "2025-07-19T16:29:29+00:00"
+            "time": "2025-07-19T16:29:29+00:00",
+            "published-time": "2025-07-19T17:05:45+00:00"
         },
         {
             "name": "laminas/laminas-diactoros",
@@ -673,7 +681,8 @@
                     "type": "community_bridge"
                 }
             ],
-            "time": "2023-10-29T16:17:44+00:00"
+            "time": "2023-10-29T16:17:44+00:00",
+            "published-time": "2023-10-29T16:18:30+00:00"
         },
         {
             "name": "psr/http-client",
@@ -725,7 +734,8 @@
             "support": {
                 "source": "https://github.com/php-fig/http-client"
             },
-            "time": "2023-09-23T14:17:50+00:00"
+            "time": "2023-09-23T14:17:50+00:00",
+            "published-time": "2023-09-23T14:18:12+00:00"
         },
         {
             "name": "psr/http-factory",
@@ -780,7 +790,8 @@
             "support": {
                 "source": "https://github.com/php-fig/http-factory"
             },
-            "time": "2024-04-15T12:06:14+00:00"
+            "time": "2024-04-15T12:06:14+00:00",
+            "published-time": "2024-05-10T07:32:19+00:00"
         },
         {
             "name": "psr/http-message",
@@ -833,7 +844,8 @@
             "support": {
                 "source": "https://github.com/php-fig/http-message/tree/1.1"
             },
-            "time": "2023-04-04T09:50:52+00:00"
+            "time": "2023-04-04T09:50:52+00:00",
+            "published-time": "2023-04-04T09:52:19+00:00"
         },
         {
             "name": "psr/log",
@@ -883,20 +895,21 @@
             "support": {
                 "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
-            "time": "2024-09-11T13:17:53+00:00"
+            "time": "2024-09-11T13:17:53+00:00",
+            "published-time": "2024-09-11T13:21:14+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
-            "version": "v3.7.1",
+            "version": "v3.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/deprecation-contracts.git",
-                "reference": "f3202fa1b5097b0af062dc978b32ecf63404e31d"
+                "reference": "feb1edf4e546af3b85c5caebe8359a20db230ca3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/f3202fa1b5097b0af062dc978b32ecf63404e31d",
-                "reference": "f3202fa1b5097b0af062dc978b32ecf63404e31d",
+                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/feb1edf4e546af3b85c5caebe8359a20db230ca3",
+                "reference": "feb1edf4e546af3b85c5caebe8359a20db230ca3",
                 "shasum": ""
             },
             "require": {
@@ -909,7 +922,7 @@
                     "name": "symfony/contracts"
                 },
                 "branch-alias": {
-                    "dev-main": "3.7-dev"
+                    "dev-main": "3.8-dev"
                 }
             },
             "autoload": {
@@ -934,7 +947,7 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.7.1"
+                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.8.1"
             },
             "funding": [
                 {
@@ -954,7 +967,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-05T06:23:12+00:00"
+            "time": "2026-09-16T14:15:10+00:00",
+            "published-time": "2026-11-04T11:25:34+00:00"
         }
     ],
     "packages-dev": [],
@@ -972,5 +986,5 @@
     "platform-overrides": {
         "php": "8.2.999"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
